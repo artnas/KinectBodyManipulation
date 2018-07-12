@@ -84,7 +84,8 @@
             <Image Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="0 0 0 5"/>
         </DockPanel>
         <Grid Grid.Row="1">
-            <Image Name ="Backdrop" Source="Images\Background.png"/>
+            <!--<Image Name ="Backdrop" Source="Images\Background.png"/>-->
+            <Image Name="Backdrop" Source=""/>
             <Image Name ="MaskedColor"/>
         </Grid>
         <Button Grid.Row="2" Style="{StaticResource SnapshotButton}" Content="Screenshot" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10 10 0 10" Name="buttonScreenshot"  Click="ButtonScreenshotClick" />
