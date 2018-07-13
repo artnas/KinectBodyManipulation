@@ -73,6 +73,21 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 }
             }
 
+            // szkielet (debug)
+            for (int i = 0; i < colorBuffer.Length; i += 4)
+            {
+                var limbPixel = limbData.pixelData[i / 4];
+
+                if (limbPixel.debugDraw)
+                {
+
+                    colorBuffer[i] = 255;
+                    colorBuffer[i + 1] = 0;
+                    colorBuffer[i + 2] = 0;
+
+                }
+            }
+
         }
 
         private static void DrawThickDot(byte[] buffer, int index, int thickness, Color color)

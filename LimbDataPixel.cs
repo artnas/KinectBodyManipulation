@@ -14,7 +14,16 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public JointType endJointType;
         public bool isBone = false;
         public bool isJoint = false;
+        public bool debugDraw = false;
         public sbyte humanIndex = -1;
+
+        public void Clear()
+        {
+            this.humanIndex = -1;
+            this.isBone = false;
+            this.isJoint = false;
+            this.debugDraw = false;
+        }
 
     }
 }

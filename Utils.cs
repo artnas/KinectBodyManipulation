@@ -158,13 +158,29 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public static void GetPointsBetween(List<Vector3> list, Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
         {
-            List<Vector3> points = list;
             list.Clear();
 
             foreach (Vector3 point in IteratePointsBetween(from, to, width, height, onlyIncludePointsOnScreen))
             {
-                points.Add(point);
+                list.Add(point);
             }
+
+            // sortowanie wzgledem odleglosci od punktu poczatkowego
+            if (list.Count > 0)
+            {
+                var start = list.First();
+
+                list.Sort((a, b) => Vector3.Distance(start, a).CompareTo(Vector3.Distance(start, b)));
+            }
+           
+        }
+
+        // oblicza wektor prostopadly do prostej (a, b)
+        public static Vector3 GetPerpendicularVector(Vector3 a, Vector3 b)
+        {
+            Vector3 v = b - a;
+
+            return new Vector3(-v.Y, v.X, 0) / (float) Math.Sqrt(v.X*v.X + v.Y*v.Y);
         }
 
         /// <summary>

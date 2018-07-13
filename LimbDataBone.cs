@@ -11,7 +11,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
     public class LimbDataBone
     {
 
-        public Joint startJoint, endJoint;
+        public readonly Joint startJoint, endJoint;
+        public readonly JointTypePair jointTypePair;
 
         public List<Vector3> points = new List<Vector3>();
 
@@ -25,10 +26,17 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             return points.Last();
         }
 
+        private JointTypePair GetJointTypePair()
+        {
+            return new JointTypePair(startJoint, endJoint);
+        }
+
         public LimbDataBone(Joint startJoint, Joint endJoint)
         {
             this.startJoint = startJoint;
             this.endJoint = endJoint;
+
+            this.jointTypePair = GetJointTypePair();
         }
 
     }

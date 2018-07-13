@@ -35,9 +35,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         {
             foreach(LimbDataPixel lpd in limbData.pixelData)
             {
-                lpd.humanIndex = -1;
-                lpd.isBone = false;
-                lpd.isJoint = false;
+                lpd.Clear();
             }
         }
 
@@ -93,7 +91,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             LimbDataBone bone = limbDataSkeleton.GetBoneByJointPair(a, b);
 
-            //var aPosition = new Vector3(a.Position.X, a.Position.Y, a.Position.Z);
             var aPosition = Utils.SkeletonPointToScreen(a.Position);
             var bPosition = Utils.SkeletonPointToScreen(b.Position);
 
@@ -119,6 +116,103 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 pixelsQueue.Enqueue(bufferIndex);
 
             }
+
+            if (points.Count > 0)
+            {
+
+                ProcessBone(limbDataSkeleton, bone, pixelsQueue);
+                
+            }
+
+        }
+
+        private void ProcessBone(LimbDataSkeleton limbDataSkeleton, LimbDataBone bone, Queue<int> pixelsQueue)
+        {
+
+            Vector3 perpendicularVector = Utils.GetPerpendicularVector(bone.GetStartPoint(), bone.GetEndPoint());
+
+            float jointOffset = 0;
+
+            if (Configuration.boneOffsetDictionary.ContainsKey(bone.jointTypePair))
+            {
+                jointOffset = Configuration.boneOffsetDictionary[bone.jointTypePair];
+            }
+
+            int index = (int)Math.Floor(bone.points.Count * jointOffset);
+            if (index >= bone.points.Count)
+            {
+                index = bone.points.Count - 1;
+            }
+
+            // usun punkty przed indeksem
+            if (index != 0)
+            {
+                bone.points.RemoveRange(0, index);
+                index = 0;
+            }
+
+            Vector3 point = bone.points[index];
+
+            bool isOk = true;
+
+            int steps = 0;
+
+            for (int i = 1; i < 30; i++)
+            {
+
+                if (!isOk)
+                    break;
+
+                for (int j = -1; j <= 1; j += 2)
+                {
+
+                    Vector3 offsetPoint = point + perpendicularVector * i * j;
+
+                    int x = (int)offsetPoint.X;
+                    int y = (int)offsetPoint.Y;
+
+                    if (x < 0 || x >= Configuration.width || y < 0 || y >= Configuration.height)
+                    {
+                        continue;
+                    }
+
+                    int colorBufferIndex = (x + y * Configuration.width) * 4;
+
+                    if (backgroundRemovedBuffer[colorBufferIndex + 3] < 1)
+                    {
+                        isOk = false;
+                        break;
+                    }
+                    else
+                    {
+                        int limbDataPixelIndex = colorBufferIndex / 4;
+
+                        LimbDataPixel pixel = limbData.pixelData[limbDataPixelIndex];
+
+                        if (pixel.humanIndex != -1)
+                        {
+                            if (pixel.humanIndex != limbDataSkeleton.skeleton.TrackingId)
+                            {
+                                isOk = false;
+                                break;
+                            }
+                        }
+
+                        pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
+                        pixel.startJointType = bone.startJoint.JointType;
+                        pixel.endJointType = bone.endJoint.JointType;
+                        pixel.debugDraw = true;
+
+                        pixelsQueue.Enqueue(limbDataPixelIndex);
+
+                        steps++;
+                    }
+
+                }
+
+            }
+
+            //Console.WriteLine(steps);
 
         }
 
