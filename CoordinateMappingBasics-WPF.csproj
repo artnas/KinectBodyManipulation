@@ -82,10 +82,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Configuration.cs" />
+    <Compile Include="Curve.cs" />
     <Compile Include="ImageProcessors\BackgroundRemover.cs" />
     <Compile Include="ImageProcessors\ImageProcessor.cs" />
     <Compile Include="JointPair.cs" />
-    <Compile Include="LimbPixelData.cs" />
+    <Compile Include="LimbData.cs" />
+    <Compile Include="LimbDataBone.cs" />
+    <Compile Include="LimbDataSkeleton.cs" />
+    <Compile Include="LimbDataPixel.cs" />
     <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

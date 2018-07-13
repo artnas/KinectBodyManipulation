@@ -11,6 +11,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public static readonly int width = 640;
         public static readonly int height = 480;
+        public static readonly int size = width * height;
 
     }
 }

@@ -144,6 +144,29 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         }
 
+        public static List<Vector3> GetPointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
+        {
+            List<Vector3> points = new List<Vector3>();
+
+            foreach (Vector3 point in IteratePointsBetween(from, to, width, height, onlyIncludePointsOnScreen))
+            {
+                points.Add(point);
+            }
+
+            return points;
+        }
+
+        public static void GetPointsBetween(List<Vector3> list, Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
+        {
+            List<Vector3> points = list;
+            list.Clear();
+
+            foreach (Vector3 point in IteratePointsBetween(from, to, width, height, onlyIncludePointsOnScreen))
+            {
+                points.Add(point);
+            }
+        }
+
         /// <summary>
         /// Maps a SkeletonPoint to lie within our render space and converts to Point
         /// </summary>

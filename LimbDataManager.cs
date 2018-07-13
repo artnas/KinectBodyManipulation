@@ -15,7 +15,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         private DepthImagePixel[] depthBuffer;
         private byte[] backgroundRemovedBuffer;
 
-        public LimbPixelData[] limbPixelData;
+        public LimbData limbData;
 
         public LimbDataManager(byte[] colorBuffer, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer)
         {
@@ -23,11 +23,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             this.depthBuffer = depthBuffer;
             this.backgroundRemovedBuffer = backgroundRemovedBuffer;
 
-            limbPixelData = new LimbPixelData[Configuration.width * Configuration.height];
-            for (var i = 0; i < Configuration.width * Configuration.height; i++)
-            {
-                limbPixelData[i] = new LimbPixelData();
-            }
+            this.limbData = new LimbData();
         }
 
         private int getBufferIndex(int x, int y)
@@ -37,10 +33,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         private void ClearBuffer()
         {
-            foreach(LimbPixelData lpd in limbPixelData)
+            foreach(LimbDataPixel lpd in limbData.pixelData)
             {
                 lpd.humanIndex = -1;
                 lpd.isBone = false;
+                lpd.isJoint = false;
             }
         }
 
@@ -49,25 +46,44 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             ClearBuffer();
 
-            foreach(var skeleton in skeletons)
+            Queue<int> pixelsQueue = new Queue<int>();
+
+            foreach (var skeleton in skeletons)
             {
+                LimbDataSkeleton foundSkeleton = null;
+
+                foreach (var limbDataSkeleton in limbData.limbDataSkeletons)
+                {
+                    if (limbDataSkeleton.skeleton == skeleton)
+                    {
+                        foundSkeleton = limbDataSkeleton;
+                        break;
+                    }
+                }
+
+                if (foundSkeleton == null)
+                {
+                    foundSkeleton = new LimbDataSkeleton(skeleton);
+                    limbData.limbDataSkeletons.Add(foundSkeleton);
+                }
+
                 foreach (JointPair jointPair in Utils.SkeletonIterator(skeleton))
                 {
                     //Console.WriteLine("para " + jointPair.a.JointType + " " + jointPair.b.JointType);
-                    AssignPixelsBetweenJoints(skeleton, jointPair);
+                    AssignPixelsBetweenJoints(foundSkeleton, jointPair, pixelsQueue);
                 }
             }
 
-            FloodFill();
+            FloodFill(pixelsQueue);
             
         }
 
-        private void AssignPixelsBetweenJoints(Skeleton skeleton, JointPair jointPair)
+        private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, JointPair jointPair, Queue<int> pixelsQueue)
         {
-            AssignPixelsBetweenJoints(skeleton, jointPair.a, jointPair.b);
+            AssignPixelsBetweenJoints(limbDataSkeleton, jointPair.a, jointPair.b, pixelsQueue);
         }
 
-        private void AssignPixelsBetweenJoints(Skeleton skeleton, Joint a, Joint b)
+        private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, Joint a, Joint b, Queue<int> pixelsQueue)
         {
 
             if (a.TrackingState == JointTrackingState.NotTracked || b.TrackingState == JointTrackingState.NotTracked)
@@ -75,47 +91,62 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 return;
             }
 
+            LimbDataBone bone = limbDataSkeleton.GetBoneByJointPair(a, b);
+
             //var aPosition = new Vector3(a.Position.X, a.Position.Y, a.Position.Z);
             var aPosition = Utils.SkeletonPointToScreen(a.Position);
             var bPosition = Utils.SkeletonPointToScreen(b.Position);
 
-            foreach (Vector3 position in Utils.IteratePointsBetween(aPosition, bPosition, Configuration.width, Configuration.height))
+            List<Vector3> points = bone.points;
+            Utils.GetPointsBetween(points, aPosition, bPosition, Configuration.width, Configuration.height);
+
+            for (int i = 0; i < points.Count; i++)
             {
+
+                Vector3 position = points[i];
 
                 int bufferIndex = getBufferIndex((int)position.X, (int)position.Y);
 
-                LimbPixelData pixel = limbPixelData[bufferIndex];
-                pixel.humanIndex = (sbyte)skeleton.TrackingId;
+                LimbDataPixel pixel = limbData.pixelData[bufferIndex];
+                pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
                 pixel.startJointType = a.JointType;
                 pixel.endJointType = b.JointType;
                 pixel.isBone = true;
+
+                if (i == 0)
+                    pixel.isJoint = true;
+
+                pixelsQueue.Enqueue(bufferIndex);
 
             }
 
         }
 
-        private void FloodFill()
+        private void FloodFill(Queue<int> pixelsQueue)
         {
 
-            Queue<int> pixelsToDillate = new Queue<int>();
-
-            // wypelnianie stacka bazowymi pikselami
-            for (int i = 0; i < limbPixelData.Length; i++)
+            if (pixelsQueue == null)
             {
-                if (limbPixelData[i].humanIndex != -1)
-                    pixelsToDillate.Enqueue(i);              
-            }
+                pixelsQueue = new Queue<int>();
+
+                // wypelnianie stacka bazowymi pikselami
+                for (int i = 0; i < limbData.pixelData.Length; i++)
+                {
+                    if (limbData.pixelData[i].humanIndex != -1)
+                        pixelsQueue.Enqueue(i);
+                }
+            }       
 
             // FloodFill
-            while (pixelsToDillate.Count > 0)
+            while (pixelsQueue.Count > 0)
             {
-                int index = pixelsToDillate.Dequeue();
+                int index = pixelsQueue.Dequeue();
 
-                if (index < 0 || index >= limbPixelData.Length)
+                if (index < 0 || index >= limbData.pixelData.Length)
                     continue;
 
                 byte alpha = backgroundRemovedBuffer[index * 4 + 3];
-                LimbPixelData lpd = limbPixelData[index];
+                LimbDataPixel lpd = limbData.pixelData[index];
 
                 if (alpha == 0)
                     continue;
@@ -133,23 +164,23 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                         (index % Configuration.width == 0 && xOffset == -1) || 
                         ((index + 1) % Configuration.width == 0 && xOffset == 1) ||
                         (index / Configuration.width == 0 && yOffset == 1)
-                        // (limbPixelData.Length - index - xOffset <= Configuration.width && yOffset == -1)
+                        // (limbData.pixelData.Length - index - xOffset <= Configuration.width && yOffset == -1)
                     ){
                         continue;
                     }   
 
                     int offsetIndex = index + offset;
 
-                    if (offsetIndex < 0 || offsetIndex >= limbPixelData.Length)
+                    if (offsetIndex < 0 || offsetIndex >= limbData.pixelData.Length)
                         continue;
 
-                    if (limbPixelData[offsetIndex].humanIndex == -1)
+                    if (limbData.pixelData[offsetIndex].humanIndex == -1)
                     {
-                        limbPixelData[offsetIndex].humanIndex = lpd.humanIndex;
-                        limbPixelData[offsetIndex].startJointType = lpd.startJointType;
-                        limbPixelData[offsetIndex].endJointType = lpd.endJointType;
+                        limbData.pixelData[offsetIndex].humanIndex = lpd.humanIndex;
+                        limbData.pixelData[offsetIndex].startJointType = lpd.startJointType;
+                        limbData.pixelData[offsetIndex].endJointType = lpd.endJointType;
 
-                        pixelsToDillate.Enqueue(offsetIndex);
+                        pixelsQueue.Enqueue(offsetIndex);
                     }
                 }
             }

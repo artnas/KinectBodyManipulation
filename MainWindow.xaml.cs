@@ -105,8 +105,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         private LimbDataManager limbDataManager;
 
-        private BackgroundRemover backgroundRemover;
-
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -131,29 +129,27 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 if (potentialSensor.Status == KinectStatus.Connected)
                 {
                     this.sensor = potentialSensor;
+                    Utils.sensor = this.sensor;
                     break;
                 }
             }
 
             if (null != this.sensor)
             {
-                // Turn on the depth stream to receive depth frames
-                this.sensor.DepthStream.Enable(DepthFormat);
-                Utils.sensor = this.sensor;
-
-                this.depthWidth = this.sensor.DepthStream.FrameWidth;
-
-                this.depthHeight = this.sensor.DepthStream.FrameHeight;
 
                 this.sensor.ColorStream.Enable(ColorFormat);
+                // Turn on the depth stream to receive depth frames
+                this.sensor.DepthStream.Enable(DepthFormat);
+                // Turn on to get player masks
+                this.sensor.SkeletonStream.Enable();
+
+                this.depthWidth = this.sensor.DepthStream.FrameWidth;
+                this.depthHeight = this.sensor.DepthStream.FrameHeight;
 
                 int colorWidth = this.sensor.ColorStream.FrameWidth;
                 int colorHeight = this.sensor.ColorStream.FrameHeight;
 
                 this.colorToDepthDivisor = colorWidth / this.depthWidth;
-
-                // Turn on to get player masks
-                this.sensor.SkeletonStream.Enable();
 
                 // Allocate space to put the depth pixels we'll receive
                 this.depthBuffer = new DepthImagePixel[this.sensor.DepthStream.FramePixelDataLength];
@@ -172,7 +168,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                 //
                 this.limbDataManager = new LimbDataManager(colorBuffer, depthBuffer, backgroundRemovedBuffer);
-                this.backgroundRemover = new BackgroundRemover(colorHeight, colorHeight, depthWidth, depthHeight, colorBuffer, depthBuffer, colorCoordinates);
 
                 this.backgroundRemovedColorStream = new BackgroundRemovedColorStream(this.sensor);
                 this.backgroundRemovedColorStream.Enable(ColorFormat, DepthFormat);
@@ -258,7 +253,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             limbDataManager.Update(skeletons);
 
-            Drawing.DrawDebug(colorBitmap, outputBuffer, limbDataManager.limbPixelData);
+            Drawing.DrawDebug(colorBitmap, outputBuffer, limbDataManager.limbData);
 
             this.colorBitmap.WritePixels(
                 new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),

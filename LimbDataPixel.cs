@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 {
-    public class LimbPixelData
+    public class LimbDataPixel
     {
 
         public JointType startJointType;
         public JointType endJointType;
         public bool isBone = false;
+        public bool isJoint = false;
         public sbyte humanIndex = -1;
 
     }
