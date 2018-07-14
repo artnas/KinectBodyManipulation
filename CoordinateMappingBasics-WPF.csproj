@@ -83,7 +83,6 @@
     </ApplicationDefinition>
     <Compile Include="Configuration.cs" />
     <Compile Include="Curve.cs" />
-    <Compile Include="ImageProcessors\BackgroundRemover.cs" />
     <Compile Include="ImageProcessors\ImageProcessor.cs" />
     <Compile Include="JointTypePair.cs" />
     <Compile Include="JointPair.cs" />

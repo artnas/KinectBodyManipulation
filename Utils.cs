@@ -43,8 +43,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             { 1, 0 },       // prawo
             { 1, 1 },       // prawo gora
             { 1, -1 },      // prawo dol
-            { 0, 1 },      // gora
-            { 0, 1 },       // dol 
+            { 0, 1 },       // gora
+            { 0, -1 },       // dol 
         };
 
         /// <summary>
@@ -186,14 +186,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
                 list.Add(point);
             }
-
-            // sortowanie wzgledem odleglosci od punktu poczatkowego
-            if (list.Count > 0)
-            {
-                var start = list.First();
-
-                list.Sort((a, b) => Vector3.DistanceSquared(start, a).CompareTo(Vector3.DistanceSquared(start, b)));
-            }
            
         }
 
@@ -246,6 +238,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             float value = Interpolate((float)a, (float)b, v, 1f - v);
 
             return (int)value;
+        }
+
+        public static int GetBoneHash(JointType a, JointType b)
+        {
+            return (int) a | ((int) b << 4);
         }
 
     }

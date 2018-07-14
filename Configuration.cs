@@ -15,10 +15,12 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public static readonly int height = 480;
         public static readonly int size = width * height;
 
+        public static readonly byte alphaThreshold = 40;
+
         public static readonly Dictionary<JointTypePair, BoneConfiguration> boneConfigurationsDictionary = new Dictionary<JointTypePair, BoneConfiguration>()
         {
 
-            { new JointTypePair(JointType.Head, JointType.ShoulderCenter), new BoneConfiguration(new JointTypePair(JointType.Head, JointType.ShoulderCenter), 0.1f, 0.1f, 20, 20, Colors.Black) },
+            { new JointTypePair(JointType.Head, JointType.ShoulderCenter), new BoneConfiguration(new JointTypePair(JointType.Head, JointType.ShoulderCenter), 0.1f, 0.4f, 20, 10, Colors.Black) },
 
             { new JointTypePair(JointType.ShoulderCenter, JointType.ShoulderLeft), new BoneConfiguration(new JointTypePair(JointType.ShoulderCenter, JointType.ShoulderLeft), 0.7f, 0.1f, 10, 10, Colors.Blue) },
             { new JointTypePair(JointType.ShoulderCenter, JointType.ShoulderRight), new BoneConfiguration(new JointTypePair(JointType.ShoulderCenter, JointType.ShoulderRight), 0.7f, 0.1f, 10, 10, Colors.Red) },
@@ -32,15 +34,15 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             { new JointTypePair(JointType.WristLeft, JointType.HandLeft), new BoneConfiguration(new JointTypePair(JointType.WristLeft, JointType.HandLeft), 0.1f, 0.1f, 10, 10, Colors.Lime) },
             { new JointTypePair(JointType.WristRight, JointType.HandRight), new BoneConfiguration(new JointTypePair(JointType.WristRight, JointType.HandRight), 0.1f, 0.1f, 10, 10, Colors.LimeGreen) },
 
-            { new JointTypePair(JointType.ShoulderCenter, JointType.Spine), new BoneConfiguration(new JointTypePair(JointType.ShoulderCenter, JointType.Spine), 0.1f, 0.1f, 30, 10, Colors.White) },
+            { new JointTypePair(JointType.ShoulderCenter, JointType.Spine), new BoneConfiguration(new JointTypePair(JointType.ShoulderCenter, JointType.Spine), 0.0f, 0.1f, 40, 15, Colors.White) },
 
-            { new JointTypePair(JointType.Spine, JointType.HipCenter), new BoneConfiguration(new JointTypePair(JointType.Spine, JointType.HipCenter), 0.1f, 0.1f, 40, 10, Colors.DarkSlateGray) },
+            { new JointTypePair(JointType.Spine, JointType.HipCenter), new BoneConfiguration(new JointTypePair(JointType.Spine, JointType.HipCenter), 0.05f, 0.1f, 35, 30, Colors.DarkSlateGray) },
 
             { new JointTypePair(JointType.HipCenter, JointType.HipLeft), new BoneConfiguration(new JointTypePair(JointType.HipCenter, JointType.HipLeft), 0.2f, 0.1f, 15, 15, Colors.Blue) },
             { new JointTypePair(JointType.HipCenter, JointType.HipRight), new BoneConfiguration(new JointTypePair(JointType.HipCenter, JointType.HipRight), 0.2f, 0.1f, 15, 15, Colors.Red) },
 
-            { new JointTypePair(JointType.HipLeft, JointType.KneeLeft), new BoneConfiguration(new JointTypePair(JointType.HipLeft, JointType.KneeLeft), 0.2f, 0.1f, 20, 15, Colors.OrangeRed) },
-            { new JointTypePair(JointType.HipRight, JointType.KneeRight), new BoneConfiguration(new JointTypePair(JointType.HipRight, JointType.KneeRight), 0.2f, 0.1f, 20, 15, Colors.CornflowerBlue) },
+            { new JointTypePair(JointType.HipLeft, JointType.KneeLeft), new BoneConfiguration(new JointTypePair(JointType.HipLeft, JointType.KneeLeft), 0.2f, 0.1f, 15, 15, Colors.OrangeRed) },
+            { new JointTypePair(JointType.HipRight, JointType.KneeRight), new BoneConfiguration(new JointTypePair(JointType.HipRight, JointType.KneeRight), 0.2f, 0.1f, 15, 15, Colors.CornflowerBlue) },
 
             { new JointTypePair(JointType.KneeLeft, JointType.AnkleLeft), new BoneConfiguration(new JointTypePair(JointType.KneeLeft, JointType.AnkleLeft), 0.1f, 0.1f, 15, 15, Colors.DarkMagenta) },
             { new JointTypePair(JointType.KneeRight, JointType.AnkleRight), new BoneConfiguration(new JointTypePair(JointType.KneeRight, JointType.AnkleRight), 0.1f, 0.1f, 15, 15, Colors.Crimson) },
@@ -49,6 +51,24 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             { new JointTypePair(JointType.AnkleRight, JointType.FootRight), new BoneConfiguration(new JointTypePair(JointType.AnkleRight, JointType.FootLeft), 0.1f, 0.1f, 15, 15, Colors.LimeGreen) },
 
         };
+
+        private static Dictionary<int, Color> boneColorsDictionary;
+        public static Color GetBoneColor(int boneHash)
+        {
+            if (boneColorsDictionary == null)
+            {
+                boneColorsDictionary = new Dictionary<int, Color>();
+
+                foreach (var entry in boneConfigurationsDictionary)
+                {
+                    int hash = Utils.GetBoneHash(entry.Key.a, entry.Key.b);
+
+                    boneColorsDictionary.Add(hash, entry.Value.color);
+                }
+            }
+
+            return boneColorsDictionary[boneHash];
+        }
 
     }
 

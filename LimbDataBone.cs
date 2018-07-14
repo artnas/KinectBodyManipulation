@@ -13,6 +13,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public readonly Joint startJoint, endJoint;
         public readonly JointTypePair jointTypePair;
+        public readonly int boneHash;
 
         public List<Vector3> points = new List<Vector3>();
 
@@ -37,6 +38,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             this.endJoint = endJoint;
 
             this.jointTypePair = GetJointTypePair();
+
+            this.boneHash = Utils.GetBoneHash(jointTypePair.a, jointTypePair.b);
         }
 
     }

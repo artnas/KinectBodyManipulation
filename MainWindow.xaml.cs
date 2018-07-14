@@ -16,7 +16,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using Microsoft.Kinect;
-    using Microsoft.Samples.Kinect.CoordinateMappingBasics.ImageProcessors;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml

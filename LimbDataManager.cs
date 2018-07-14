@@ -97,8 +97,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             List<Vector3> points = bone.points;
             Utils.GetPointsBetween(points, aPosition, bPosition, Configuration.width, Configuration.height);
 
+            /*
+
             for (int i = 0; i < points.Count; i++)
-            {
+            {             
 
                 Vector3 position = points[i];
 
@@ -119,6 +121,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 pixelsQueue.Enqueue(bufferIndex);
 
             }
+
+            */
 
             if (points.Count > 0)
             {
@@ -185,6 +189,23 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     if (!isOk)
                         break;
 
+                    {
+                        int bufferIndex = getBufferIndex((int)point.X, (int)point.Y);
+
+                        if (bufferIndex > 0 && bufferIndex < limbData.pixelData.Length)
+                        {
+                            LimbDataPixel pixel = limbData.pixelData[bufferIndex];
+                            pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
+                            pixel.boneHash = bone.boneHash;
+                            pixel.isBone = true;
+
+                            if (k == startIndex)
+                                pixel.isJoint = true;
+
+                            pixelsQueue.Enqueue(bufferIndex);
+                        }
+                    }
+
                     for (int j = -1; j <= 1; j += 2)
                     {
 
@@ -200,7 +221,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                         int colorBufferIndex = (x + y * Configuration.width) * 4;
 
-                        if (backgroundRemovedBuffer[colorBufferIndex + 3] < 1)
+                        if (backgroundRemovedBuffer[colorBufferIndex + 3] < Configuration.alphaThreshold)
                         {
                             isOk = false;
                             break;
@@ -221,8 +242,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                             }
 
                             pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
-                            pixel.startJointType = bone.startJoint.JointType;
-                            pixel.endJointType = bone.endJoint.JointType;
+                            pixel.boneHash = bone.boneHash;
                             pixel.debugDraw = true;
 
                             pixelsQueue.Enqueue(limbDataPixelIndex);
@@ -236,11 +256,30 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             }
 
             // usun punkty przed indeksem
-            if (startIndex != 0)
+            // if (startIndex != 0)
+            // {
+            //     bone.points.RemoveRange(0, startIndex);
+            //     startIndex = 0;
+            // }
+        
+            for (int i = 0; i < startIndex; i++)
             {
-                bone.points.RemoveRange(0, startIndex);
-                startIndex = 0;
+                int index = (int) (bone.points[i].X + bone.points[i].Y * Configuration.width);
+                if (index > 0 && index < limbData.pixelData.Length)
+                {
+                    limbData.pixelData[index].Clear();
+                }
             }
+            for (int i = endIndex; i < bone.points.Count; i++)
+            {
+                int index = (int)(bone.points[i].X + bone.points[i].Y * Configuration.width);
+                if (index > 0 && index < limbData.pixelData.Length)
+                {
+                    limbData.pixelData[index].Clear();
+                }
+            }
+
+            bone.points = bone.points.GetRange(startIndex, (endIndex - startIndex));
 
         }
 
@@ -270,7 +309,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 byte alpha = backgroundRemovedBuffer[index * 4 + 3];
                 LimbDataPixel lpd = limbData.pixelData[index];
 
-                if (alpha == 0)
+                if (lpd.humanIndex == -1)
+                    continue;
+
+                if (alpha < Configuration.alphaThreshold)
                     continue;
 
                 // 8 stron
@@ -299,8 +341,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     if (limbData.pixelData[offsetIndex].humanIndex == -1)
                     {
                         limbData.pixelData[offsetIndex].humanIndex = lpd.humanIndex;
-                        limbData.pixelData[offsetIndex].startJointType = lpd.startJointType;
-                        limbData.pixelData[offsetIndex].endJointType = lpd.endJointType;
+                        limbData.pixelData[offsetIndex].boneHash = lpd.boneHash;
 
                         pixelsQueue.Enqueue(offsetIndex);
                     }
