@@ -131,33 +131,70 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             Vector3 perpendicularVector = Utils.GetPerpendicularVector(bone.GetStartPoint(), bone.GetEndPoint());
 
-            float jointOffset = 0;
+            BoneConfiguration boneConfiguration = null;
 
-            if (Configuration.boneOffsetDictionary.ContainsKey(bone.jointTypePair))
+            if (Configuration.boneConfigurationsDictionary.ContainsKey(bone.jointTypePair))
             {
-                jointOffset = Configuration.boneOffsetDictionary[bone.jointTypePair];
+                boneConfiguration = Configuration.boneConfigurationsDictionary[bone.jointTypePair];
+            }
+            else
+            {
+                boneConfiguration = Configuration.boneConfigurationDefault;
             }
 
-            int index = (int)Math.Floor(bone.points.Count * jointOffset);
-            if (index >= bone.points.Count)
-            {
-                index = bone.points.Count - 1;
-            }
+           ProcessBoneJoint(limbDataSkeleton, bone, pixelsQueue, perpendicularVector, true, boneConfiguration);
+           ProcessBoneJoint(limbDataSkeleton, bone, pixelsQueue, perpendicularVector, false, boneConfiguration);
 
-            // usun punkty przed indeksem
-            if (index != 0)
-            {
-                bone.points.RemoveRange(0, index);
-                index = 0;
-            }
+        }
 
-            Vector3 point = bone.points[index];
+        private void ProcessBoneJoint(LimbDataSkeleton limbDataSkeleton, LimbDataBone bone, Queue<int> pixelsQueue, Vector3 perpendicularVector, bool isStart, BoneConfiguration boneConfiguration)
+        {
+
+            if (bone.points.Count == 0)
+                return;
+
+            Vector3 point = bone.points.First();
+            int width = 10;
+
+            if (isStart)
+            {
+
+                int index = (int) Math.Floor(bone.points.Count * boneConfiguration.startOffset) + 1;
+                if (index >= bone.points.Count)
+                {
+                    index = bone.points.Count - 1;
+                }
+
+                // usun punkty przed indeksem
+                if (index != 0)
+                {
+                    bone.points.RemoveRange(0, index);
+                    index = 0;
+                }
+
+                point = bone.points[index];
+
+                if (boneConfiguration.startWidth != -1)
+                {
+                    width = boneConfiguration.startWidth;
+                }
+
+            }
+            else
+            {
+
+                point = bone.points.Last();
+
+                if (boneConfiguration.endWidth != -1)
+                {
+                    width = boneConfiguration.endWidth;
+                }
+
+            }
 
             bool isOk = true;
 
-            int steps = 0;
-
-            for (int i = 1; i < 30; i++)
+            for (int i = 1; i < width; i++)
             {
 
                 if (!isOk)
@@ -205,14 +242,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                         pixelsQueue.Enqueue(limbDataPixelIndex);
 
-                        steps++;
                     }
 
                 }
 
             }
-
-            //Console.WriteLine(steps);
 
         }
 
