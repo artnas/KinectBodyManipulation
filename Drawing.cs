@@ -23,6 +23,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 if (limbPixel.humanIndex != -1)
                 {
 
+                    //var color = Configuration.boneConfigurationsDictionary[new JointTypePair(limbPixel.startJointType, limbPixel.endJointType)].color;
                     var color = Utils.limbColors[((int)limbPixel.startJointType) % Utils.limbColors.Length];
 
                     colorBuffer[i] = Utils.Interpolate(colorBuffer[i], color.B, 0.7f);

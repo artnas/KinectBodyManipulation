@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
@@ -86,6 +87,25 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public static System.Collections.IEnumerable IteratePointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
         {
 
+            Vector3 v = (to - from);
+
+            int length = (int)Math.Ceiling(v.Length());
+
+            v = Vector3.Normalize(v);
+
+            Vector3 p = from;
+
+            for (int i = 0; i < length; i++)
+            {
+
+                p += v;
+
+                yield return new Vector3((int) p.X, (int) p.Y, (int) p.Z);
+
+            }
+
+            /*
+
             float a = (float)(to.Y - from.Y) / (to.X - from.X);
             float b = (from.Y) - a * from.X;
 
@@ -142,6 +162,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             }
 
+            */
+
         }
 
         public static List<Vector3> GetPointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
@@ -170,7 +192,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
                 var start = list.First();
 
-                list.Sort((a, b) => Vector3.Distance(start, a).CompareTo(Vector3.Distance(start, b)));
+                list.Sort((a, b) => Vector3.DistanceSquared(start, a).CompareTo(Vector3.DistanceSquared(start, b)));
             }
            
         }
@@ -217,6 +239,13 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 value = 255;
 
             return (byte) value;
+        }
+
+        public static int Interpolate(int a, int b, float v)
+        {
+            float value = Interpolate((float)a, (float)b, v, 1f - v);
+
+            return (int)value;
         }
 
     }

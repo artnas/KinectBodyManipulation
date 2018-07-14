@@ -113,6 +113,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 if (i == 0)
                     pixel.isJoint = true;
 
+                if (i <= points.Count / 4)
+                    pixel.debugDraw = true;
+
                 pixelsQueue.Enqueue(bufferIndex);
 
             }
@@ -137,13 +140,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
                 boneConfiguration = Configuration.boneConfigurationsDictionary[bone.jointTypePair];
             }
-            else
-            {
-                boneConfiguration = Configuration.boneConfigurationDefault;
-            }
 
-           ProcessBoneJoint(limbDataSkeleton, bone, pixelsQueue, perpendicularVector, true, boneConfiguration);
-           ProcessBoneJoint(limbDataSkeleton, bone, pixelsQueue, perpendicularVector, false, boneConfiguration);
+            ProcessBoneJoint(limbDataSkeleton, bone, pixelsQueue, perpendicularVector, true, boneConfiguration);
 
         }
 
@@ -153,99 +151,95 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             if (bone.points.Count == 0)
                 return;
 
-            Vector3 point = bone.points.First();
-            int width = 10;
-
-            if (isStart)
+            int startIndex = (int)Math.Floor(bone.points.Count * boneConfiguration.startOffset) + 1;
+            if (startIndex >= bone.points.Count)
             {
-
-                int index = (int) Math.Floor(bone.points.Count * boneConfiguration.startOffset) + 1;
-                if (index >= bone.points.Count)
-                {
-                    index = bone.points.Count - 1;
-                }
-
-                // usun punkty przed indeksem
-                if (index != 0)
-                {
-                    bone.points.RemoveRange(0, index);
-                    index = 0;
-                }
-
-                point = bone.points[index];
-
-                if (boneConfiguration.startWidth != -1)
-                {
-                    width = boneConfiguration.startWidth;
-                }
-
-            }
-            else
-            {
-
-                point = bone.points.Last();
-
-                if (boneConfiguration.endWidth != -1)
-                {
-                    width = boneConfiguration.endWidth;
-                }
-
+                startIndex = bone.points.Count - 1;
             }
 
-            bool isOk = true;
+            int endIndex = (int)Math.Ceiling(bone.points.Count * (1f - boneConfiguration.endOffset) ) - 1;
+            if (endIndex >= bone.points.Count)
+            {
+                endIndex = bone.points.Count - 1;
+            }
 
-            for (int i = 1; i < width; i++)
+            int startWidth = boneConfiguration.startWidth;
+            int endWidth = boneConfiguration.endWidth;
+
+            int length = endIndex - startIndex;
+
+            for (int k = startIndex; k < endIndex; k+=3)
             {
 
-                if (!isOk)
-                    break;
+                Vector3 point = bone.points[k];
 
-                for (int j = -1; j <= 1; j += 2)
+                bool isOk = true;
+
+                float progress = (float)(k - startIndex) / length;
+
+                int width = Utils.Interpolate(startWidth, endWidth, progress);
+
+                for (int i = 1; i < width; i++)
                 {
 
-                    Vector3 offsetPoint = point + perpendicularVector * i * j;
-
-                    int x = (int)offsetPoint.X;
-                    int y = (int)offsetPoint.Y;
-
-                    if (x < 0 || x >= Configuration.width || y < 0 || y >= Configuration.height)
-                    {
-                        continue;
-                    }
-
-                    int colorBufferIndex = (x + y * Configuration.width) * 4;
-
-                    if (backgroundRemovedBuffer[colorBufferIndex + 3] < 1)
-                    {
-                        isOk = false;
+                    if (!isOk)
                         break;
-                    }
-                    else
+
+                    for (int j = -1; j <= 1; j += 2)
                     {
-                        int limbDataPixelIndex = colorBufferIndex / 4;
 
-                        LimbDataPixel pixel = limbData.pixelData[limbDataPixelIndex];
+                        Vector3 offsetPoint = point + perpendicularVector * i * j;
 
-                        if (pixel.humanIndex != -1)
+                        int x = (int)offsetPoint.X;
+                        int y = (int)offsetPoint.Y;
+
+                        if (x < 0 || x >= Configuration.width || y < 0 || y >= Configuration.height)
                         {
-                            if (pixel.humanIndex != limbDataSkeleton.skeleton.TrackingId)
-                            {
-                                isOk = false;
-                                break;
-                            }
+                            continue;
                         }
 
-                        pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
-                        pixel.startJointType = bone.startJoint.JointType;
-                        pixel.endJointType = bone.endJoint.JointType;
-                        pixel.debugDraw = true;
+                        int colorBufferIndex = (x + y * Configuration.width) * 4;
 
-                        pixelsQueue.Enqueue(limbDataPixelIndex);
+                        if (backgroundRemovedBuffer[colorBufferIndex + 3] < 1)
+                        {
+                            isOk = false;
+                            break;
+                        }
+                        else
+                        {
+                            int limbDataPixelIndex = colorBufferIndex / 4;
+
+                            LimbDataPixel pixel = limbData.pixelData[limbDataPixelIndex];
+
+                            if (pixel.humanIndex != -1)
+                            {
+                                if (pixel.humanIndex != limbDataSkeleton.skeleton.TrackingId)
+                                {
+                                    isOk = false;
+                                    break;
+                                }
+                            }
+
+                            pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
+                            pixel.startJointType = bone.startJoint.JointType;
+                            pixel.endJointType = bone.endJoint.JointType;
+                            pixel.debugDraw = true;
+
+                            pixelsQueue.Enqueue(limbDataPixelIndex);
+
+                        }
 
                     }
 
                 }
 
+            }
+
+            // usun punkty przed indeksem
+            if (startIndex != 0)
+            {
+                bone.points.RemoveRange(0, startIndex);
+                startIndex = 0;
             }
 
         }
