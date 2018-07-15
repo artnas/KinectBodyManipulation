@@ -17,6 +17,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public List<Vector3> points = new List<Vector3>();
 
+        public Vector3 startPoint, endPoint;
+
         public Vector3 GetStartPoint()
         {
             return points.First();

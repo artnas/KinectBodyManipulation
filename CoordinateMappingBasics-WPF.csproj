@@ -81,8 +81,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BoneProcessor.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Curve.cs" />
+    <Compile Include="Drawing_Debug.cs" />
+    <Compile Include="Drawing_Normal.cs" />
     <Compile Include="ImageProcessors\ImageProcessor.cs" />
     <Compile Include="JointTypePair.cs" />
     <Compile Include="JointPair.cs" />
@@ -90,6 +93,7 @@
     <Compile Include="LimbDataBone.cs" />
     <Compile Include="LimbDataSkeleton.cs" />
     <Compile Include="LimbDataPixel.cs" />
+    <Compile Include="Drawing_Human.cs" />
     <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -12,21 +12,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
     public static class Utils
     {
 
-        public static KinectSensor sensor;
-
-        public static readonly Color[] limbColors = {
-            Color.FromRgb(255,255,255),
-
-            Color.FromRgb(255,255,0),
-            Color.FromRgb(255,0,0),
-
-            Color.FromRgb(0,255,0),
-            Color.FromRgb(255,255,0),
-
-            Color.FromRgb(0,0,255),
-            Color.FromRgb(0,255,255),
-        };
-
         public static readonly int[,] cardinalDirections =
         {
             { -1, 0 },  // lewo
@@ -38,13 +23,13 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public static readonly int[,] ordinalDirections =
         {
             { -1, 0 },      // lewo
-            { -1, 1 },      // lewo gora
-            { -1, -1 },     // lewo dol
+            { -1, -1 },      // lewo gora
+            { -1, 1 },     // lewo dol
             { 1, 0 },       // prawo
-            { 1, 1 },       // prawo gora
-            { 1, -1 },      // prawo dol
-            { 0, 1 },       // gora
-            { 0, -1 },       // dol 
+            { 1, -1 },       // prawo gora
+            { 1, 1 },      // prawo dol
+            { 0, -1 },       // gora
+            { 0, 1 },      // dol 
         };
 
         /// <summary>
@@ -104,66 +89,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             }
 
-            /*
-
-            float a = (float)(to.Y - from.Y) / (to.X - from.X);
-            float b = (from.Y) - a * from.X;
-
-            if (from.X > to.X)
-            {
-                var temp = from.X;
-                from.X = to.X;
-                to.X = temp;
-            }
-
-            if (from.Y > to.Y)
-            {
-                var temp = from.Y;
-                from.Y = to.Y;
-                to.Y = temp;
-            }
-
-            float xDistance = to.X - from.X;
-            float yDistance = to.Y - from.Y;
-            float zDistance = to.Z - from.Z;
-
-            for (int x = (int)Math.Floor(from.X); x <= to.X; x++)
-            {
-
-                int y = (int)(a * x + b);
-
-                if (onlyIncludePointsOnScreen && (x < 0 || x >= width || y < 0 || y >= height))
-                    continue;
-
-                float progress = (to.X - x) / xDistance;
-                float z = Vector3.Lerp(from, to, progress).Z;
-
-                yield return new Vector3(x, y, z);
-
-            }
-
-            for (int y = (int)Math.Floor(from.Y); y <= to.Y; y++)
-            {
-
-                int x;
-
-                if (from.X != to.X)
-                    x = (int)((y - b) / a);
-                else
-                    x = (int)(from.X);
-
-                if (onlyIncludePointsOnScreen && (x < 0 || x >= width || y < 0 || y >= height))
-                    continue;
-
-                float progress = (to.Y - y) / yDistance;
-                float z = Vector3.Lerp(from, to, progress).Z;
-
-                yield return new Vector3(x, y, z);
-
-            }
-
-            */
-
         }
 
         public static List<Vector3> GetPointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
@@ -202,7 +127,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         /// </summary>
         /// <param name="skelpoint">point to map</param>
         /// <returns>mapped point</returns>
-        public static Vector3 SkeletonPointToScreen(SkeletonPoint skelpoint)
+        public static Vector3 SkeletonPointToScreen(KinectSensor sensor, SkeletonPoint skelpoint)
         {
             // Convert point to depth space.  
             // We are not using depth directly, but we do want the points in our 640x480 output resolution.
@@ -211,6 +136,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             return new Vector3(colorPoint.X, colorPoint.Y, skelpoint.Z);
         }
 
+        /// <summary>
+        /// Calculates an interpolated value based on provided values and their weights
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="aWeight"></param>
+        /// <param name="bWeight"></param>
+        /// <returns></returns>
         public static float Interpolate(float a, float b, float aWeight, float bWeight)
         {
             return (a * aWeight + b * bWeight) / (aWeight + bWeight);
@@ -240,9 +173,26 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             return (int)value;
         }
 
+        /// <summary>
+        /// Calculates bone hash for a bone defined by a start and end joint type
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static int GetBoneHash(JointType a, JointType b)
         {
             return (int) a | ((int) b << 4);
+        }
+
+        public static void GetIndexCoordinates(int index, ref int x, ref int y)
+        {
+            x = index % Configuration.width;
+            y = (index - x) / Configuration.width;
+        }
+
+        public static int GetIndexByCoordinates(int x, int y)
+        {
+            return x + y * Configuration.width;
         }
 
     }

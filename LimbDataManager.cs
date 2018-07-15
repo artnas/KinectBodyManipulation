@@ -10,6 +10,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 {
     public class LimbDataManager
     {
+
+        private KinectSensor sensor;
      
         private byte[] colorBuffer;
         private DepthImagePixel[] depthBuffer;
@@ -17,11 +19,12 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public LimbData limbData;
 
-        public LimbDataManager(byte[] colorBuffer, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer)
+        public LimbDataManager(byte[] colorBuffer, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer, KinectSensor sensor)
         {
             this.colorBuffer = colorBuffer;
             this.depthBuffer = depthBuffer;
             this.backgroundRemovedBuffer = backgroundRemovedBuffer;
+            this.sensor = sensor;
 
             this.limbData = new LimbData();
         }
@@ -91,8 +94,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             LimbDataBone bone = limbDataSkeleton.GetBoneByJointPair(a, b);
 
-            var aPosition = Utils.SkeletonPointToScreen(a.Position);
-            var bPosition = Utils.SkeletonPointToScreen(b.Position);
+            var aPosition = Utils.SkeletonPointToScreen(sensor, a.Position);
+            var bPosition = Utils.SkeletonPointToScreen(sensor, b.Position);
+
+            bone.startPoint = aPosition;
+            bone.endPoint = bPosition;
 
             List<Vector3> points = bone.points;
             Utils.GetPointsBetween(points, aPosition, bPosition, Configuration.width, Configuration.height);
