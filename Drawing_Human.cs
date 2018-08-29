@@ -26,12 +26,12 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                     //if (limbPixel.boneHash == b) return;
 
-                    outputBuffer[i] = Utils.Interpolate(savedBackgroundColorBuffer[i], colorBuffer[i],
-                        savedBackgroundColorBuffer[i + 3] / 255f);
-                    outputBuffer[i + 1] = Utils.Interpolate(savedBackgroundColorBuffer[i], colorBuffer[i + 1],
-                        savedBackgroundColorBuffer[i + 3] / 255f);
-                    outputBuffer[i + 2] = Utils.Interpolate(savedBackgroundColorBuffer[i], colorBuffer[i + 2],
-                        savedBackgroundColorBuffer[i + 3] / 255f);
+                    outputBuffer[i] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i],
+                        1f - backgroundRemovedBuffer[i + 3] / 255f);
+                    outputBuffer[i + 1] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 1],
+                        1f - backgroundRemovedBuffer[i + 3] / 255f);
+                    outputBuffer[i + 2] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 2],
+                        1f - backgroundRemovedBuffer[i + 3] / 255f);
 
                 }
             });

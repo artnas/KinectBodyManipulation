@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Kinect;
@@ -24,7 +25,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         private static LimbDataPixel[] oldLimbDataPixels = new LimbDataPixel[Configuration.size];
 
-        private static Dictionary<int, HashSet<int>> bonePixelsDictionary = new Dictionary<int, HashSet<int>>(20);
+        private static Dictionary<int, BonePixelsData> bonePixelsDictionary = new Dictionary<int, BonePixelsData>(20);
 
         public static void SetBuffers(DepthImagePixel[] depthBuffer, byte[] colorBuffer, byte[] outputBuffer, byte[] backgroundRemovedBuffer, LimbDataManager limbDataManager, byte[] savedBackgroundColorBuffer, DepthImagePixel[] savedBackgroundDepthBuffer, byte[] normalBuffer)
         {
@@ -43,9 +44,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             Array.Copy(limbDataManager.limbData.pixelData, oldLimbDataPixels, limbDataManager.limbData.pixelData.Length);
             AssignBonePixelsToDictionaries();
 
-            foreach (var i in normalBuffer)
+            for (int i = 0; i < normalBuffer.Length; i++)
             {
-                normalBuffer[i] = 0;
+                normalBuffer[i] = 128;
             }
 
             foreach (var limbDataSkeleton in limbDataManager.limbData.limbDataSkeletons)
@@ -63,43 +64,53 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             if (bone.points.Count == 0)
                 return;
 
-            if (!bonePixelsDictionary.ContainsKey(bone.boneHash) || bonePixelsDictionary[bone.boneHash] == null || bonePixelsDictionary[bone.boneHash].Count == 0)
+            if (!bonePixelsDictionary.ContainsKey(bone.boneHash) || bonePixelsDictionary[bone.boneHash] == null || bonePixelsDictionary[bone.boneHash].indices.Count == 0)
             {
                 return;
             }
 
-            HashSet<int> pixelIndices = bonePixelsDictionary[bone.boneHash];
+            var bonePixelData = bonePixelsDictionary[bone.boneHash];
 
             switch (bone.boneHash)
             {
                 case 35:    // head, shoulder center
-                    ProcessBone_Size(bone, pixelIndices);
+                    ProcessBone_Size(bone, bonePixelData);
                     break;
                 default:
-                    ProcessBone_Normal(bone, pixelIndices);
+                    ProcessBone_Normal(bone, bonePixelData);
                     break;
             }
 
         }
 
-        private static void ProcessBone_Size(LimbDataBone bone, HashSet<int> indices)
+        private static void ProcessBone_Size(LimbDataBone bone, BonePixelsData bonePixelData)
         {
 
-            float scale = 1f;
+            Vector3 boneVector = Vector3.Normalize(bone.endPoint - bone.startPoint);
 
-            int originalStartX = (int)bone.startPoint.X;
-            int originalStartY = (int)bone.startPoint.Y;
+            HashSet<int> indices = bonePixelData.indices;
 
-            int trimmedStartX = (int)bone.GetStartPoint().X;
-            int trimmedStartY = (int)bone.GetStartPoint().Y;
+            //ProcessBone_Normal(bone, indices);
 
-            int startX = trimmedStartX;
-            int startY = trimmedStartY;
+            float scale = Settings.headSize;
 
-            float startOffsetX = (originalStartX - trimmedStartX) / (scale);
-            float startOffsetY = (originalStartY - trimmedStartY) / (scale);
+            float originalStartX = bone.endPoint.X;
+            float originalStartY = bone.endPoint.Y;
 
-            Console.WriteLine(startOffsetX + " " + startOffsetY);
+            float startX = originalStartX;
+            float startY = originalStartY;
+
+            int pixelsWidth = bonePixelData.maxX - bonePixelData.minX;
+            int pixelsHeight = bonePixelData.maxY - bonePixelData.minY;
+
+            float p = startY - bonePixelData.maxY;
+            float p2 = startX - bonePixelData.maxX;
+
+            // int pixelsOffsetX = (int)((pixelsWidth * scale - pixelsWidth) * boneVector.X) / 4;
+            // int pixelsOffsetY = (int)((pixelsHeight * scale - pixelsHeight) * boneVector.Y) / 4;
+
+            float pixelsOffsetX = (((p2 / 2f) * scale - p2 + p2 / 2f) * boneVector.X);
+            float pixelsOffsetY = (((p / 2f) * scale - p + p / 2f) * boneVector.Y);
 
             Parallel.For(0L, oldLimbDataPixels.Length, i =>
             {
@@ -108,14 +119,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 int x = 0, y = 0;
                 Utils.GetIndexCoordinates((int)i, ref x, ref y);
 
-                int offsetX = startX - x;
-                int offsetY = startY - y;
+                float offsetX = startX - x;
+                float offsetY = startY - y;
 
                 float transformedX = startX - offsetX / scale;
                 float transformedY = startY - offsetY / scale;
 
-                transformedX += startOffsetX;
-                transformedY += startOffsetY;
+                //transformedX += pixelsOffsetX;
+                transformedY -= pixelsOffsetY;
 
                 if (transformedX < 0 || transformedX >= Configuration.width || transformedY < 0 || transformedY >= Configuration.height)
                 {
@@ -142,26 +153,36 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                         1f - backgroundRemovedBuffer[sourceIndex + 3] / 255f);
                     outputBuffer[targetIndex + 2] = Utils.Interpolate(savedBackgroundColorBuffer[sourceIndex], backgroundRemovedBuffer[sourceIndex + 2],
                         1f - backgroundRemovedBuffer[sourceIndex + 3] / 255f);
+
+                    // normalBuffer[targetIndex] = (byte) (-offsetX * scale + 128);
+                    // normalBuffer[targetIndex + 1] = (byte) (-offsetY * scale + 128);
                 }
             });
 
         }
 
-        private static void ProcessBone_Normal(LimbDataBone bone, HashSet<int> indices)
+        private static void ProcessBone_Normal(LimbDataBone bone, BonePixelsData bonePixelData)
         {
 
-            List<int> indicesList = indices.ToList();
+            List<int> indicesList = bonePixelData.indices.ToList();
 
             Parallel.For(0, indicesList.Count, i =>
             {
-                i = indicesList[i] * 4;
 
-                outputBuffer[i] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i],
-                    1f - backgroundRemovedBuffer[i + 3] / 255f);
-                outputBuffer[i + 1] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 1],
-                    1f - backgroundRemovedBuffer[i + 3] / 255f);
-                outputBuffer[i + 2] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 2],
-                    1f - backgroundRemovedBuffer[i + 3] / 255f);
+                 i = indicesList[i] * 4;
+                
+                 outputBuffer[i] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i],
+                     1f - backgroundRemovedBuffer[i + 3] / 255f);
+                 outputBuffer[i + 1] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 1],
+                     1f - backgroundRemovedBuffer[i + 3] / 255f);
+                 outputBuffer[i + 2] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 2],
+                     1f - backgroundRemovedBuffer[i + 3] / 255f);
+
+                // i = indicesList[i] * 4;
+                //
+                // normalBuffer[i] = (byte)(128);
+                // normalBuffer[i + 1] = (byte)(128);
+
             });
 
         }
@@ -171,7 +192,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             // wyczysc listy
             foreach (var entry in bonePixelsDictionary)
             {
-                entry.Value.Clear();
+                entry.Value.indices.Clear();
+                entry.Value.minX = entry.Value.maxX = entry.Value.minY = entry.Value.maxY = 0;
             }
 
             for (int i = 0; i < limbDataManager.limbData.pixelData.Length; i++)
@@ -181,14 +203,38 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 if (limbPixel.humanIndex != -1)
                 {
 
+                    int x = 0, y = 0;
+
+                    Utils.GetIndexCoordinates(i, ref x, ref y);
+
                     if (bonePixelsDictionary.ContainsKey(limbPixel.boneHash))
                     {
-                        bonePixelsDictionary[limbPixel.boneHash].Add(i);
+                        bonePixelsDictionary[limbPixel.boneHash].indices.Add(i);
+
+                        if (x < bonePixelsDictionary[limbPixel.boneHash].minX)
+                        {
+                            bonePixelsDictionary[limbPixel.boneHash].minX = x;
+                        }
+                        else if (x > bonePixelsDictionary[limbPixel.boneHash].maxX)
+                        {
+                            bonePixelsDictionary[limbPixel.boneHash].maxX = x;
+                        }
+
+                        if (y < bonePixelsDictionary[limbPixel.boneHash].minY)
+                        {
+                            bonePixelsDictionary[limbPixel.boneHash].minY = y;
+                        }
+                        else if (y > bonePixelsDictionary[limbPixel.boneHash].maxY)
+                        {
+                            bonePixelsDictionary[limbPixel.boneHash].maxY = y;
+                        }
                     }
                     else
                     {
-                        bonePixelsDictionary.Add(limbPixel.boneHash, new HashSet<int>());
-                        bonePixelsDictionary[limbPixel.boneHash].Add(i);
+                        bonePixelsDictionary.Add(limbPixel.boneHash, new BonePixelsData());
+                        bonePixelsDictionary[limbPixel.boneHash].indices.Add(i);
+                        bonePixelsDictionary[limbPixel.boneHash].minX = bonePixelsDictionary[limbPixel.boneHash].maxX = x;
+                        bonePixelsDictionary[limbPixel.boneHash].minY = bonePixelsDictionary[limbPixel.boneHash].maxY = y;
                     }
 
                 }
@@ -203,6 +249,17 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             //     }        
             // }
 
+        }
+
+        private class BonePixelsData
+        {
+            public int minX, maxX, minY, maxY;
+            public HashSet<int> indices;
+
+            public BonePixelsData()
+            {
+                indices = new HashSet<int>();
+            }
         }
 
     }

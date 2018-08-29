@@ -28,9 +28,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                         var color = Configuration.GetBoneColor(limbPixel.boneHash);
 
-                        colorBuffer[i] = Utils.Interpolate(colorBuffer[i], color.B, 0.7f);
-                        colorBuffer[i + 1] = Utils.Interpolate(colorBuffer[i + 1], color.G, 0.7f);
-                        colorBuffer[i + 2] = Utils.Interpolate(colorBuffer[i + 2], color.R, 0.7f);
+                        outputBuffer[i] = Utils.Interpolate(outputBuffer[i], color.B, 0.7f);
+                        outputBuffer[i + 1] = Utils.Interpolate(outputBuffer[i + 1], color.G, 0.7f);
+                        outputBuffer[i + 2] = Utils.Interpolate(outputBuffer[i + 2], color.R, 0.7f);
 
                     }
                 }
@@ -62,7 +62,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                         // piksele kosci
                         foreach (var point in bone.points)
                         {
-                            DrawThickDot(colorBuffer, ((int) point.X + (int) point.Y * Configuration.width) * 4, 2,
+                            DrawThickDot(outputBuffer, ((int) point.X + (int) point.Y * Configuration.width) * 4, 2,
                                 color);
                         }
                     }
@@ -80,10 +80,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                             continue;
 
                         // piksele poczatkowego i koncowego jointa tej kosci
-                        DrawThickDot(colorBuffer,
+                        DrawThickDot(outputBuffer,
                             ((int) bone.GetStartPoint().X + (int) bone.GetStartPoint().Y * Configuration.width) * 4, 3,
                             Colors.Yellow);
-                        DrawThickDot(colorBuffer,
+                        DrawThickDot(outputBuffer,
                             ((int) bone.GetEndPoint().X + (int) bone.GetEndPoint().Y * Configuration.width) * 4, 3,
                             Colors.Yellow);
                     }
@@ -100,9 +100,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     if (limbPixel.debugDraw)
                     {
 
-                        colorBuffer[i] = 255;
-                        colorBuffer[i + 1] = 0;
-                        colorBuffer[i + 2] = 0;
+                        outputBuffer[i] = 255;
+                        outputBuffer[i + 1] = 0;
+                        outputBuffer[i + 2] = 0;
 
                     }
                 }

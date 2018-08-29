@@ -176,7 +176,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 }
             }
 
-            //Array.Copy(this.backgroundRemovedBuffer, this.outputBuffer, this.outputBuffer.Length);
+            // Array.Copy(this.backgroundRemovedBuffer, this.outputBuffer, this.outputBuffer.Length);
+
+            Settings.Update(this);
 
             limbDataManager.Update(skeletons);
 
@@ -187,7 +189,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             
             //Drawing.DrawDebug(true, true, true, true);        
             //Drawing.DrawHuman();
-            //Drawing.ProcessNormalDisplacement();
+            // Drawing.DrawNormalMap();
+            // Drawing.ProcessNormalDisplacement();
 
             DrawOutputBuffer();
 
@@ -396,7 +399,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             BitmapEncoder encoder = new PngBitmapEncoder();
 
             // create frame from the writable bitmap and add to encoder
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap)); 
 
             string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 

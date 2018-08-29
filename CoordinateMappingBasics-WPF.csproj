@@ -94,6 +94,7 @@
     <Compile Include="LimbDataSkeleton.cs" />
     <Compile Include="LimbDataPixel.cs" />
     <Compile Include="Drawing_Human.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

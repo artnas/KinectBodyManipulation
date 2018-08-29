@@ -95,5 +95,6 @@
                 <TextBlock Name="statusBarText" Margin="-1 0 0 0">Press 'Screenshot' to save a screenshot to your 'My Pictures' directory.</TextBlock>
             </StatusBarItem>
         </StatusBar>
+        <Slider x:Name="HeadSize" HorizontalAlignment="Left" Margin="138,14,0,0" Grid.Row="2" VerticalAlignment="Top" RenderTransformOrigin="3.5,0.778" Width="100" Maximum="200" Minimum="50" Value="100"/>
     </Grid>
 </Window>
