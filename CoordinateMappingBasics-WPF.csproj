@@ -83,6 +83,7 @@
     </ApplicationDefinition>
     <Compile Include="BoneProcessor.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Curves.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Drawing_Debug.cs" />
     <Compile Include="Drawing_Normal.cs" />

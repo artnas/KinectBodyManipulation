@@ -151,7 +151,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public static float Interpolate(float a, float b, float v)
         {
-            return Interpolate(a, b, v, 1f - v);
+            return Interpolate(a, b, 1f - v, v);
         }
 
         public static byte Interpolate(byte a, byte b, float v)

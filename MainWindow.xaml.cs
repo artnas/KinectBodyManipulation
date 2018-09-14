@@ -428,26 +428,26 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void CheckBoxNearModeChanged(object sender, RoutedEventArgs e)
-        {
-            if (this.sensor != null)
-            {
-                // will not function on non-Kinect for Windows devices
-                try
-                {
-                    if (this.checkBoxNearMode.IsChecked.GetValueOrDefault())
-                    {
-                        this.sensor.DepthStream.Range = DepthRange.Near;
-                    }
-                    else
-                    {
-                        this.sensor.DepthStream.Range = DepthRange.Default;
-                    }
-                }
-                catch (InvalidOperationException)
-                {
-                }
-            }
-        }
+        // private void CheckBoxNearModeChanged(object sender, RoutedEventArgs e)
+        // {
+        //     if (this.sensor != null)
+        //     {
+        //         // will not function on non-Kinect for Windows devices
+        //         try
+        //         {
+        //             if (this.checkBoxNearMode.IsChecked.GetValueOrDefault())
+        //             {
+        //                 this.sensor.DepthStream.Range = DepthRange.Near;
+        //             }
+        //             else
+        //             {
+        //                 this.sensor.DepthStream.Range = DepthRange.Default;
+        //             }
+        //         }
+        //         catch (InvalidOperationException)
+        //         {
+        //         }
+        //     }
+        // }
     }
 }

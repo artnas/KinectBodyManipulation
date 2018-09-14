@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinateMappingBasics-WPF", "CoordinateMappingBasics-WPF.csproj", "{BA49DE61-9346-4156-B382-75C2D5370DCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsProject", "..\UnitTestsProject\UnitTestsProject.csproj", "{F830F4CE-8E39-4D1F-879A-6FE2F3C89885}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BA49DE61-9346-4156-B382-75C2D5370DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA49DE61-9346-4156-B382-75C2D5370DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA49DE61-9346-4156-B382-75C2D5370DCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F830F4CE-8E39-4D1F-879A-6FE2F3C89885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F830F4CE-8E39-4D1F-879A-6FE2F3C89885}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F830F4CE-8E39-4D1F-879A-6FE2F3C89885}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F830F4CE-8E39-4D1F-879A-6FE2F3C89885}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

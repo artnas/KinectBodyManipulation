@@ -76,6 +76,26 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 case 35:    // head, shoulder center
                     ProcessBone_Size(bone, bonePixelData);
                     break;
+                case 152:    
+                case 84:    
+                case 169:    
+                case 101:    
+                    ProcessBone_Stretch(bone, bonePixelData, new StretchParameters()
+                    {
+                        curve = Curves.sinHill,
+                        power = 1,
+                    });
+                    break;
+                case 272:
+                case 305:
+                case 220:
+                case 237:
+                    ProcessBone_Stretch(bone, bonePixelData, new StretchParameters()
+                    {
+                        curve = Curves.test,
+                        power = 0.25f,
+                    });
+                    break;
                 default:
                     ProcessBone_Normal(bone, bonePixelData);
                     break;
@@ -184,6 +204,96 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 // normalBuffer[i + 1] = (byte)(128);
 
             });
+
+        }
+
+        private struct StretchParameters
+        {
+            public Curve curve;
+            public float power;
+        }
+
+        private static void ProcessBone_Stretch(LimbDataBone bone, BonePixelsData bonePixelData, StretchParameters stretchParameters)
+        {
+
+            // List<int> indicesList = bonePixelData.indices.ToList();
+
+            // Vector3 boneVector = Vector3.Normalize(bone.endPoint - bone.startPoint);
+            Vector3 perpendicularVector = Utils.GetPerpendicularVector(bone.GetStartPoint(), bone.GetEndPoint());
+
+            var pointsBetween = Utils.GetPointsBetween(bone.startPoint, bone.endPoint, Configuration.width, Configuration.height);
+
+            Parallel.ForEach(pointsBetween, (point, parallelLoopState, index) =>
+            {
+
+                var progress = (float) index / pointsBetween.Count;
+                var curveScale = stretchParameters.curve.Evaluate(progress, stretchParameters.power);
+
+                // int index = Utils.GetIndexByCoordinates((int)point.X, (int)point.Y) * 4;
+
+                for (var direction = -1; direction <= 1; direction += 2)
+                {
+
+                    bool reachedNormalWidth = false;
+                    float scaledLineWidth = 0;
+
+                    for (var k = 0.1f; ; k+=0.05f)
+                    {
+
+                        Vector3 pointOffset = perpendicularVector * k * direction;
+                        Vector3 perpendicularPoint = point + pointOffset;
+
+                        if (perpendicularPoint.X < 0 || perpendicularPoint.X >= Configuration.width ||
+                            perpendicularPoint.Y < 0 || perpendicularPoint.Y >= Configuration.height)
+                        {
+                            break;
+                        }
+
+                        int perpendicularPointIndex = Utils.GetIndexByCoordinates((int)perpendicularPoint.X, (int)perpendicularPoint.Y);
+
+                        if (!reachedNormalWidth && !bonePixelData.indices.Contains(perpendicularPointIndex))
+                        {
+                            scaledLineWidth = k * curveScale;
+                            reachedNormalWidth = true;
+                        }
+
+                        if (reachedNormalWidth && k >= scaledLineWidth)
+                        {
+                            break;
+                        }
+
+                        Vector3 samplingPoint = point + (pointOffset / curveScale);
+
+                        int samplingIndex = Utils.GetIndexByCoordinates((int) samplingPoint.X, (int) samplingPoint.Y) * 4;
+
+                        int outputIndex = perpendicularPointIndex * 4;
+
+                        outputBuffer[outputIndex] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex], backgroundRemovedBuffer[samplingIndex],
+                            1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                        outputBuffer[outputIndex + 1] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex], backgroundRemovedBuffer[samplingIndex + 1],
+                            1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                        outputBuffer[outputIndex + 2] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex], backgroundRemovedBuffer[samplingIndex + 2],
+                            1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+
+                    }
+
+                }
+          
+            });
+
+            // Parallel.For(0, indicesList.Count, i =>
+            // {
+            //
+            //     i = indicesList[i] * 4;
+            //
+            //     // outputBuffer[i] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i],
+            //     //     1f - backgroundRemovedBuffer[i + 3] / 255f);
+            //     // outputBuffer[i + 1] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 1],
+            //     //     1f - backgroundRemovedBuffer[i + 3] / 255f);
+            //     // outputBuffer[i + 2] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 2],
+            //     //     1f - backgroundRemovedBuffer[i + 3] / 255f);
+            //
+            // });
 
         }
 
