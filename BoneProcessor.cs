@@ -83,7 +83,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     ProcessBone_Stretch(bone, bonePixelData, new StretchParameters()
                     {
                         curve = Curves.sinHill,
-                        power = 1,
+                        power = 1.25f,
                     });
                     break;
                 case 272:
@@ -92,7 +92,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 case 237:
                     ProcessBone_Stretch(bone, bonePixelData, new StretchParameters()
                     {
-                        curve = Curves.test,
+                        curve = Curves.inverseSinHill,
                         power = 0.25f,
                     });
                     break;
@@ -218,7 +218,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             // List<int> indicesList = bonePixelData.indices.ToList();
 
-            // Vector3 boneVector = Vector3.Normalize(bone.endPoint - bone.startPoint);
+            Vector3 boneVector = Vector3.Normalize(bone.endPoint - bone.startPoint);
             Vector3 perpendicularVector = Utils.GetPerpendicularVector(bone.GetStartPoint(), bone.GetEndPoint());
 
             var pointsBetween = Utils.GetPointsBetween(bone.startPoint, bone.endPoint, Configuration.width, Configuration.height);
@@ -234,46 +234,52 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 for (var direction = -1; direction <= 1; direction += 2)
                 {
 
-                    bool reachedNormalWidth = false;
-                    float scaledLineWidth = 0;
-
-                    for (var k = 0.1f; ; k+=0.05f)
+                    for (var k = 0.1f; ; k+=1f)
                     {
 
-                        Vector3 pointOffset = perpendicularVector * k * direction;
-                        Vector3 perpendicularPoint = point + pointOffset;
+                        var shouldBreak = false;
 
-                        if (perpendicularPoint.X < 0 || perpendicularPoint.X >= Configuration.width ||
-                            perpendicularPoint.Y < 0 || perpendicularPoint.Y >= Configuration.height)
+                        for (var l = -1; l <= 1; l++)
                         {
+
+                            Vector3 pointOffset = perpendicularVector * k * direction;
+                            Vector3 perpendicularPoint = point + pointOffset + boneVector * l;
+                            Vector3 samplingPoint = point + ( (pointOffset + boneVector * l) / curveScale);
+
+                            if (perpendicularPoint.X < 0 || perpendicularPoint.X >= Configuration.width ||
+                                perpendicularPoint.Y < 0 || perpendicularPoint.Y >= Configuration.height)
+                            {
+                                break;
+                            }
+
+                            int perpendicularPointIndex = Utils.GetIndexByCoordinates((int) perpendicularPoint.X,
+                                (int) perpendicularPoint.Y);
+                            int samplingIndex =
+                                Utils.GetIndexByCoordinates((int) samplingPoint.X, (int) samplingPoint.Y);
+
+                            if (!bonePixelData.indices.Contains(samplingIndex))
+                            {
+                                shouldBreak = true;
+                                break;
+                            }
+
+                            samplingIndex *= 4;
+                            int outputIndex = perpendicularPointIndex * 4;
+
+                            outputBuffer[outputIndex] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex],
+                                backgroundRemovedBuffer[samplingIndex],
+                                1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                            outputBuffer[outputIndex + 1] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex],
+                                backgroundRemovedBuffer[samplingIndex + 1],
+                                1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                            outputBuffer[outputIndex + 2] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex],
+                                backgroundRemovedBuffer[samplingIndex + 2],
+                                1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+
+                        }
+
+                        if (shouldBreak)
                             break;
-                        }
-
-                        int perpendicularPointIndex = Utils.GetIndexByCoordinates((int)perpendicularPoint.X, (int)perpendicularPoint.Y);
-
-                        if (!reachedNormalWidth && !bonePixelData.indices.Contains(perpendicularPointIndex))
-                        {
-                            scaledLineWidth = k * curveScale;
-                            reachedNormalWidth = true;
-                        }
-
-                        if (reachedNormalWidth && k >= scaledLineWidth)
-                        {
-                            break;
-                        }
-
-                        Vector3 samplingPoint = point + (pointOffset / curveScale);
-
-                        int samplingIndex = Utils.GetIndexByCoordinates((int) samplingPoint.X, (int) samplingPoint.Y) * 4;
-
-                        int outputIndex = perpendicularPointIndex * 4;
-
-                        outputBuffer[outputIndex] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex], backgroundRemovedBuffer[samplingIndex],
-                            1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
-                        outputBuffer[outputIndex + 1] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex], backgroundRemovedBuffer[samplingIndex + 1],
-                            1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
-                        outputBuffer[outputIndex + 2] = Utils.Interpolate(savedBackgroundColorBuffer[samplingIndex], backgroundRemovedBuffer[samplingIndex + 2],
-                            1f - backgroundRemovedBuffer[samplingIndex + 3] / 255f);
 
                     }
 
