@@ -15,7 +15,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public static readonly int height = 480;
         public static readonly int size = width * height;
 
-        public static readonly byte alphaThreshold = 40;
+        public static readonly byte alphaThreshold = 120;
+        public static readonly short depthThreshold = 150;
 
         public static readonly Dictionary<JointTypePair, BoneConfiguration> boneConfigurationsDictionary = new Dictionary<JointTypePair, BoneConfiguration>()
         {

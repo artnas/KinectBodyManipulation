@@ -71,6 +71,12 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             var bonePixelData = bonePixelsDictionary[bone.boneHash];
 
+            if (!Settings.Instance.DrawMorphs)
+            {
+                ProcessBone_Normal(bone, bonePixelData);
+                return;
+            }
+
             switch (bone.boneHash)
             {
                 case 35:    // head, shoulder center

@@ -131,6 +131,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         {
             // Convert point to depth space.  
             // We are not using depth directly, but we do want the points in our 640x480 output resolution.
+
             var depthPoint = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
             var colorPoint = sensor.CoordinateMapper.MapDepthPointToColorPoint(DepthImageFormat.Resolution640x480Fps30, depthPoint, ColorImageFormat.RgbResolution640x480Fps30);
             return new Vector3(colorPoint.X, colorPoint.Y, skelpoint.Z);
@@ -174,7 +175,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         }
 
         /// <summary>
-        /// Calculates bone hash for a bone defined by a start and end joint type
+        /// Calculates bone hash for bone defined by the given start and end joint types
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>

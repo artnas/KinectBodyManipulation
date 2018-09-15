@@ -40,6 +40,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         private byte[] outputBuffer;
         private int[] playerPixelData;
         private ColorImagePoint[] colorCoordinates;
+        private DepthImagePoint[] depthCoordinates;
 
         private bool hasSavedBackgroundColorFrame = false;
         private bool hasSavedBackgroundDepthFrame = false;
@@ -119,12 +120,13 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 this.playerPixelData = new int[this.sensor.DepthStream.FramePixelDataLength];
 
                 this.colorCoordinates = new ColorImagePoint[this.sensor.DepthStream.FramePixelDataLength];
+                this.depthCoordinates = new DepthImagePoint[this.sensor.DepthStream.FramePixelDataLength];
 
                 // This is the bitmap we'll display on-screen
                 this.colorBitmap = new WriteableBitmap(colorWidth, colorHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
 
                 //
-                this.limbDataManager = new LimbDataManager(colorBuffer, depthBuffer, backgroundRemovedBuffer, sensor);
+                this.limbDataManager = new LimbDataManager(colorBuffer, depthCoordinates, depthBuffer, backgroundRemovedBuffer, savedBackgroundDepthBuffer, sensor);
 
                 this.backgroundRemovedColorStream = new BackgroundRemovedColorStream(this.sensor);
                 this.backgroundRemovedColorStream.Enable(ColorFormat, DepthFormat);
@@ -137,7 +139,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 // Set the image we display to point to the bitmap where we'll put the image data
                 this.MaskedColor.Source = this.colorBitmap;
 
-                Drawing.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer);
+                Drawing.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer, colorCoordinates, depthCoordinates);
                 BoneProcessor.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer);
 
                 // Add an event handler to be called whenever there is new depth frame data
@@ -185,19 +187,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             // Array.Copy(this.backgroundRemovedBuffer, this.outputBuffer, this.outputBuffer.Length);
 
-            // Settings.Update(this);
-
             limbDataManager.Update(skeletons);
 
-            Drawing.DrawBackground();
-
-            BoneProcessor.ProcessAllBones();
-
-            
-            Drawing.DrawDebug();        
-            //Drawing.DrawHuman();
-            // Drawing.DrawNormalMap();
-            // Drawing.ProcessNormalDisplacement();
+            Drawing.Draw();
 
             DrawOutputBuffer();
 
@@ -298,6 +290,12 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     this.depthBuffer,
                     ColorFormat,
                     this.colorCoordinates);
+
+                this.sensor.CoordinateMapper.MapColorFrameToDepthFrame(
+                    ColorFormat, 
+                    DepthFormat, 
+                    depthBuffer, 
+                    depthCoordinates);
 
                 if (hasSavedBackgroundDepthFrame == false)
                 {

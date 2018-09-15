@@ -23,19 +23,24 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             }
         }
 
-        private Settings()
-        {
-            this.HeadSize = 100;
-            this.ArmScale = 100;
-            this.LegScale = 100;
-        }
-
         public float HeadSize { get; set; }
         public float ArmScale { get; set; }
         public float LegScale { get; set; }
         public bool DebugDrawSkeleton { get; set; }
         public bool DebugDrawJoints { get; set; }
         public bool DebugDrawSilhouette { get; set; }
+        public bool DrawMorphs { get; set; }
+
+        private Settings()
+        {
+            this.HeadSize = 100;
+            this.ArmScale = 100;
+            this.LegScale = 100;
+            this.DebugDrawSkeleton = false;
+            this.DebugDrawJoints = false;
+            this.DebugDrawSilhouette = false;
+            this.DrawMorphs = true;
+        }
 
     }
 }

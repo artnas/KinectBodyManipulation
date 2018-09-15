@@ -15,15 +15,19 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
      
         private byte[] colorBuffer;
         private DepthImagePixel[] depthBuffer;
+        private DepthImagePixel[] savedDepthBuffer;
         private byte[] backgroundRemovedBuffer;
+        private DepthImagePoint[] depthCoordinates;
 
         public LimbData limbData;
 
-        public LimbDataManager(byte[] colorBuffer, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer, KinectSensor sensor)
+        public LimbDataManager(byte[] colorBuffer, DepthImagePoint[] depthCoordinates, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer, DepthImagePixel[] savedDepthBuffer, KinectSensor sensor)
         {
             this.colorBuffer = colorBuffer;
+            this.depthCoordinates = depthCoordinates;
             this.depthBuffer = depthBuffer;
             this.backgroundRemovedBuffer = backgroundRemovedBuffer;
+            this.savedDepthBuffer = savedDepthBuffer;
             this.sensor = sensor;
 
             this.limbData = new LimbData();
@@ -247,6 +251,18 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                                 }
                             }
 
+                            // test glebii
+
+                            if (depthBuffer[limbDataPixelIndex].Depth != 0)
+                            {
+                                var difference = Math.Abs(depthBuffer[limbDataPixelIndex].Depth - savedDepthBuffer[limbDataPixelIndex].Depth);
+                                if (difference < Configuration.depthThreshold)
+                                {
+                                    isOk = false;
+                                    break;
+                                }              
+                            }
+
                             pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
                             pixel.boneHash = bone.boneHash;
                             pixel.debugDraw = true;
@@ -320,6 +336,22 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                 if (alpha < Configuration.alphaThreshold)
                     continue;
+
+                 var mappedDepthBufferIndex = 
+                     Utils.GetIndexByCoordinates(depthCoordinates[index].X, depthCoordinates[index].Y);
+                
+                 if (mappedDepthBufferIndex >= 0 && mappedDepthBufferIndex < depthBuffer.Length)
+                 {
+                     if (depthBuffer[mappedDepthBufferIndex].Depth != 0)
+                     {
+                         var difference = Math.Abs(depthBuffer[mappedDepthBufferIndex].Depth -
+                                                   savedDepthBuffer[mappedDepthBufferIndex].Depth);
+                         if (difference < Configuration.depthThreshold)
+                         {
+                             continue;
+                         }
+                     }
+                 }
 
                 // 8 stron
                 for (int j = 0; j < 8; j++)

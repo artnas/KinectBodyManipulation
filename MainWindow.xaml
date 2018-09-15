@@ -91,13 +91,14 @@
                     <MenuItem Header="_Exit" />
                 </MenuItem>
                 <MenuItem Header="_Sylwetka">
+                    <MenuItem Header="Przekształcenia aktywne" IsCheckable="True" IsChecked="{Binding DrawMorphs, Mode=TwoWay}"/>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" TextWrapping="Wrap">Wielkość głowy</TextBlock>
-                        <Slider Grid.Row="1" x:Name="HeadSize" Width="100" Maximum="200" Minimum="50" Value="{Binding HeadSize, Mode=TwoWay}"/>
+                        <Slider Grid.Row="1" x:Name="HeadSize" Width="150" Maximum="200" Minimum="50" Value="{Binding HeadSize, Mode=TwoWay}"/>
                     </Grid>
                     <Grid>
                         <Grid.RowDefinitions>
@@ -105,7 +106,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" TextWrapping="Wrap">Szerokość ramion</TextBlock>
-                        <Slider Grid.Row="1" x:Name="ArmScale" Width="100" Maximum="200" Minimum="50" Value="{Binding ArmScale, Mode=TwoWay}"/>
+                        <Slider Grid.Row="1" x:Name="ArmScale" Width="150" Maximum="200" Minimum="50" Value="{Binding ArmScale, Mode=TwoWay}"/>
                     </Grid>
                     <Grid>
                         <Grid.RowDefinitions>
@@ -113,7 +114,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" TextWrapping="Wrap">Szerokość nóg</TextBlock>
-                        <Slider Grid.Row="1" x:Name="LegScale" Width="100" Maximum="200" Minimum="50" Value="{Binding LegScale, Mode=TwoWay}"/>
+                        <Slider Grid.Row="1" x:Name="LegScale" Width="150" Maximum="200" Minimum="50" Value="{Binding LegScale, Mode=TwoWay}"/>
                     </Grid>
                 </MenuItem>
                 <MenuItem Header="_Debugowanie">
@@ -122,8 +123,8 @@
                     <MenuItem Header="Rysowanie przydziału pikseli" IsCheckable="True" IsChecked="{Binding DebugDrawSilhouette, Mode=TwoWay}"/>
                 </MenuItem>
             </Menu>
-            <TextBlock Name="statusBarText" Margin="-1 0 0 0">Wyszukiwanie kontrolera Kinect</TextBlock>
-            <Image Source="Images\Status.png" HorizontalAlignment="Right" Margin="0 0 0 5" RenderTransformOrigin="-7.2,0.595" DockPanel.Dock="Right" Width="20" Height="20" VerticalAlignment="Top"/>
+            <Image Source="Images\Status.png" HorizontalAlignment="Left" Margin="5 4 0 0" RenderTransformOrigin="-7.2,0.595" DockPanel.Dock="Left" Width="20" Height="20" VerticalAlignment="Top"/>
+            <TextBlock Name="statusBarText" Margin="5 5 0 0">Wyszukiwanie kontrolera Kinect</TextBlock>
         </DockPanel>
         <Grid Grid.Row="1" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
