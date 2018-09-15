@@ -23,6 +23,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
     public partial class MainWindow : Window
     {
 
+        private bool isProcessingFrame = false;
+
         private KinectSensor sensor;
 
         private const DepthImageFormat DepthFormat = DepthImageFormat.Resolution640x480Fps30;
@@ -64,6 +66,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         /// </summary>
         public MainWindow()
         {
+            this.DataContext = Settings.Instance;
             InitializeComponent();
         }
 
@@ -155,6 +158,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
                 this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
+            else
+            {
+                this.statusBarText.Text = "Połączono z kontrolerem Kinect";
+            }
 
         }
 
@@ -178,7 +185,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             // Array.Copy(this.backgroundRemovedBuffer, this.outputBuffer, this.outputBuffer.Length);
 
-            Settings.Update(this);
+            // Settings.Update(this);
 
             limbDataManager.Update(skeletons);
 
@@ -187,7 +194,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             BoneProcessor.ProcessAllBones();
 
             
-            //Drawing.DrawDebug(true, true, true, true);        
+            Drawing.DrawDebug();        
             //Drawing.DrawHuman();
             // Drawing.DrawNormalMap();
             // Drawing.ProcessNormalDisplacement();
@@ -234,6 +241,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         /// <param name="e">event arguments</param>
         private void SensorAllFramesReady(object sender, AllFramesReadyEventArgs e)
         {
+
+            if (isProcessingFrame)
+            {
+                return;
+            }
+
+            isProcessingFrame = true;
+            
             // in the middle of shutting down, so nothing to do
             if (null == this.sensor)
             {
@@ -359,6 +374,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                 }
             }
+
+            isProcessingFrame = false;
 
         }
 

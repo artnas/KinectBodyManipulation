@@ -27,7 +27,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             for (int i = 0; i < length; i++)
             {
                 float progress = i / (float) length;
-                values[i] = 1.0f + (float)Math.Sin(Utils.Interpolate(startRad, endRad, progress)) / 2f;
+                values[i] = (float)Math.Sin(Utils.Interpolate(startRad, endRad, progress)) / 2f;
             }
 
             return new Curve(values);

@@ -6,15 +6,36 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 {
-    public static class Settings
+    public class Settings
     {
 
-        public static float headSize = 1;
-
-        public static void Update(MainWindow window)
+        private static Settings _instance;
+        public static Settings Instance
         {
-            headSize = (float)window.HeadSize.Value / 100f;
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new Settings();
+                }
+
+                return _instance;
+            }
         }
+
+        private Settings()
+        {
+            this.HeadSize = 100;
+            this.ArmScale = 100;
+            this.LegScale = 100;
+        }
+
+        public float HeadSize { get; set; }
+        public float ArmScale { get; set; }
+        public float LegScale { get; set; }
+        public bool DebugDrawSkeleton { get; set; }
+        public bool DebugDrawJoints { get; set; }
+        public bool DebugDrawSilhouette { get; set; }
 
     }
 }

@@ -74,7 +74,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             switch (bone.boneHash)
             {
                 case 35:    // head, shoulder center
-                    ProcessBone_Size(bone, bonePixelData);
+                    ProcessBone_Size(bone, bonePixelData, Settings.Instance.HeadSize / 100f);
                     break;
                 case 152:    
                 case 84:    
@@ -83,7 +83,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     ProcessBone_Stretch(bone, bonePixelData, new StretchParameters()
                     {
                         curve = Curves.sinHill,
-                        power = 1.25f,
+                        power = Settings.Instance.ArmScale / 100f,
                     });
                     break;
                 case 272:
@@ -92,8 +92,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 case 237:
                     ProcessBone_Stretch(bone, bonePixelData, new StretchParameters()
                     {
-                        curve = Curves.inverseSinHill,
-                        power = 0.25f,
+                        curve = Curves.sinHill,
+                        power = Settings.Instance.LegScale / 100f,
                     });
                     break;
                 default:
@@ -103,7 +103,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         }
 
-        private static void ProcessBone_Size(LimbDataBone bone, BonePixelsData bonePixelData)
+        private static void ProcessBone_Size(LimbDataBone bone, BonePixelsData bonePixelData, float scale)
         {
 
             Vector3 boneVector = Vector3.Normalize(bone.endPoint - bone.startPoint);
@@ -111,8 +111,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             HashSet<int> indices = bonePixelData.indices;
 
             //ProcessBone_Normal(bone, indices);
-
-            float scale = Settings.headSize;
 
             float originalStartX = bone.endPoint.X;
             float originalStartY = bone.endPoint.Y;
@@ -227,7 +225,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
 
                 var progress = (float) index / pointsBetween.Count;
-                var curveScale = stretchParameters.curve.Evaluate(progress, stretchParameters.power);
+                var curveScale = 1f + stretchParameters.power * stretchParameters.curve.Evaluate(progress);
 
                 // int index = Utils.GetIndexByCoordinates((int)point.X, (int)point.Y) * 4;
 

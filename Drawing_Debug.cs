@@ -13,11 +13,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
     public static partial class Drawing
     {
 
-        public static void DrawDebug(bool drawBody, bool drawBones, bool drawJoints, bool drawDebug)
+        public static void DrawDebug()
         {
 
             // cialo
-            if (drawBody)
+            if (Settings.Instance.DebugDrawSilhouette)
             {
                 for (int i = 0; i < colorBuffer.Length; i += 4)
                 {
@@ -37,7 +37,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             }
 
             // szkielet (kosci)
-            if (drawBones)
+            if (Settings.Instance.DebugDrawSkeleton)
             {
                 foreach (var limbDataSkeleton in limbDataManager.limbData.limbDataSkeletons)
                 {
@@ -70,7 +70,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             }
 
             // szkielet (jointy)
-            if (drawJoints)
+            if (Settings.Instance.DebugDrawJoints)
             {
                 foreach (var limbDataSkeleton in limbDataManager.limbData.limbDataSkeletons)
                 {
@@ -91,7 +91,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             }
 
             // szkielet(debug)
-            if (drawDebug)
+            if (false)
             {
                 for (int i = 0; i < colorBuffer.Length; i += 4)
                 {
