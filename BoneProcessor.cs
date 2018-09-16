@@ -227,6 +227,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             var pointsBetween = Utils.GetPointsBetween(bone.startPoint, bone.endPoint, Configuration.width, Configuration.height);
 
+            bool[] usedIndicesFlagsArray = new bool[Configuration.size];
+
             Parallel.ForEach(pointsBetween, (point, parallelLoopState, index) =>
             {
 
@@ -269,6 +271,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                                 break;
                             }
 
+                            usedIndicesFlagsArray[samplingIndex] = true;
+
                             samplingIndex *= 4;
                             int outputIndex = perpendicularPointIndex * 4;
 
@@ -291,6 +295,31 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                 }
           
+            });
+
+            var usedIndices = new List<int>();
+            for (int i = 0; i < usedIndicesFlagsArray.Length; i++)
+            {
+                if (usedIndicesFlagsArray[i])
+                {
+                    usedIndices.Add(i);
+                }
+            }
+
+            var unusedIndices = bonePixelData.indices.Except(usedIndices).ToList();
+
+            Parallel.For(0, unusedIndices.Count, i =>
+            {
+
+                i = unusedIndices[i] * 4;
+
+                outputBuffer[i] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i],
+                    1f - backgroundRemovedBuffer[i + 3] / 255f);
+                outputBuffer[i + 1] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 1],
+                    1f - backgroundRemovedBuffer[i + 3] / 255f);
+                outputBuffer[i + 2] = Utils.Interpolate(savedBackgroundColorBuffer[i], backgroundRemovedBuffer[i + 2],
+                    1f - backgroundRemovedBuffer[i + 3] / 255f);
+
             });
 
             // Parallel.For(0, indicesList.Count, i =>
