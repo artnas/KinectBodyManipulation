@@ -243,7 +243,8 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                         var shouldBreak = false;
 
-                        for (var l = -1; l <= 1; l++)
+                        // szerokosc pedzla
+                        for (var l = -2; l <= 2; l++)
                         {
 
                             Vector3 pointOffset = perpendicularVector * k * direction;
@@ -253,6 +254,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                             if (perpendicularPoint.X < 0 || perpendicularPoint.X >= Configuration.width ||
                                 perpendicularPoint.Y < 0 || perpendicularPoint.Y >= Configuration.height)
                             {
+                                shouldBreak = true;
                                 break;
                             }
 
