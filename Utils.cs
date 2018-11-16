@@ -22,14 +22,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         public static readonly int[,] ordinalDirections =
         {
-            { -1, 0 },      // lewo
-            { -1, -1 },      // lewo gora
-            { -1, 1 },     // lewo dol
-            { 1, 0 },       // prawo
-            { 1, -1 },       // prawo gora
-            { 1, 1 },      // prawo dol
-            { 0, -1 },       // gora
-            { 0, 1 },      // dol 
+            { -1, 0 },  // lewo
+            { -1, -1 }, // lewo gora
+            { -1, 1 },  // lewo dol
+            { 1, 0 },   // prawo
+            { 1, -1 },  // prawo gora
+            { 1, 1 },   // prawo dol
+            { 0, -1 },  // gora
+            { 0, 1 },   // dol 
         };
 
         /// <summary>
@@ -69,9 +69,17 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             yield return new JointPair(skeleton.Joints[JointType.AnkleRight], skeleton.Joints[JointType.FootRight]);
         }
 
+        /// <summary>
+        /// Iteruje przez piksele pomiędzy punktami (from, to)
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="onlyIncludePointsOnScreen"></param>
+        /// <returns></returns>
         public static System.Collections.IEnumerable IteratePointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
         {
-
             Vector3 v = (to - from);
 
             int length = (int)Math.Ceiling(v.Length());
@@ -82,13 +90,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             for (int i = 0; i < length; i++)
             {
-
                 p += v;
 
                 yield return new Vector3((int) p.X, (int) p.Y, (int) p.Z);
-
             }
-
         }
 
         public static List<Vector3> GetPointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
@@ -111,7 +116,6 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
                 list.Add(point);
             }
-           
         }
 
         // oblicza wektor prostopadly do prostej (a, b)
@@ -138,13 +142,13 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         }
 
         /// <summary>
-        /// Calculates an interpolated value based on provided values and their weights
+        /// Wylicza wartość będącą wynikiem interpolacji pomiędzy dwoma wartościami na podstawie podanych wag
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <param name="aWeight"></param>
         /// <param name="bWeight"></param>
-        /// <returns></returns>
+        /// <returns>obliczona wartość</returns>
         public static float Interpolate(float a, float b, float aWeight, float bWeight)
         {
             return (a * aWeight + b * bWeight) / (aWeight + bWeight);
@@ -175,7 +179,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         }
 
         /// <summary>
-        /// Calculates bone hash for bone defined by the given start and end joint types
+        /// Calculates bone hash for a bone defined by the given start and end joint types
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>

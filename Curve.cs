@@ -9,7 +9,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
     public class Curve
     {
 
-        private float[] values;
+        private readonly float[] values;
 
         public Curve(float[] values)
         {
@@ -26,7 +26,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             for (int i = 0; i < length; i++)
             {
-                float progress = i / (float) length;
+                float progress = i / (float)length;
                 values[i] = (float)Math.Sin(Utils.Interpolate(startRad, endRad, progress)) / 2f;
             }
 

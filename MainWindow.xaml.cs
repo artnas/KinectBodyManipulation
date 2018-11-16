@@ -51,10 +51,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         private DepthImagePixel[] savedBackgroundDepthBuffer;
 
         private SkeletonStream skeletonStream;
-        private Skeleton[] skeletons = new Skeleton[6];
+        private readonly Skeleton[] skeletons = new Skeleton[6];
         private int trackedPlayerId = -1;
 
-        private byte[] normalBuffer = new byte[Configuration.size * 2];
+        private readonly byte[] normalBuffer = new byte[Configuration.size * 2];
 
         private int depthWidth, depthHeight;
 
@@ -377,72 +377,72 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         }
 
-        /// <summary>
-        /// Handles the user clicking on the screenshot button
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void ButtonScreenshotClick(object sender, RoutedEventArgs e)
-        {
-            if (null == this.sensor)
-            {
-                this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
-                return;
-            }
-
-            int colorWidth = this.sensor.ColorStream.FrameWidth;
-            int colorHeight = this.sensor.ColorStream.FrameHeight;
-
-            // create a render target that we'll render our controls to
-            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(colorWidth, colorHeight, 96.0, 96.0, PixelFormats.Pbgra32);
-
-            DrawingVisual dv = new DrawingVisual();
-            using (DrawingContext dc = dv.RenderOpen())
-            {
-                // render the backdrop
-                VisualBrush backdropBrush = new VisualBrush(Backdrop);
-                dc.DrawRectangle(backdropBrush, null, new Rect(new Point(), new Size(colorWidth, colorHeight)));
-
-                // render the color image masked out by players
-                VisualBrush colorBrush = new VisualBrush(MaskedColor);
-                dc.DrawRectangle(colorBrush, null, new Rect(new Point(), new Size(colorWidth, colorHeight)));
-            }
-
-            renderBitmap.Render(dv);
-    
-            // create a png bitmap encoder which knows how to save a .png file
-            BitmapEncoder encoder = new PngBitmapEncoder();
-
-            // create frame from the writable bitmap and add to encoder
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap)); 
-
-            string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
-
-            string myPhotos = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-
-            string path = Path.Combine(myPhotos, "KinectSnapshot-" + time + ".png");
-
-            // write the new file to disk
-            try
-            {
-                using (FileStream fs = new FileStream(path, FileMode.Create))
-                {
-                    encoder.Save(fs);
-                }
-
-                this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteSuccess, path);
-            }
-            catch (IOException)
-            {
-                this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteFailed, path);
-            }
-        }
+        // /// <summary>
+        // /// Handles the user clicking on the screenshot button
+        // /// </summary>
+        // /// <param name="sender">object sending the event</param>
+        // /// <param name="e">event arguments</param>
+        // private void ButtonScreenshotClick(object sender, RoutedEventArgs e)
+        // {
+        //     if (null == this.sensor)
+        //     {
+        //         this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
+        //         return;
+        //     }
+        //
+        //     int colorWidth = this.sensor.ColorStream.FrameWidth;
+        //     int colorHeight = this.sensor.ColorStream.FrameHeight;
+        //
+        //     // create a render target that we'll render our controls to
+        //     RenderTargetBitmap renderBitmap = new RenderTargetBitmap(colorWidth, colorHeight, 96.0, 96.0, PixelFormats.Pbgra32);
+        //
+        //     DrawingVisual dv = new DrawingVisual();
+        //     using (DrawingContext dc = dv.RenderOpen())
+        //     {
+        //         // render the backdrop
+        //         VisualBrush backdropBrush = new VisualBrush(Backdrop);
+        //         dc.DrawRectangle(backdropBrush, null, new Rect(new Point(), new Size(colorWidth, colorHeight)));
+        //
+        //         // render the color image masked out by players
+        //         VisualBrush colorBrush = new VisualBrush(MaskedColor);
+        //         dc.DrawRectangle(colorBrush, null, new Rect(new Point(), new Size(colorWidth, colorHeight)));
+        //     }
+        //
+        //     renderBitmap.Render(dv);
+        //
+        //     // create a png bitmap encoder which knows how to save a .png file
+        //     BitmapEncoder encoder = new PngBitmapEncoder();
+        //
+        //     // create frame from the writable bitmap and add to encoder
+        //     encoder.Frames.Add(BitmapFrame.Create(renderBitmap)); 
+        //
+        //     string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
+        //
+        //     string myPhotos = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+        //
+        //     string path = Path.Combine(myPhotos, "KinectSnapshot-" + time + ".png");
+        //
+        //     // write the new file to disk
+        //     try
+        //     {
+        //         using (FileStream fs = new FileStream(path, FileMode.Create))
+        //         {
+        //             encoder.Save(fs);
+        //         }
+        //
+        //         this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteSuccess, path);
+        //     }
+        //     catch (IOException)
+        //     {
+        //         this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteFailed, path);
+        //     }
+        // }
         
-        /// <summary>
-        /// Handles the checking or unchecking of the near mode combo box
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
+        // /// <summary>
+        // /// Handles the checking or unchecking of the near mode combo box
+        // /// </summary>
+        // /// <param name="sender">object sending the event</param>
+        // /// <param name="e">event arguments</param>
         // private void CheckBoxNearModeChanged(object sender, RoutedEventArgs e)
         // {
         //     if (this.sensor != null)
