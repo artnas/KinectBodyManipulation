@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
 using Microsoft.Kinect;
 
-namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
+namespace KinectBodyModification
 {
     public static class Configuration
     {
+
+        public const DepthImageFormat DepthFormat = DepthImageFormat.Resolution640x480Fps30;
+        public const ColorImageFormat ColorFormat = ColorImageFormat.RgbResolution640x480Fps30;
 
         public static readonly int width = 640;
         public static readonly int height = 480;

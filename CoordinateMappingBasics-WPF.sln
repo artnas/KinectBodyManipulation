@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinateMappingBasics-WPF", "CoordinateMappingBasics-WPF.csproj", "{BA49DE61-9346-4156-B382-75C2D5370DCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinectBodyModification", "KinectBodyModification.csproj", "{BA49DE61-9346-4156-B382-75C2D5370DCD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsProject", "..\UnitTestsProject\UnitTestsProject.csproj", "{F830F4CE-8E39-4D1F-879A-6FE2F3C89885}"
 EndProject

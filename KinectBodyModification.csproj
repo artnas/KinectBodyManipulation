@@ -87,7 +87,7 @@
     <Compile Include="Curve.cs" />
     <Compile Include="Drawing_Debug.cs" />
     <Compile Include="Drawing_Normal.cs" />
-    <Compile Include="ImageProcessors\ImageProcessor.cs" />
+    <Compile Include="GlobalBuffers.cs" />
     <Compile Include="JointTypePair.cs" />
     <Compile Include="JointPair.cs" />
     <Compile Include="LimbData.cs" />

@@ -4,10 +4,10 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
-{
-    using System.Windows;
+using System.Windows;
 
+namespace KinectBodyModification
+{
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

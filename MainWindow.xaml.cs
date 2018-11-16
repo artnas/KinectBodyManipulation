@@ -4,19 +4,17 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit.BackgroundRemoval;
+using Drawing = KinectBodyModification.Drawing;
 
-namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
+namespace KinectBodyModification
 {
-    using System;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using System.Windows;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using Microsoft.Kinect;
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -27,47 +25,39 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
         private KinectSensor sensor;
 
-        private const DepthImageFormat DepthFormat = DepthImageFormat.Resolution640x480Fps30;
-        private const ColorImageFormat ColorFormat = ColorImageFormat.RgbResolution640x480Fps30;
-
         private WriteableBitmap colorBitmap;
-        private WriteableBitmap playerOpacityMaskImage = null;
 
-        private DepthImagePixel[] depthBuffer;    
-        private byte[] colorBuffer;
-        private int colorToDepthDivisor;
+        // private DepthImagePixel[] depthBuffer;    
+        // private byte[] colorBuffer;
 
-        private byte[] outputBuffer;
-        private int[] playerPixelData;
-        private ColorImagePoint[] colorCoordinates;
-        private DepthImagePoint[] depthCoordinates;
+        // private byte[] outputBuffer;
+        // private int[] playerPixelData;
+        // private ColorImagePoint[] colorCoordinates;
+        // private DepthImagePoint[] depthCoordinates;
 
         private bool hasSavedBackgroundColorFrame = false;
         private bool hasSavedBackgroundDepthFrame = false;
-        private byte[] backgroundRemovedBuffer;
-        private BackgroundRemovedColorStream backgroundRemovedColorStream;
+        // private byte[] backgroundRemovedBuffer;
+        // private BackgroundRemovedColorStream backgroundRemovedColorStream;
 
-        private byte[] savedBackgroundColorBuffer;
-        private DepthImagePixel[] savedBackgroundDepthBuffer;
+        // private byte[] savedBackgroundColorBuffer;
+        // private DepthImagePixel[] savedBackgroundDepthBuffer;
 
-        private SkeletonStream skeletonStream;
         private readonly Skeleton[] skeletons = new Skeleton[6];
         private int trackedPlayerId = -1;
 
-        private readonly byte[] normalBuffer = new byte[Configuration.size * 2];
+        // private readonly byte[] normalBuffer = new byte[Configuration.size * 2];
 
-        private int depthWidth, depthHeight;
+        // private int depthWidth, depthHeight;
 
-        private int opaquePixelValue = -1;
-
-        private LimbDataManager limbDataManager;
+        // private LimbDataManager limbDataManager;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
-            this.DataContext = Settings.Instance;
+            DataContext = Settings.Instance;
             InitializeComponent();
         }
 
@@ -86,84 +76,81 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             {
                 if (potentialSensor.Status == KinectStatus.Connected)
                 {
-                    this.sensor = potentialSensor;
+                    sensor = potentialSensor;
                     break;
                 }
             }
 
-            if (null != this.sensor)
+            if (null != sensor)
             {
 
-                this.sensor.ColorStream.Enable(ColorFormat); 
-                this.sensor.DepthStream.Enable(DepthFormat); // Turn on the depth stream to receive depth frames
-                this.sensor.SkeletonStream.Enable(); // Turn on to get player masks
+                sensor.ColorStream.Enable(Configuration.ColorFormat); 
+                sensor.DepthStream.Enable(Configuration.DepthFormat); // Turn on the depth stream to receive depth frames
+                sensor.SkeletonStream.Enable(); // Turn on to get player masks
 
-                this.depthWidth = this.sensor.DepthStream.FrameWidth;
-                this.depthHeight = this.sensor.DepthStream.FrameHeight;
+                // this.depthWidth = this.sensor.DepthStream.FrameWidth;
+                // this.depthHeight = this.sensor.DepthStream.FrameHeight;
+                //
+                // int colorWidth = this.sensor.ColorStream.FrameWidth;
+                // int colorHeight = this.sensor.ColorStream.FrameHeight;
 
-                int colorWidth = this.sensor.ColorStream.FrameWidth;
-                int colorHeight = this.sensor.ColorStream.FrameHeight;
-
-                this.colorToDepthDivisor = colorWidth / this.depthWidth;
+                // this.colorToDepthDivisor = colorWidth / this.depthWidth;
 
                 // Allocate space to put the depth pixels we'll receive
-                this.depthBuffer = new DepthImagePixel[this.sensor.DepthStream.FramePixelDataLength];
+                GlobalBuffers.depthBuffer = new DepthImagePixel[sensor.DepthStream.FramePixelDataLength];
 
                 // Allocate space to put the color pixels we'll create
-                this.colorBuffer = new byte[this.sensor.ColorStream.FramePixelDataLength];
-                this.backgroundRemovedBuffer = new byte[this.colorBuffer.Length];
-                this.outputBuffer = new byte[this.colorBuffer.Length];
+                GlobalBuffers.colorBuffer = new byte[sensor.ColorStream.FramePixelDataLength];
+                GlobalBuffers.backgroundRemovedBuffer = new byte[GlobalBuffers.colorBuffer.Length];
+                GlobalBuffers.outputBuffer = new byte[GlobalBuffers.colorBuffer.Length];
 
-                this.savedBackgroundColorBuffer = new byte[this.colorBuffer.Length];
-                this.savedBackgroundDepthBuffer = new DepthImagePixel[this.depthBuffer.Length];
+                GlobalBuffers.savedBackgroundColorBuffer = new byte[GlobalBuffers.colorBuffer.Length];
+                GlobalBuffers.savedBackgroundDepthBuffer = new DepthImagePixel[GlobalBuffers.depthBuffer.Length];
 
-                this.playerPixelData = new int[this.sensor.DepthStream.FramePixelDataLength];
+                GlobalBuffers.playerPixelData = new int[sensor.DepthStream.FramePixelDataLength];
 
-                this.colorCoordinates = new ColorImagePoint[this.sensor.DepthStream.FramePixelDataLength];
-                this.depthCoordinates = new DepthImagePoint[this.sensor.DepthStream.FramePixelDataLength];
+                GlobalBuffers.colorCoordinates = new ColorImagePoint[sensor.DepthStream.FramePixelDataLength];
+                GlobalBuffers.depthCoordinates = new DepthImagePoint[sensor.DepthStream.FramePixelDataLength];
+
+                GlobalBuffers.normalBuffer = new byte[Configuration.size * 2];
 
                 // This is the bitmap we'll display on-screen
-                this.colorBitmap = new WriteableBitmap(colorWidth, colorHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
+                colorBitmap = new WriteableBitmap(Configuration.width, Configuration.height, 96.0, 96.0, PixelFormats.Bgr32, null);
 
                 //
-                this.limbDataManager = new LimbDataManager(colorBuffer, depthCoordinates, depthBuffer, backgroundRemovedBuffer, savedBackgroundDepthBuffer, sensor);
+                // GlobalBuffers.limbDataManager = new LimbDataManager(colorBuffer, depthCoordinates, depthBuffer, backgroundRemovedBuffer, savedBackgroundDepthBuffer, sensor);
 
-                this.backgroundRemovedColorStream = new BackgroundRemovedColorStream(this.sensor);
-                this.backgroundRemovedColorStream.Enable(ColorFormat, DepthFormat);
-                this.backgroundRemovedColorStream.SetTrackedPlayer(0);
+                GlobalBuffers.limbDataManager = new LimbDataManager(sensor);
+
+                GlobalBuffers.backgroundRemovedColorStream = new BackgroundRemovedColorStream(sensor);
+                GlobalBuffers.backgroundRemovedColorStream.Enable(Configuration.ColorFormat, Configuration.DepthFormat);
+                GlobalBuffers.backgroundRemovedColorStream.SetTrackedPlayer(0);
 
                 // Add an event handler to be called when the background removed color frame is ready, so that we can
                 // composite the image and output to the app
-                this.backgroundRemovedColorStream.BackgroundRemovedFrameReady += this.BackgroundRemovedFrameReadyHandler;
+                GlobalBuffers.backgroundRemovedColorStream.BackgroundRemovedFrameReady += this.BackgroundRemovedFrameReadyHandler;
 
                 // Set the image we display to point to the bitmap where we'll put the image data
-                this.MaskedColor.Source = this.colorBitmap;
+                MaskedColor.Source = colorBitmap;
 
-                Drawing.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer, colorCoordinates, depthCoordinates);
-                BoneProcessor.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer);
+                // Drawing.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer, colorCoordinates, depthCoordinates);
+                // BoneProcessor.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer);
 
                 // Add an event handler to be called whenever there is new depth frame data
-                this.sensor.AllFramesReady += this.SensorAllFramesReady;
+                sensor.AllFramesReady += SensorAllFramesReady;
 
                 // Start the sensor!
                 try
                 {
-                    this.sensor.Start();
+                    sensor.Start();
                 }
                 catch (IOException)
                 {
-                    this.sensor = null;
+                    sensor = null;
                 }
             }
 
-            if (null == this.sensor)
-            {
-                this.statusBarText.Text = Properties.Resources.NoKinectReady;
-            }
-            else
-            {
-                this.statusBarText.Text = "Połączono z kontrolerem Kinect";
-            }
+            statusBarText.Text = sensor == null ? Properties.Resources.NoKinectReady : "Połączono z kontrolerem Kinect";
 
         }
 
@@ -180,14 +167,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 if (backgroundRemovedFrame != null)
                 {
 
-                    Array.Copy(backgroundRemovedFrame.GetRawPixelData(), this.backgroundRemovedBuffer, this.backgroundRemovedBuffer.Length);
+                    Array.Copy(backgroundRemovedFrame.GetRawPixelData(), GlobalBuffers.backgroundRemovedBuffer, GlobalBuffers.backgroundRemovedBuffer.Length);
 
                 }
             }
 
             // Array.Copy(this.backgroundRemovedBuffer, this.outputBuffer, this.outputBuffer.Length);
 
-            limbDataManager.Update(skeletons);
+            GlobalBuffers.limbDataManager.Update(skeletons);
 
             Drawing.Draw();
 
@@ -198,10 +185,10 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         private void DrawOutputBuffer()
         {
 
-            this.colorBitmap.WritePixels(
-                new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
-                this.outputBuffer,
-                this.colorBitmap.PixelWidth * sizeof(int),
+            colorBitmap.WritePixels(
+                new Int32Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight),
+                GlobalBuffers.outputBuffer,
+                colorBitmap.PixelWidth * sizeof(int),
                 0);
 
         }
@@ -213,16 +200,16 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         /// <param name="e">event arguments</param>
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (null != this.backgroundRemovedColorStream)
+            if (null != GlobalBuffers.backgroundRemovedColorStream)
             {
-                this.backgroundRemovedColorStream.Dispose();
-                this.backgroundRemovedColorStream = null;
+                GlobalBuffers.backgroundRemovedColorStream.Dispose();
+                GlobalBuffers.backgroundRemovedColorStream = null;
             }
 
-            if (null != this.sensor)
+            if (null != sensor)
             {
-                this.sensor.Stop();
-                this.sensor = null;
+                sensor.Stop();
+                sensor = null;
             }
         }
 
@@ -242,7 +229,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
             isProcessingFrame = true;
             
             // in the middle of shutting down, so nothing to do
-            if (null == this.sensor)
+            if (sensor == null)
             {
                 return;
             }
@@ -253,11 +240,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
             {
-                if (null != depthFrame)
+                if (depthFrame != null)
                 {
                     // Copy the pixel data from the image to a temporary array
-                    depthFrame.CopyDepthImagePixelDataTo(this.depthBuffer);
-                    this.backgroundRemovedColorStream.ProcessDepth(depthFrame.GetRawPixelData(), depthFrame.Timestamp);
+                    depthFrame.CopyDepthImagePixelDataTo(GlobalBuffers.depthBuffer);
+                    GlobalBuffers.backgroundRemovedColorStream.ProcessDepth(depthFrame.GetRawPixelData(), depthFrame.Timestamp);
 
                     depthReceived = true;
                 }
@@ -265,55 +252,51 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
             {
-                if (null != colorFrame)
+                if (colorFrame != null)
                 {
                     // Copy the pixel data from the image to a temporary array
-                    colorFrame.CopyPixelDataTo(this.colorBuffer);
-                    this.backgroundRemovedColorStream.ProcessColor(colorFrame.GetRawPixelData(), colorFrame.Timestamp);
+                    colorFrame.CopyPixelDataTo(GlobalBuffers.colorBuffer);
+                    GlobalBuffers.backgroundRemovedColorStream.ProcessColor(colorFrame.GetRawPixelData(), colorFrame.Timestamp);
 
                     colorReceived = true;
 
                     if (hasSavedBackgroundColorFrame == false)
                     {
                         hasSavedBackgroundColorFrame = true;
-                        Array.Copy(colorBuffer, savedBackgroundColorBuffer, colorBuffer.Length);
+                        Array.Copy(GlobalBuffers.colorBuffer, GlobalBuffers.savedBackgroundColorBuffer, GlobalBuffers.colorBuffer.Length);
                     }
                 }
             }
 
             // do our processing outside of the using block
             // so that we return resources to the kinect as soon as possible
-            if (true == depthReceived)
+            if (depthReceived)
             {
-                this.sensor.CoordinateMapper.MapDepthFrameToColorFrame(
-                    DepthFormat,
-                    this.depthBuffer,
-                    ColorFormat,
-                    this.colorCoordinates);
+                sensor.CoordinateMapper.MapDepthFrameToColorFrame(Configuration.DepthFormat,
+                    GlobalBuffers.depthBuffer, Configuration.ColorFormat,
+                    GlobalBuffers.colorCoordinates);
 
-                this.sensor.CoordinateMapper.MapColorFrameToDepthFrame(
-                    ColorFormat, 
-                    DepthFormat, 
-                    depthBuffer, 
-                    depthCoordinates);
+                sensor.CoordinateMapper.MapColorFrameToDepthFrame(Configuration.ColorFormat, Configuration.DepthFormat,
+                    GlobalBuffers.depthBuffer,
+                    GlobalBuffers.depthCoordinates);
 
                 if (hasSavedBackgroundDepthFrame == false)
                 {
                     hasSavedBackgroundDepthFrame = true;
-                    Array.Copy(depthBuffer, savedBackgroundDepthBuffer, depthBuffer.Length);
+                    Array.Copy(GlobalBuffers.depthBuffer, GlobalBuffers.savedBackgroundDepthBuffer, GlobalBuffers.depthBuffer.Length);
                 }
 
-                Array.Clear(this.playerPixelData, 0, this.playerPixelData.Length);
+                Array.Clear(GlobalBuffers.playerPixelData, 0, GlobalBuffers.playerPixelData.Length);
 
                 // loop over each row and column of the depth
-                for (int y = 0; y < this.depthHeight; ++y)
+                for (int y = 0; y < Configuration.height; ++y)
                 {
-                    for (int x = 0; x < this.depthWidth; ++x)
+                    for (int x = 0; x < Configuration.width; ++x)
                     {
                         // calculate index into depth array
-                        int depthIndex = x + (y * this.depthWidth);
+                        int depthIndex = x + (y * Configuration.width);
 
-                        DepthImagePixel depthPixel = this.depthBuffer[depthIndex];
+                        DepthImagePixel depthPixel = GlobalBuffers.depthBuffer[depthIndex];
 
                         int player = depthPixel.PlayerIndex;
 
@@ -321,27 +304,29 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                         if (player > 0)
                         {
                             // retrieve the depth to color mapping for the current depth pixel
-                            ColorImagePoint colorImagePoint = this.colorCoordinates[depthIndex];
+                            ColorImagePoint colorImagePoint = GlobalBuffers.colorCoordinates[depthIndex];
 
                             // scale color coordinates to depth resolution
-                            int colorInDepthX = colorImagePoint.X / this.colorToDepthDivisor;
-                            int colorInDepthY = colorImagePoint.Y / this.colorToDepthDivisor;
+                            int colorInDepthX = colorImagePoint.X;
+                            int colorInDepthY = colorImagePoint.Y;
 
                             // make sure the depth pixel maps to a valid point in color space
                             // check y > 0 and y < depthHeight to make sure we don't write outside of the array
                             // check x > 0 instead of >= 0 since to fill gaps we set opaque current pixel plus the one to the left
                             // because of how the sensor works it is more correct to do it this way than to set to the right
-                            if (colorInDepthX > 0 && colorInDepthX < this.depthWidth && colorInDepthY >= 0 && colorInDepthY < this.depthHeight)
+                            if (colorInDepthX > 0 && colorInDepthX < Configuration.width && colorInDepthY >= 0 && colorInDepthY < Configuration.height)
                             {
                                 // calculate index into the player mask pixel array
-                                int playerPixelIndex = colorInDepthX + (colorInDepthY * this.depthWidth);
+                                int playerPixelIndex = colorInDepthX + (colorInDepthY * Configuration.width);
+
+                                // int opaquePixelValue = -1;
 
                                 // set opaque
-                                this.playerPixelData[playerPixelIndex] = opaquePixelValue;
+                                GlobalBuffers.playerPixelData[playerPixelIndex] = -1;
 
                                 // compensate for depth/color not corresponding exactly by setting the pixel 
                                 // to the left to opaque as well
-                                this.playerPixelData[playerPixelIndex - 1] = opaquePixelValue;
+                                GlobalBuffers.playerPixelData[playerPixelIndex - 1] = -1;
                             }
                         }
                     }
@@ -355,7 +340,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                     //skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
-                    this.backgroundRemovedColorStream.ProcessSkeleton(skeletons, skeletonFrame.Timestamp);
+                    GlobalBuffers.backgroundRemovedColorStream.ProcessSkeleton(skeletons, skeletonFrame.Timestamp);
 
                     if (trackedPlayerId == -1)
                     {
@@ -363,7 +348,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                         {
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                this.backgroundRemovedColorStream.SetTrackedPlayer(skeleton.TrackingId);
+                                GlobalBuffers.backgroundRemovedColorStream.SetTrackedPlayer(skeleton.TrackingId);
                                 trackedPlayerId = skeleton.TrackingId;
                                 Console.WriteLine("setting tracked id to " + trackedPlayerId);
                             }

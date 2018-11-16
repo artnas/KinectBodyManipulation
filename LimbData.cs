@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Kinect;
+﻿using System.Collections.Generic;
 
-namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
+namespace KinectBodyModification
 {
     public class LimbData
     {
 
-        public LimbDataPixel[] pixelData = new LimbDataPixel[Configuration.size];
+        public LimbDataPixel[] pixelData;
         public List<LimbDataSkeleton> limbDataSkeletons = new List<LimbDataSkeleton>();
 
         public LimbData()

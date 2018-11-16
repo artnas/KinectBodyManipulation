@@ -1,37 +1,34 @@
-﻿using Microsoft.Kinect;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using Microsoft.Kinect;
 
-namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
+namespace KinectBodyModification
 {
     public class LimbDataManager
     {
 
-        private KinectSensor sensor;
-     
-        private byte[] colorBuffer;
-        private DepthImagePixel[] depthBuffer;
-        private DepthImagePixel[] savedDepthBuffer;
-        private byte[] backgroundRemovedBuffer;
-        private DepthImagePoint[] depthCoordinates;
+        private readonly KinectSensor sensor;
 
         public LimbData limbData;
 
-        public LimbDataManager(byte[] colorBuffer, DepthImagePoint[] depthCoordinates, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer, DepthImagePixel[] savedDepthBuffer, KinectSensor sensor)
+        public LimbDataManager(KinectSensor sensor)
         {
-            this.colorBuffer = colorBuffer;
-            this.depthCoordinates = depthCoordinates;
-            this.depthBuffer = depthBuffer;
-            this.backgroundRemovedBuffer = backgroundRemovedBuffer;
-            this.savedDepthBuffer = savedDepthBuffer;
             this.sensor = sensor;
-
             this.limbData = new LimbData();
         }
+
+        // public LimbDataManager(byte[] colorBuffer, DepthImagePoint[] depthCoordinates, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer, DepthImagePixel[] savedDepthBuffer, KinectSensor sensor)
+        // {
+        //     this.colorBuffer = colorBuffer;
+        //     this.depthCoordinates = depthCoordinates;
+        //     this.depthBuffer = depthBuffer;
+        //     this.backgroundRemovedBuffer = backgroundRemovedBuffer;
+        //     this.savedDepthBuffer = savedDepthBuffer;
+        //     this.sensor = sensor;
+        //
+        //     this.limbData = new LimbData();
+        // }
 
         private int getBufferIndex(int x, int y)
         {
@@ -231,7 +228,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                         int colorBufferIndex = (x + y * Configuration.width) * 4;
 
-                        if (backgroundRemovedBuffer[colorBufferIndex + 3] < Configuration.alphaThreshold)
+                        if (GlobalBuffers.backgroundRemovedBuffer[colorBufferIndex + 3] < Configuration.alphaThreshold)
                         {
                             isOk = false;
                             break;
@@ -253,9 +250,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                             // test glebii
 
-                            if (depthBuffer[limbDataPixelIndex].Depth != 0)
+                            if (GlobalBuffers.depthBuffer[limbDataPixelIndex].Depth != 0)
                             {
-                                var difference = Math.Abs(depthBuffer[limbDataPixelIndex].Depth - savedDepthBuffer[limbDataPixelIndex].Depth);
+                                var difference = Math.Abs(GlobalBuffers.depthBuffer[limbDataPixelIndex].Depth - GlobalBuffers.savedBackgroundDepthBuffer[limbDataPixelIndex].Depth);
                                 if (difference < Configuration.depthThreshold)
                                 {
                                     isOk = false;
@@ -328,7 +325,7 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                 if (index < 0 || index >= limbData.pixelData.Length)
                     continue;
 
-                byte alpha = backgroundRemovedBuffer[index * 4 + 3];
+                byte alpha = GlobalBuffers.backgroundRemovedBuffer[index * 4 + 3];
                 LimbDataPixel lpd = limbData.pixelData[index];
 
                 if (lpd.humanIndex == -1)
@@ -338,14 +335,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
                     continue;
 
                  var mappedDepthBufferIndex = 
-                     Utils.GetIndexByCoordinates(depthCoordinates[index].X, depthCoordinates[index].Y);
+                     Utils.GetIndexByCoordinates(GlobalBuffers.depthCoordinates[index].X, GlobalBuffers.depthCoordinates[index].Y);
                 
-                 if (mappedDepthBufferIndex >= 0 && mappedDepthBufferIndex < depthBuffer.Length)
+                 if (mappedDepthBufferIndex >= 0 && mappedDepthBufferIndex < GlobalBuffers.depthBuffer.Length)
                  {
-                     if (depthBuffer[mappedDepthBufferIndex].Depth != 0)
+                     if (GlobalBuffers.depthBuffer[mappedDepthBufferIndex].Depth != 0)
                      {
-                         var difference = Math.Abs(depthBuffer[mappedDepthBufferIndex].Depth -
-                                                   savedDepthBuffer[mappedDepthBufferIndex].Depth);
+                         var difference = Math.Abs(GlobalBuffers.depthBuffer[mappedDepthBufferIndex].Depth -
+                                                   GlobalBuffers.savedBackgroundDepthBuffer[mappedDepthBufferIndex].Depth);
                          if (difference < Configuration.depthThreshold)
                          {
                              continue;

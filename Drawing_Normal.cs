@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
+namespace KinectBodyModification
 {
     public static partial class Drawing
     {
@@ -17,14 +14,14 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
             float scale = 2;
 
-            Parallel.For(0, outputBuffer.Length / 4, i =>
+            Parallel.For(0, GlobalBuffers.outputBuffer.Length / 4, i =>
             {
 
                 i *= 4;
 
-                outputBuffer[i] = 255;
-                outputBuffer[i + 1] = (byte)(128 + (normalBuffer[i / 2] - 128) * scale);
-                outputBuffer[i + 2] = (byte)(128 + (normalBuffer[i / 2 + 1] - 128) * scale);
+                GlobalBuffers.outputBuffer[i] = 255;
+                GlobalBuffers.outputBuffer[i + 1] = (byte)(128 + (GlobalBuffers.normalBuffer[i / 2] - 128) * scale);
+                GlobalBuffers.outputBuffer[i + 2] = (byte)(128 + (GlobalBuffers.normalBuffer[i / 2 + 1] - 128) * scale);
 
             });
 
@@ -33,17 +30,17 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public static void ProcessNormalDisplacement()
         {
 
-            Array.Copy(outputBuffer, tempBuffer, outputBuffer.Length);
+            Array.Copy(GlobalBuffers.outputBuffer, tempBuffer, GlobalBuffers.outputBuffer.Length);
 
-            Parallel.For(0, outputBuffer.Length / 4, i =>
+            Parallel.For(0, GlobalBuffers.outputBuffer.Length / 4, i =>
             {
 
                 int x = 0, y = 0;
 
                 Utils.GetIndexCoordinates(i, ref x, ref y);
 
-                x += (normalBuffer[i*2 + 0] - 128);
-                y += (normalBuffer[i*2 + 1] - 128);
+                x += (GlobalBuffers.normalBuffer[i*2 + 0] - 128);
+                y += (GlobalBuffers.normalBuffer[i*2 + 1] - 128);
 
                 i *= 4;
 
@@ -54,9 +51,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                 int index = Utils.GetIndexByCoordinates(x, y) * 4;
 
-                outputBuffer[i] = tempBuffer[index];
-                outputBuffer[i + 1] = tempBuffer[index + 1];
-                outputBuffer[i + 2] = tempBuffer[index + 2];
+                GlobalBuffers.outputBuffer[i] = tempBuffer[index];
+                GlobalBuffers.outputBuffer[i + 1] = tempBuffer[index + 1];
+                GlobalBuffers.outputBuffer[i + 2] = tempBuffer[index + 2];
             });
 
         }
@@ -64,11 +61,11 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
         public static void ProcessNormalGlassDisplacement()
         {
 
-            Array.Copy(outputBuffer, tempBuffer, outputBuffer.Length);
+            Array.Copy(GlobalBuffers.outputBuffer, tempBuffer, GlobalBuffers.outputBuffer.Length);
 
             float scale = 0.5f;
 
-            Parallel.For(0, colorBuffer.Length / 4, i =>
+            Parallel.For(0, GlobalBuffers.colorBuffer.Length / 4, i =>
             {
 
                 int x = 0, y = 0;
@@ -87,9 +84,9 @@ namespace Microsoft.Samples.Kinect.CoordinateMappingBasics
 
                 int index = Utils.GetIndexByCoordinates(x, y) * 4;
 
-                outputBuffer[i] = tempBuffer[index];
-                outputBuffer[i + 1] = tempBuffer[index + 1];
-                outputBuffer[i + 2] = tempBuffer[index + 2];
+                GlobalBuffers.outputBuffer[i] = tempBuffer[index];
+                GlobalBuffers.outputBuffer[i + 1] = tempBuffer[index + 1];
+                GlobalBuffers.outputBuffer[i + 2] = tempBuffer[index + 2];
             });
 
         }
