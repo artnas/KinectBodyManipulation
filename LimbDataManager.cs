@@ -18,18 +18,6 @@ namespace KinectBodyModification
             this.limbData = new LimbData();
         }
 
-        // public LimbDataManager(byte[] colorBuffer, DepthImagePoint[] depthCoordinates, DepthImagePixel[] depthBuffer, byte[] backgroundRemovedBuffer, DepthImagePixel[] savedDepthBuffer, KinectSensor sensor)
-        // {
-        //     this.colorBuffer = colorBuffer;
-        //     this.depthCoordinates = depthCoordinates;
-        //     this.depthBuffer = depthBuffer;
-        //     this.backgroundRemovedBuffer = backgroundRemovedBuffer;
-        //     this.savedDepthBuffer = savedDepthBuffer;
-        //     this.sensor = sensor;
-        //
-        //     this.limbData = new LimbData();
-        // }
-
         private int getBufferIndex(int x, int y)
         {
             return y * Configuration.width + x;
@@ -360,13 +348,14 @@ namespace KinectBodyModification
 
                     // pomijanie wylewania poza krawedzie obrazka
                     if (
-                        (index % Configuration.width == 0 && xOffset == -1) || 
+                        (index % Configuration.width == 0 && xOffset == -1) ||
                         ((index + 1) % Configuration.width == 0 && xOffset == 1) ||
                         (index / Configuration.width == 0 && yOffset == 1)
                         // (limbData.pixelData.Length - index - xOffset <= Configuration.width && yOffset == -1)
-                    ){
+                    )
+                    {
                         continue;
-                    }   
+                    }
 
                     int offsetIndex = index + offset;
 

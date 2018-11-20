@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
+using GB = KinectBodyModification.GlobalBuffers;
+
 namespace KinectBodyModification
 {
     public static partial class Drawing
@@ -14,14 +16,14 @@ namespace KinectBodyModification
 
             float scale = 2;
 
-            Parallel.For(0, GlobalBuffers.outputBuffer.Length / 4, i =>
+            Parallel.For(0, GB.outputBuffer.Length / 4, i =>
             {
 
                 i *= 4;
 
-                GlobalBuffers.outputBuffer[i] = 255;
-                GlobalBuffers.outputBuffer[i + 1] = (byte)(128 + (GlobalBuffers.normalBuffer[i / 2] - 128) * scale);
-                GlobalBuffers.outputBuffer[i + 2] = (byte)(128 + (GlobalBuffers.normalBuffer[i / 2 + 1] - 128) * scale);
+                GB.outputBuffer[i] = 255;
+                GB.outputBuffer[i + 1] = (byte)(128 + (GB.normalBuffer[i / 2] - 128) * scale);
+                GB.outputBuffer[i + 2] = (byte)(128 + (GB.normalBuffer[i / 2 + 1] - 128) * scale);
 
             });
 
@@ -30,17 +32,17 @@ namespace KinectBodyModification
         public static void ProcessNormalDisplacement()
         {
 
-            Array.Copy(GlobalBuffers.outputBuffer, tempBuffer, GlobalBuffers.outputBuffer.Length);
+            Array.Copy(GB.outputBuffer, tempBuffer, GB.outputBuffer.Length);
 
-            Parallel.For(0, GlobalBuffers.outputBuffer.Length / 4, i =>
+            Parallel.For(0, GB.outputBuffer.Length / 4, i =>
             {
 
                 int x = 0, y = 0;
 
                 Utils.GetIndexCoordinates(i, ref x, ref y);
 
-                x += (GlobalBuffers.normalBuffer[i*2 + 0] - 128);
-                y += (GlobalBuffers.normalBuffer[i*2 + 1] - 128);
+                x += (GB.normalBuffer[i*2 + 0] - 128);
+                y += (GB.normalBuffer[i*2 + 1] - 128);
 
                 i *= 4;
 
@@ -51,9 +53,9 @@ namespace KinectBodyModification
 
                 int index = Utils.GetIndexByCoordinates(x, y) * 4;
 
-                GlobalBuffers.outputBuffer[i] = tempBuffer[index];
-                GlobalBuffers.outputBuffer[i + 1] = tempBuffer[index + 1];
-                GlobalBuffers.outputBuffer[i + 2] = tempBuffer[index + 2];
+                GB.outputBuffer[i] = tempBuffer[index];
+                GB.outputBuffer[i + 1] = tempBuffer[index + 1];
+                GB.outputBuffer[i + 2] = tempBuffer[index + 2];
             });
 
         }
@@ -61,11 +63,11 @@ namespace KinectBodyModification
         public static void ProcessNormalGlassDisplacement()
         {
 
-            Array.Copy(GlobalBuffers.outputBuffer, tempBuffer, GlobalBuffers.outputBuffer.Length);
+            Array.Copy(GB.outputBuffer, tempBuffer, GB.outputBuffer.Length);
 
             float scale = 0.5f;
 
-            Parallel.For(0, GlobalBuffers.colorBuffer.Length / 4, i =>
+            Parallel.For(0, GB.colorBuffer.Length / 4, i =>
             {
 
                 int x = 0, y = 0;
@@ -84,9 +86,9 @@ namespace KinectBodyModification
 
                 int index = Utils.GetIndexByCoordinates(x, y) * 4;
 
-                GlobalBuffers.outputBuffer[i] = tempBuffer[index];
-                GlobalBuffers.outputBuffer[i + 1] = tempBuffer[index + 1];
-                GlobalBuffers.outputBuffer[i + 2] = tempBuffer[index + 2];
+                GB.outputBuffer[i] = tempBuffer[index];
+                GB.outputBuffer[i + 1] = tempBuffer[index + 1];
+                GB.outputBuffer[i + 2] = tempBuffer[index + 2];
             });
 
         }

@@ -5,52 +5,33 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Kinect;
 
+using GB = KinectBodyModification.GlobalBuffers;
+
 namespace KinectBodyModification
 {
     public static class BoneProcessor
     {
-        // private static DepthImagePixel[] depthBuffer;
-        //
-        // private static byte[] colorBuffer;
-        // private static byte[] outputBuffer;
-        // private static byte[] backgroundRemovedBuffer;
-        // private static byte[] normalBuffer;
-        //
-        // private static byte[] savedBackgroundColorBuffer;
-        // private static DepthImagePixel[] savedBackgroundDepthBuffer;
-        //
-        // private static LimbDataManager limbDataManager;
 
         private static readonly LimbDataPixel[] oldLimbDataPixels = new LimbDataPixel[Configuration.size];
 
         private static readonly Dictionary<int, BonePixelsData> bonePixelsDictionary =
             new Dictionary<int, BonePixelsData>(20);
 
-        // public static void SetBuffers(DepthImagePixel[] depthBuffer, byte[] colorBuffer, byte[] outputBuffer,
-        //     byte[] backgroundRemovedBuffer, LimbDataManager limbDataManager, byte[] savedBackgroundColorBuffer,
-        //     DepthImagePixel[] savedBackgroundDepthBuffer, byte[] normalBuffer)
-        // {
-        //     BoneProcessor.depthBuffer = depthBuffer;
-        //     BoneProcessor.colorBuffer = colorBuffer;
-        //     BoneProcessor.outputBuffer = outputBuffer;
-        //     BoneProcessor.backgroundRemovedBuffer = backgroundRemovedBuffer;
-        //     BoneProcessor.limbDataManager = limbDataManager;
-        //     BoneProcessor.savedBackgroundColorBuffer = savedBackgroundColorBuffer;
-        //     BoneProcessor.savedBackgroundDepthBuffer = savedBackgroundDepthBuffer;
-        //     BoneProcessor.normalBuffer = normalBuffer;
-        // }
-
         public static void ProcessAllBones()
         {
-            Array.Copy(GlobalBuffers.limbDataManager.limbData.pixelData, oldLimbDataPixels,
-                GlobalBuffers.limbDataManager.limbData.pixelData.Length);
+            Array.Copy(GB.limbDataManager.limbData.pixelData, oldLimbDataPixels,
+                GB.limbDataManager.limbData.pixelData.Length);
             AssignBonePixelsToDictionaries();
 
-            for (var i = 0; i < GlobalBuffers.normalBuffer.Length; i++) GlobalBuffers.normalBuffer[i] = 128;
+            for (var i = 0; i < GB.normalBuffer.Length; i++) GB.normalBuffer[i] = 128;
 
-            foreach (var limbDataSkeleton in GlobalBuffers.limbDataManager.limbData.limbDataSkeletons)
-            foreach (var bone in limbDataSkeleton.bones)
-                ProcessBone(bone);
+            foreach (var limbDataSkeleton in GB.limbDataManager.limbData.limbDataSkeletons)
+            {
+                foreach (var bone in limbDataSkeleton.bones)
+                {
+                    ProcessBone(bone);
+                }
+            }
         }
 
         public static void ProcessBone(LimbDataBone bone)
@@ -80,7 +61,7 @@ namespace KinectBodyModification
                 case 101:
                     ProcessBone_Stretch(bone, bonePixelData, new StretchParameters
                     {
-                        curve = Curves.sinHill,
+                        curve = Curves.steepHillCurve,
                         power = Settings.Instance.ArmScale / 100f
                     });
                     break;
@@ -90,7 +71,7 @@ namespace KinectBodyModification
                 case 237:
                     ProcessBone_Stretch(bone, bonePixelData, new StretchParameters
                     {
-                        curve = Curves.sinHill,
+                        curve = Curves.hillCurve,
                         power = Settings.Instance.LegScale / 100f
                     });
                     break;
@@ -159,15 +140,15 @@ namespace KinectBodyModification
 
                     //outputBuffer[transformedIndex] = backgroundRemovedBuffer
 
-                    GlobalBuffers.outputBuffer[targetIndex] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[sourceIndex],
-                        GlobalBuffers.backgroundRemovedBuffer[sourceIndex],
-                        1f - GlobalBuffers.backgroundRemovedBuffer[sourceIndex + 3] / 255f);
-                    GlobalBuffers.outputBuffer[targetIndex + 1] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[sourceIndex],
-                        GlobalBuffers.backgroundRemovedBuffer[sourceIndex + 1],
-                        1f - GlobalBuffers.backgroundRemovedBuffer[sourceIndex + 3] / 255f);
-                    GlobalBuffers.outputBuffer[targetIndex + 2] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[sourceIndex],
-                        GlobalBuffers.backgroundRemovedBuffer[sourceIndex + 2],
-                        1f - GlobalBuffers.backgroundRemovedBuffer[sourceIndex + 3] / 255f);
+                    GB.outputBuffer[targetIndex] = Utils.Interpolate(GB.savedBackgroundColorBuffer[sourceIndex],
+                        GB.backgroundRemovedBuffer[sourceIndex],
+                        1f - GB.backgroundRemovedBuffer[sourceIndex + 3] / 255f);
+                    GB.outputBuffer[targetIndex + 1] = Utils.Interpolate(GB.savedBackgroundColorBuffer[sourceIndex],
+                        GB.backgroundRemovedBuffer[sourceIndex + 1],
+                        1f - GB.backgroundRemovedBuffer[sourceIndex + 3] / 255f);
+                    GB.outputBuffer[targetIndex + 2] = Utils.Interpolate(GB.savedBackgroundColorBuffer[sourceIndex],
+                        GB.backgroundRemovedBuffer[sourceIndex + 2],
+                        1f - GB.backgroundRemovedBuffer[sourceIndex + 3] / 255f);
 
                     // normalBuffer[targetIndex] = (byte) (-offsetX * scale + 128);
                     // normalBuffer[targetIndex + 1] = (byte) (-offsetY * scale + 128);
@@ -183,12 +164,12 @@ namespace KinectBodyModification
             {
                 i = indicesList[i] * 4;
 
-                GlobalBuffers.outputBuffer[i] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[i], GlobalBuffers.backgroundRemovedBuffer[i],
-                    1f - GlobalBuffers.backgroundRemovedBuffer[i + 3] / 255f);
-                GlobalBuffers.outputBuffer[i + 1] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[i], GlobalBuffers.backgroundRemovedBuffer[i + 1],
-                    1f - GlobalBuffers.backgroundRemovedBuffer[i + 3] / 255f);
-                GlobalBuffers.outputBuffer[i + 2] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[i], GlobalBuffers.backgroundRemovedBuffer[i + 2],
-                    1f - GlobalBuffers.backgroundRemovedBuffer[i + 3] / 255f);
+                GB.outputBuffer[i] = Utils.Interpolate(GB.savedBackgroundColorBuffer[i], GB.backgroundRemovedBuffer[i],
+                    1f - GB.backgroundRemovedBuffer[i + 3] / 255f);
+                GB.outputBuffer[i + 1] = Utils.Interpolate(GB.savedBackgroundColorBuffer[i], GB.backgroundRemovedBuffer[i + 1],
+                    1f - GB.backgroundRemovedBuffer[i + 3] / 255f);
+                GB.outputBuffer[i + 2] = Utils.Interpolate(GB.savedBackgroundColorBuffer[i], GB.backgroundRemovedBuffer[i + 2],
+                    1f - GB.backgroundRemovedBuffer[i + 3] / 255f);
 
                 // i = indicesList[i] * 4;
                 //
@@ -201,6 +182,8 @@ namespace KinectBodyModification
             StretchParameters stretchParameters)
         {
             // List<int> indicesList = bonePixelData.indices.ToList();
+
+            stretchParameters.power -= 1f;
 
             var boneVector = Vector3.Normalize(bone.endPoint - bone.startPoint);
             var perpendicularVector = Utils.GetPerpendicularVector(bone.GetStartPoint(), bone.GetEndPoint());
@@ -252,15 +235,15 @@ namespace KinectBodyModification
                         samplingIndex *= 4;
                         var outputIndex = perpendicularPointIndex * 4;
 
-                        GlobalBuffers.outputBuffer[outputIndex] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[samplingIndex],
-                            GlobalBuffers.backgroundRemovedBuffer[samplingIndex],
-                            1f - GlobalBuffers.backgroundRemovedBuffer[samplingIndex + 3] / 255f);
-                        GlobalBuffers.outputBuffer[outputIndex + 1] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[samplingIndex],
-                            GlobalBuffers.backgroundRemovedBuffer[samplingIndex + 1],
-                            1f - GlobalBuffers.backgroundRemovedBuffer[samplingIndex + 3] / 255f);
-                        GlobalBuffers.outputBuffer[outputIndex + 2] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[samplingIndex],
-                            GlobalBuffers.backgroundRemovedBuffer[samplingIndex + 2],
-                            1f - GlobalBuffers.backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                            GB.outputBuffer[outputIndex] = Utils.Interpolate(GB.savedBackgroundColorBuffer[samplingIndex],
+                            GB.backgroundRemovedBuffer[samplingIndex],
+                            1f - GB.backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                            GB.outputBuffer[outputIndex + 1] = Utils.Interpolate(GB.savedBackgroundColorBuffer[samplingIndex],
+                            GB.backgroundRemovedBuffer[samplingIndex + 1],
+                            1f - GB.backgroundRemovedBuffer[samplingIndex + 3] / 255f);
+                            GB.outputBuffer[outputIndex + 2] = Utils.Interpolate(GB.savedBackgroundColorBuffer[samplingIndex],
+                            GB.backgroundRemovedBuffer[samplingIndex + 2],
+                            1f - GB.backgroundRemovedBuffer[samplingIndex + 3] / 255f);
                     }
 
                     if (shouldBreak)
@@ -279,12 +262,12 @@ namespace KinectBodyModification
             {
                 i = unusedIndices[i] * 4;
 
-                GlobalBuffers.outputBuffer[i] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[i], GlobalBuffers.backgroundRemovedBuffer[i],
-                    1f - GlobalBuffers.backgroundRemovedBuffer[i + 3] / 255f);
-                GlobalBuffers.outputBuffer[i + 1] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[i], GlobalBuffers.backgroundRemovedBuffer[i + 1],
-                    1f - GlobalBuffers.backgroundRemovedBuffer[i + 3] / 255f);
-                GlobalBuffers.outputBuffer[i + 2] = Utils.Interpolate(GlobalBuffers.savedBackgroundColorBuffer[i], GlobalBuffers.backgroundRemovedBuffer[i + 2],
-                    1f - GlobalBuffers.backgroundRemovedBuffer[i + 3] / 255f);
+                GB.outputBuffer[i] = Utils.Interpolate(GB.savedBackgroundColorBuffer[i], GB.backgroundRemovedBuffer[i],
+                    1f - GB.backgroundRemovedBuffer[i + 3] / 255f);
+                GB.outputBuffer[i + 1] = Utils.Interpolate(GB.savedBackgroundColorBuffer[i], GB.backgroundRemovedBuffer[i + 1],
+                    1f - GB.backgroundRemovedBuffer[i + 3] / 255f);
+                GB.outputBuffer[i + 2] = Utils.Interpolate(GB.savedBackgroundColorBuffer[i], GB.backgroundRemovedBuffer[i + 2],
+                    1f - GB.backgroundRemovedBuffer[i + 3] / 255f);
             });
 
             // Parallel.For(0, indicesList.Count, i =>
@@ -311,9 +294,9 @@ namespace KinectBodyModification
                 entry.Value.minX = entry.Value.maxX = entry.Value.minY = entry.Value.maxY = 0;
             }
 
-            for (var i = 0; i < GlobalBuffers.limbDataManager.limbData.pixelData.Length; i++)
+            for (var i = 0; i < GB.limbDataManager.limbData.pixelData.Length; i++)
             {
-                var limbPixel = GlobalBuffers.limbDataManager.limbData.pixelData[i];
+                var limbPixel = GB.limbDataManager.limbData.pixelData[i];
 
                 if (limbPixel.humanIndex != -1)
                 {
