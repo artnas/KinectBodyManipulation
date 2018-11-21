@@ -9,17 +9,22 @@ using OpenTK.Graphics.ES30;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using OpenTK.Platform;
+using All = OpenTK.Graphics.OpenGL.All;
 using BufferTarget = OpenTK.Graphics.OpenGL.BufferTarget;
 using BufferUsageHint = OpenTK.Graphics.OpenGL.BufferUsageHint;
 using ClearBufferMask = OpenTK.Graphics.OpenGL.ClearBufferMask;
+using EnableCap = OpenTK.Graphics.OpenGL.EnableCap;
 using FramebufferTarget = OpenTK.Graphics.OpenGL.FramebufferTarget;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using MatrixMode = OpenTK.Graphics.OpenGL.MatrixMode;
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
+using PixelInternalFormat = OpenTK.Graphics.OpenGL.PixelInternalFormat;
 using PixelType = OpenTK.Graphics.OpenGL.PixelType;
 using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
 using ReadBufferMode = OpenTK.Graphics.OpenGL.ReadBufferMode;
 using RenderbufferTarget = OpenTK.Graphics.OpenGL.RenderbufferTarget;
+using TextureParameterName = OpenTK.Graphics.OpenGL.TextureParameterName;
+using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 using VertexAttribPointerType = OpenTK.Graphics.OpenGL.VertexAttribPointerType;
 
 // https://stackoverflow.com/questions/12157646/how-to-render-offscreen-on-opengl
@@ -37,7 +42,8 @@ namespace KBMGraphics
 
         private GraphicsContext context;
 
-        private readonly int[] frameBuffer = {0}, renderBuffer = {0};
+        private readonly int[] frameBuffer = {0}, renderBuffer = {0}, texturePointer = {0};
+        private byte[] pixels;
 
         public KBMRenderer(int width, int height, byte[] outputBuffer, byte[] textureBuffer)
         {
@@ -69,6 +75,7 @@ namespace KBMGraphics
 
             GL.GenFramebuffers(1, frameBuffer);
             GL.GenRenderbuffers(1, renderBuffer);
+            GL.GenTextures(1, texturePointer);
 
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderBuffer[0]);
             GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, width, height);
@@ -81,6 +88,28 @@ namespace KBMGraphics
             // new GraphicsContext()
             //
             // GL.GenTextures(1, out textureColorBuffer);
+
+            GL.BindTexture(TextureTarget.Texture2D, texturePointer[0]);
+
+            // Black/white checkerboard
+            pixels = new byte[]{
+                0, 0, 0,   255, 5, 255,
+                255, 77, 255,   0, 0, 0
+            };
+
+            unsafe
+            {
+                fixed(byte* ptr = &pixels[0])
+                {
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, 2, 2, 0, PixelFormat.Rgb,
+                        PixelType.UnsignedByte, new IntPtr(ptr));
+                }
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.Enable(EnableCap.Texture2D);
         }
 
         ~KBMRenderer()
@@ -144,7 +173,7 @@ namespace KBMGraphics
             // // GL.DrawArrays(PrimitiveType.Polygon, 0, vertices.Length/2);
             // GL.DisableVertexAttribArray(0);
 
-             GL.Begin(PrimitiveType.Polygon);
+             GL.Begin(PrimitiveType.Triangles);
 
             // GL.Vertex2(200, 100);
             // GL.Vertex2(400, 100);
@@ -157,14 +186,15 @@ namespace KBMGraphics
             // GL.Vertex2(800, 0);
             // GL.Vertex2(0, 600);
 
+            Random r = new Random();
+
             for (var i = 0; i < sceneData.vertices.Length; i++)
             {
+                GL.TexCoord2(r.NextDouble(), r.NextDouble());
                 GL.Vertex2(sceneData.vertices[i].X, sceneData.vertices[i].Y);
             }
 
             GL.End();
-
-             // GL.End();
 
             OnAfterDraw();
         }
