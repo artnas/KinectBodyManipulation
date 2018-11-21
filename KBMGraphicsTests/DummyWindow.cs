@@ -73,12 +73,12 @@ namespace KBMGraphicsTests
 
         private void Render()
         {         
-            if (renderer == null)
-            {
-                renderer = new KBMRenderer(width, height, outputBuffer, textureBuffer);
-            }
-
-            renderer.Draw();
+            // if (renderer == null)
+            // {
+            //     renderer = new KBMRenderer(width, height, outputBuffer, textureBuffer);
+            // }
+            //
+            // renderer.Draw();
         }
     }
 }

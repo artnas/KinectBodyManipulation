@@ -8,10 +8,13 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.ES30;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using OpenTK.Platform;
 using BufferTarget = OpenTK.Graphics.OpenGL.BufferTarget;
 using BufferUsageHint = OpenTK.Graphics.OpenGL.BufferUsageHint;
+using ClearBufferMask = OpenTK.Graphics.OpenGL.ClearBufferMask;
 using FramebufferTarget = OpenTK.Graphics.OpenGL.FramebufferTarget;
 using GL = OpenTK.Graphics.OpenGL.GL;
+using MatrixMode = OpenTK.Graphics.OpenGL.MatrixMode;
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 using PixelType = OpenTK.Graphics.OpenGL.PixelType;
 using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
@@ -30,6 +33,7 @@ namespace KBMGraphics
         public readonly int height;
         public readonly byte[] OutputBuffer;
         public readonly byte[] TextureBuffer;
+        private KBMSceneData sceneData;
 
         private GraphicsContext context;
 
@@ -42,11 +46,26 @@ namespace KBMGraphics
             this.OutputBuffer = outputBuffer;
             this.TextureBuffer = textureBuffer;
             // this.graphicsMode = new GraphicsMode(new ColorFormat(8, 8, 8, 8), 0, 0, 0);
-
             
+            // var window = new GameWindow(width, height, GraphicsMode.Default);
+
+
+
+            // var context = new GraphicsContext(new ContextHandle(handle), null);
+
+            // context.MakeCurrent(window.WindowInfo);
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+
+            GL.Ortho(0f, width, height, 0f, -1000f, 1000f);
+
+            // GL.MatrixMode(MatrixMode.Projection);
 
             // GL.ReadBuffer(ReadBufferMode.Back);
             // GL.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, outputBuffer);
+
+            
 
             GL.GenFramebuffers(1, frameBuffer);
             GL.GenRenderbuffers(1, renderBuffer);
@@ -54,8 +73,6 @@ namespace KBMGraphics
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderBuffer[0]);
             GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, width, height);
             // GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, renderBuffer[0]);
-
-            
 
             // var framebuffer = GL.GenFramebuffer();
             // GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
@@ -72,62 +89,82 @@ namespace KBMGraphics
             // GL.DeleteRenderbuffers(1, renderBuffer);
         }
 
+        public void SetSceneData(KBMSceneData sceneData)
+        {
+            this.sceneData = sceneData;
+        }
+
         private void OnBeforeDraw()
         {
-            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, frameBuffer[0]);
+            // GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, frameBuffer[0]);
         }
 
         private void OnAfterDraw()
         {
-            GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
-            GL.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, this.OutputBuffer);
-            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, 0);
+            // GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
+            // GL.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, this.OutputBuffer);
+            // GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, 0);
             
         }
-
-        private int test = 0;
 
         public void Draw()
         {
 
-            test++;
-
             OnBeforeDraw();
 
-            float[] vertices =
-            {
-                test, 0f,
-                200f, 0f,
-                400f, 400f
-            };
+            // GL.ClearColor(1, 1, 0, 1);
 
-            int[] vertexBuffer = {0};
-            GL.GenBuffers(1, vertexBuffer);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer[0]);
-            GL.BufferData(BufferTarget.ArrayBuffer, 4 * vertices.Length, vertices, BufferUsageHint.StaticDraw);
+            Matrix4 modelView = Matrix4.LookAt(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
-            GL.EnableVertexAttribArray(0);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer[0]);
+            GL.MatrixMode(MatrixMode.Modelview);
 
-            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 0, 0);
+            GL.LoadMatrix(ref modelView);
 
-            // GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-            // GL.DrawArrays(PrimitiveType.Polygon, 0, vertices.Length/2);
-            GL.DisableVertexAttribArray(0);
-
-            // GL.Begin(PrimitiveType.Polygon);
+            // float[] vertices =
+            // {
+            //     test, 0f,
+            //     200f, 0f,
+            //     400f, 400f
+            // };
             //
+            // int[] vertexBuffer = {0};
+            // GL.GenBuffers(1, vertexBuffer);
+            //
+            // GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer[0]);
+            // GL.BufferData(BufferTarget.ArrayBuffer, 4 * vertices.Length, vertices, BufferUsageHint.StaticDraw);
+            //
+            // GL.EnableVertexAttribArray(0);
+            // // GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer[0]);
+            //
+            // GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 0, 0);
+            //
+            // // GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            // // GL.DrawArrays(PrimitiveType.Polygon, 0, vertices.Length/2);
+            // GL.DisableVertexAttribArray(0);
+
+             GL.Begin(PrimitiveType.Polygon);
+
             // GL.Vertex2(200, 100);
             // GL.Vertex2(400, 100);
             // GL.Vertex2(550, 300);
             // GL.Vertex2(400, 480);
             // GL.Vertex2(200, 480);
             // GL.Vertex2(50, 300);
-            //
-            // GL.End();
 
-            // GL.End();
+            // GL.Vertex2(0, 0);
+            // GL.Vertex2(800, 0);
+            // GL.Vertex2(0, 600);
+
+            for (var i = 0; i < sceneData.vertices.Length; i++)
+            {
+                GL.Vertex2(sceneData.vertices[i].X, sceneData.vertices[i].Y);
+            }
+
+            GL.End();
+
+             // GL.End();
 
             OnAfterDraw();
         }

@@ -5,8 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KBMGraphicsTests"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        xmlns:openTk="clr-namespace:OpenTK;assembly=OpenTK.GLControl"
+        Title="MainWindow" Height="600" Width="800">
     <Grid>
-        
+        <WindowsFormsHost Initialized="WindowsFormsHost_Initialized">
+            <openTk:GLControl x:Name="RenderCanvas" Load="renderCanvas_Load" Paint="renderCanvas_Paint" Width="800" Height="600"/>
+        </WindowsFormsHost>
     </Grid>
 </Window>
