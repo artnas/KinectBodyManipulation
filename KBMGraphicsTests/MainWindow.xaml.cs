@@ -89,8 +89,8 @@ namespace KBMGraphicsTests
 
             Random r = new Random();
 
-            while (true)
-            {
+            // while (true)
+            // {
 
                 for (var i = 0; i < sceneData.vertices.Length; i++)
                 {
@@ -103,9 +103,9 @@ namespace KBMGraphicsTests
                 GL.Flush();
                 RenderCanvas.SwapBuffers();
 
-                Thread.Sleep(30);
-
-            }
+            //     Thread.Sleep(30);
+            //
+            // }
         }
 
     }

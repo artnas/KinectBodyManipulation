@@ -9,6 +9,7 @@ using OpenTK.Graphics.ES30;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using OpenTK.Platform;
+using TriangleNet;
 using All = OpenTK.Graphics.OpenGL.All;
 using BufferTarget = OpenTK.Graphics.OpenGL.BufferTarget;
 using BufferUsageHint = OpenTK.Graphics.OpenGL.BufferUsageHint;
@@ -40,10 +41,14 @@ namespace KBMGraphics
         public readonly byte[] TextureBuffer;
         private KBMSceneData sceneData;
 
+        private BodyPolygonizer bodyPolygonizer;
+
         private GraphicsContext context;
 
         private readonly int[] frameBuffer = {0}, renderBuffer = {0}, texturePointer = {0};
         private byte[] pixels;
+
+        private QuadraticMesh mesh;
 
         public KBMRenderer(int width, int height, byte[] outputBuffer, byte[] textureBuffer)
         {
@@ -51,8 +56,12 @@ namespace KBMGraphics
             this.height = height;
             this.OutputBuffer = outputBuffer;
             this.TextureBuffer = textureBuffer;
+
+            this.bodyPolygonizer = new BodyPolygonizer();
             // this.graphicsMode = new GraphicsMode(new ColorFormat(8, 8, 8, 8), 0, 0, 0);
-            
+
+            this.mesh = new QuadraticMesh(bodyPolygonizer.GetMesh());
+
             // var window = new GameWindow(width, height, GraphicsMode.Default);
 
 
@@ -188,11 +197,43 @@ namespace KBMGraphics
 
             Random r = new Random();
 
-            for (var i = 0; i < sceneData.vertices.Length; i++)
-            {
-                GL.TexCoord2(r.NextDouble(), r.NextDouble());
-                GL.Vertex2(sceneData.vertices[i].X, sceneData.vertices[i].Y);
-            }
+            // for (var i = 0; i < sceneData.vertices.Length; i++)
+            // {
+            //     GL.TexCoord2(r.NextDouble(), r.NextDouble());
+            //     GL.Vertex2(sceneData.vertices[i].X, sceneData.vertices[i].Y);
+            // }
+
+             for (var triangleIndex = 0; triangleIndex < mesh.indices.Count; triangleIndex+=3)
+             {
+                 var a = mesh.indices[triangleIndex];
+                 var b = mesh.indices[triangleIndex+1];
+                 var c = mesh.indices[triangleIndex+2];
+            
+                 GL.TexCoord2(mesh.vertices[a].X / width, mesh.vertices[a].Y / height);
+                 GL.Vertex2(mesh.vertices[a].X, mesh.vertices[a].Y);
+            
+                 GL.TexCoord2(mesh.vertices[b].X / width, mesh.vertices[b].Y / height);
+                 GL.Vertex2(mesh.vertices[b].X, mesh.vertices[b].Y);
+            
+                 GL.TexCoord2(mesh.vertices[c].X / width, mesh.vertices[c].Y / height);
+                 GL.Vertex2(mesh.vertices[c].X, mesh.vertices[c].Y);
+             }
+
+            // for (var triangleIndex = 0; triangleIndex < mesh.Indices.GetLength(0); triangleIndex++)
+            // {
+            //     var a = mesh.Indices[triangleIndex, 0];
+            //     var b = mesh.Indices[triangleIndex, 1];
+            //     var c = mesh.Indices[triangleIndex, 2];
+            //
+            //     GL.TexCoord2(mesh.Vertices[a].X / width, mesh.Vertices[a].Y / height);
+            //     GL.Vertex2(mesh.Vertices[a].X, mesh.Vertices[a].Y);
+            //
+            //     GL.TexCoord2(mesh.Vertices[b].X / width, mesh.Vertices[b].Y / height);
+            //     GL.Vertex2(mesh.Vertices[b].X, mesh.Vertices[b].Y);
+            //
+            //     GL.TexCoord2(mesh.Vertices[c].X / width, mesh.Vertices[c].Y / height);
+            //     GL.Vertex2(mesh.Vertices[c].X, mesh.Vertices[c].Y);
+            // }
 
             GL.End();
 
