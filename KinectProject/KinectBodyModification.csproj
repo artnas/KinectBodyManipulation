@@ -81,6 +81,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BonePixelsData.cs" />
     <Compile Include="BoneProcessor.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Curves.cs" />

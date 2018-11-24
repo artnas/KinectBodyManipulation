@@ -16,7 +16,7 @@ namespace KinectBodyModification
             {
                 for (int i = 0; i < GB.colorBuffer.Length; i += 4)
                 {
-                    var limbPixel = GB.limbDataManager.limbData.pixelData[i / 4];
+                    var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
 
                     if (limbPixel.humanIndex != -1 && limbPixel.boneHash != -1)
                     {
@@ -86,20 +86,31 @@ namespace KinectBodyModification
             }
 
             // szkielet(debug)
-            // if (false)
+            // for (int i = 0; i < GB.colorBuffer.Length; i += 4)
             // {
-            //     for (int i = 0; i < colorBuffer.Length; i += 4)
+            //     var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
+            //
+            //     if (limbPixel.debugDraw)
             //     {
-            //         var limbPixel = limbDataManager.limbData.pixelData[i / 4];
             //
-            //         if (limbPixel.debugDraw)
-            //         {
+            //         GB.outputBuffer[i] = 255;
+            //         GB.outputBuffer[i + 1] = 0;
+            //         GB.outputBuffer[i + 2] = 0;
             //
-            //             outputBuffer[i] = 255;
-            //             outputBuffer[i + 1] = 0;
-            //             outputBuffer[i + 2] = 0;
+            //     }
+            // }
+
+            // for (int i = 0; i < GB.colorBuffer.Length; i += 4)
+            // {
+            //     var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
             //
-            //         }
+            //     if (limbPixel.isContour)
+            //     {
+            //
+            //         GB.outputBuffer[i] = 255;
+            //         GB.outputBuffer[i + 1] = 0;
+            //         GB.outputBuffer[i + 2] = 0;
+            //
             //     }
             // }
 

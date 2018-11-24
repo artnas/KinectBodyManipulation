@@ -98,10 +98,10 @@ namespace KinectBodyModification
 
                 // this.colorToDepthDivisor = colorWidth / this.depthWidth;
 
-                // Allocate space to put the depth pixels we'll receive
+                // Allocate space to put the depth allPixels we'll receive
                 GB.depthBuffer = new DepthImagePixel[sensor.DepthStream.FramePixelDataLength];
 
-                // Allocate space to put the color pixels we'll create
+                // Allocate space to put the color allPixels we'll create
                 GB.colorBuffer = new byte[sensor.ColorStream.FramePixelDataLength];
                 GB.backgroundRemovedBuffer = new byte[GB.colorBuffer.Length];
                 GB.outputBuffer = new byte[GB.colorBuffer.Length];

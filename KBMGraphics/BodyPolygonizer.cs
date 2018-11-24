@@ -33,6 +33,14 @@ namespace KBMGraphics
                 new Vertex(0, 100)
             }));
 
+            // var poly = new Polygon();
+            // poly.Add(new Vertex(0, 0));
+            // poly.Add(new Vertex(100, 0));
+            // poly.Add(new Vertex(100, 100));
+            // poly.Add(new Vertex(50, 75));
+            // poly.Add(new Vertex(25, 90));
+            // poly.Add(new Vertex(0, 100));
+
             var mesh = poly.Triangulate(
                 new ConstraintOptions { ConformingDelaunay = true },
                 new QualityOptions { MinimumAngle = 25.0 }

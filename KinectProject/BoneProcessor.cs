@@ -19,8 +19,8 @@ namespace KinectBodyModification
 
         public static void ProcessAllBones()
         {
-            Array.Copy(GB.limbDataManager.limbData.pixelData, oldLimbDataPixels,
-                GB.limbDataManager.limbData.pixelData.Length);
+            Array.Copy(GB.limbDataManager.limbData.allPixels, oldLimbDataPixels,
+                GB.limbDataManager.limbData.allPixels.Length);
             AssignBonePixelsToDictionaries();
 
             for (var i = 0; i < GB.normalBuffer.Length; i++) GB.normalBuffer[i] = 128;
@@ -130,7 +130,7 @@ namespace KinectBodyModification
 
                 if (indices.Contains(transformedIndex))
                 {
-                    //var sourcePixelData = limbDataManager.limbData.pixelData[transformedIndex];
+                    //var sourcePixelData = limbDataManager.limbData.allPixels[transformedIndex];
 
                     //limbPixel.boneHash = sourcePixelData.boneHash;
                     //limbPixel.humanIndex = sourcePixelData.humanIndex;
@@ -294,9 +294,9 @@ namespace KinectBodyModification
                 entry.Value.minX = entry.Value.maxX = entry.Value.minY = entry.Value.maxY = 0;
             }
 
-            for (var i = 0; i < GB.limbDataManager.limbData.pixelData.Length; i++)
+            for (var i = 0; i < GB.limbDataManager.limbData.allPixels.Length; i++)
             {
-                var limbPixel = GB.limbDataManager.limbData.pixelData[i];
+                var limbPixel = GB.limbDataManager.limbData.allPixels[i];
 
                 if (limbPixel.humanIndex != -1)
                 {
@@ -344,17 +344,6 @@ namespace KinectBodyModification
         {
             public Curve curve;
             public float power;
-        }
-
-        private class BonePixelsData
-        {
-            public readonly HashSet<int> indices;
-            public int minX, maxX, minY, maxY;
-
-            public BonePixelsData()
-            {
-                indices = new HashSet<int>();
-            }
         }
     }
 }

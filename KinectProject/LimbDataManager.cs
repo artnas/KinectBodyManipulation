@@ -25,7 +25,10 @@ namespace KinectBodyModification
 
         private void ClearBuffer()
         {
-            foreach(LimbDataPixel lpd in limbData.pixelData)
+            limbData.activePixels.Clear();
+            limbData.contourPixels.Clear();
+            
+            foreach(LimbDataPixel lpd in limbData.allPixels)
             {
                 lpd.Clear();
             }
@@ -33,7 +36,6 @@ namespace KinectBodyModification
 
         public void Update(Skeleton[] skeletons)
         {
-
             ClearBuffer();
 
             Queue<int> pixelsQueue = new Queue<int>();
@@ -65,7 +67,20 @@ namespace KinectBodyModification
             }
 
             FloodFill(pixelsQueue);
-            
+
+            foreach (var index in limbData.activePixels)
+            {
+                int pointX = 0, pointY = 0;
+                Utils.GetIndexCoordinates(index, ref pointX, ref pointY);
+
+                var isContour = IsContour(index, pointX, pointY);
+          
+                if (isContour)
+                {
+                    limbData.allPixels[index].isContour = isContour;
+                    limbData.contourPixels.Add(index);
+                }
+            }
         }
 
         private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, JointPair jointPair, Queue<int> pixelsQueue)
@@ -75,7 +90,6 @@ namespace KinectBodyModification
 
         private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, Joint a, Joint b, Queue<int> pixelsQueue)
         {
-
             if (a.TrackingState == JointTrackingState.NotTracked || b.TrackingState == JointTrackingState.NotTracked)
             {
                 return;
@@ -101,7 +115,7 @@ namespace KinectBodyModification
 
                 int bufferIndex = getBufferIndex((int)position.X, (int)position.Y);
 
-                LimbDataPixel pixel = limbData.pixelData[bufferIndex];
+                LimbDataPixel pixel = limbData.allPixels[bufferIndex];
                 pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
                 pixel.startJointType = a.JointType;
                 pixel.endJointType = b.JointType;
@@ -125,12 +139,10 @@ namespace KinectBodyModification
                 ProcessBone(limbDataSkeleton, bone, pixelsQueue);
                 
             }
-
         }
 
         private void ProcessBone(LimbDataSkeleton limbDataSkeleton, LimbDataBone bone, Queue<int> pixelsQueue)
         {
-
             Vector3 perpendicularVector = Utils.GetPerpendicularVector(bone.GetStartPoint(), bone.GetEndPoint());
 
             BoneConfiguration boneConfiguration = null;
@@ -141,12 +153,10 @@ namespace KinectBodyModification
             }
 
             ProcessBoneJoint(limbDataSkeleton, bone, pixelsQueue, perpendicularVector, true, boneConfiguration);
-
         }
 
         private void ProcessBoneJoint(LimbDataSkeleton limbDataSkeleton, LimbDataBone bone, Queue<int> pixelsQueue, Vector3 perpendicularVector, bool isStart, BoneConfiguration boneConfiguration)
         {
-
             if (bone.points.Count == 0)
                 return;
 
@@ -187,12 +197,14 @@ namespace KinectBodyModification
                     {
                         int bufferIndex = getBufferIndex((int)point.X, (int)point.Y);
 
-                        if (bufferIndex > 0 && bufferIndex < limbData.pixelData.Length)
+                        if (bufferIndex > 0 && bufferIndex < limbData.allPixels.Length)
                         {
-                            LimbDataPixel pixel = limbData.pixelData[bufferIndex];
+                            LimbDataPixel pixel = limbData.allPixels[bufferIndex];
                             pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
                             pixel.boneHash = bone.boneHash;
                             pixel.isBone = true;
+
+                            limbData.activePixels.Add(bufferIndex);
 
                             if (k == startIndex)
                                 pixel.isJoint = true;
@@ -225,7 +237,7 @@ namespace KinectBodyModification
                         {
                             int limbDataPixelIndex = colorBufferIndex / 4;
 
-                            LimbDataPixel pixel = limbData.pixelData[limbDataPixelIndex];
+                            LimbDataPixel pixel = limbData.allPixels[limbDataPixelIndex];
 
                             if (pixel.humanIndex != -1)
                             {
@@ -252,8 +264,9 @@ namespace KinectBodyModification
                             pixel.boneHash = bone.boneHash;
                             pixel.debugDraw = true;
 
-                            pixelsQueue.Enqueue(limbDataPixelIndex);
+                            limbData.activePixels.Add(limbDataPixelIndex);
 
+                            pixelsQueue.Enqueue(limbDataPixelIndex);
                         }
 
                     }
@@ -272,22 +285,42 @@ namespace KinectBodyModification
             for (int i = 0; i < startIndex; i++)
             {
                 int index = (int) (bone.points[i].X + bone.points[i].Y * Configuration.width);
-                if (index > 0 && index < limbData.pixelData.Length)
+                if (index > 0 && index < limbData.allPixels.Length)
                 {
-                    limbData.pixelData[index].Clear();
+                    limbData.allPixels[index].Clear();
                 }
             }
             for (int i = endIndex; i < bone.points.Count; i++)
             {
                 int index = (int)(bone.points[i].X + bone.points[i].Y * Configuration.width);
-                if (index > 0 && index < limbData.pixelData.Length)
+                if (index > 0 && index < limbData.allPixels.Length)
                 {
-                    limbData.pixelData[index].Clear();
+                    limbData.allPixels[index].Clear();
                 }
             }
 
             bone.points = bone.points.GetRange(startIndex, (endIndex - startIndex));
+        }
 
+        private bool IsContour(int index, int x, int y)
+        {
+            for (var i = 0; i < 4; i++)
+            {
+                var directionX = Utils.cardinalDirections[i, 0];
+                var directionY = Utils.cardinalDirections[i, 1];
+
+                var offsetX = x + directionX;
+                var offsetY = y + directionY;
+
+                int neighborIndex = Utils.GetIndexByCoordinates(offsetX, offsetY);
+
+                if (!Utils.AreCoordinatesInBounds(offsetX, offsetY) || limbData.allPixels[neighborIndex].humanIndex == -1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void FloodFill(Queue<int> pixelsQueue)
@@ -298,9 +331,9 @@ namespace KinectBodyModification
                 pixelsQueue = new Queue<int>();
 
                 // wypelnianie stacka bazowymi pikselami
-                for (int i = 0; i < limbData.pixelData.Length; i++)
+                for (int i = 0; i < limbData.allPixels.Length; i++)
                 {
-                    if (limbData.pixelData[i].humanIndex != -1)
+                    if (limbData.allPixels[i].humanIndex != -1)
                         pixelsQueue.Enqueue(i);
                 }
             }       
@@ -310,11 +343,16 @@ namespace KinectBodyModification
             {
                 int index = pixelsQueue.Dequeue();
 
-                if (index < 0 || index >= limbData.pixelData.Length)
+                if (!limbData.activePixels.Contains(index))
+                {
+                    limbData.activePixels.Add(index);
+                }
+
+                if (index < 0 || index >= limbData.allPixels.Length)
                     continue;
 
                 byte alpha = GlobalBuffers.backgroundRemovedBuffer[index * 4 + 3];
-                LimbDataPixel lpd = limbData.pixelData[index];
+                LimbDataPixel lpd = limbData.allPixels[index];
 
                 if (lpd.humanIndex == -1)
                     continue;
@@ -351,7 +389,7 @@ namespace KinectBodyModification
                         (index % Configuration.width == 0 && xOffset == -1) ||
                         ((index + 1) % Configuration.width == 0 && xOffset == 1) ||
                         (index / Configuration.width == 0 && yOffset == 1)
-                        // (limbData.pixelData.Length - index - xOffset <= Configuration.width && yOffset == -1)
+                        // (limbData.allPixels.Length - index - xOffset <= Configuration.width && yOffset == -1)
                     )
                     {
                         continue;
@@ -359,13 +397,13 @@ namespace KinectBodyModification
 
                     int offsetIndex = index + offset;
 
-                    if (offsetIndex < 0 || offsetIndex >= limbData.pixelData.Length)
+                    if (offsetIndex < 0 || offsetIndex >= limbData.allPixels.Length)
                         continue;
 
-                    if (limbData.pixelData[offsetIndex].humanIndex == -1)
+                    if (limbData.allPixels[offsetIndex].humanIndex == -1)
                     {
-                        limbData.pixelData[offsetIndex].humanIndex = lpd.humanIndex;
-                        limbData.pixelData[offsetIndex].boneHash = lpd.boneHash;
+                        limbData.allPixels[offsetIndex].humanIndex = lpd.humanIndex;
+                        limbData.allPixels[offsetIndex].boneHash = lpd.boneHash;
 
                         pixelsQueue.Enqueue(offsetIndex);
                     }

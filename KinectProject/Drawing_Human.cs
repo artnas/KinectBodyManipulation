@@ -17,7 +17,7 @@ namespace KinectBodyModification
             {
                 i *= 4;
 
-                var limbPixel = GB.limbDataManager.limbData.pixelData[i / 4];
+                var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
 
                 if (limbPixel.humanIndex != -1)
                 {

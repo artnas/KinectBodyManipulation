@@ -196,5 +196,10 @@ namespace KinectBodyModification
             return x + y * Configuration.width;
         }
 
+        public static bool AreCoordinatesInBounds(int x, int y)
+        {
+            return (x >= 0 && x < Configuration.width && y >= 0 && y < Configuration.height);
+        }
+
     }
 }
