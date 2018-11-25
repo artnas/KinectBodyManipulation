@@ -28,6 +28,35 @@ namespace KinectBodyModification
             { 0, 1 },   // dol 
         };
 
+        public static readonly int[,] contourSeekingDirections =
+        {
+            { 0, 2 },
+            { 1, 1 },
+            { 1, 2 },
+            { 2, 2 },
+            { 2, 1 },
+            { 2, 0 },
+            { 1, -1 },
+            { 2, -1 },
+            { 2, -2 },
+            { 1, -2 },
+            { 0, -2 },
+            { -1, -2 },
+            { -1, -1 },
+            { -2, -2 },
+            { -2, -1 },
+            { -2, 0 },
+            { -2, 1 },
+            { -1, 1 },
+            { -2, 2 },
+            { -1, 2 },
+            { 0, 3 },
+            { 3, 0 },
+            { 0, -3 },
+            { -3, 0 },
+        };
+        public static readonly int contourSeekingDirectionsCount = contourSeekingDirections.GetLength(0);
+
         /// <summary>
         /// Iteruje przez szkielet zwracajac wszystkie pary jointow w postaci: (joint nadrzedny, joint podrzedny)
         /// </summary>

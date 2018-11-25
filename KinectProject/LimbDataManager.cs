@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Numerics;
+using KBMGraphics;
 using Microsoft.Kinect;
 
 namespace KinectBodyModification
@@ -9,12 +12,15 @@ namespace KinectBodyModification
     {
 
         private readonly KinectSensor sensor;
+        private readonly BodyPolygonizer bodyPolygonizer;
 
         public LimbData limbData;
 
         public LimbDataManager(KinectSensor sensor)
         {
             this.sensor = sensor;
+            this.bodyPolygonizer = new BodyPolygonizer(Configuration.width, Configuration.height);
+
             this.limbData = new LimbData();
         }
 
@@ -81,6 +87,11 @@ namespace KinectBodyModification
                     limbData.contourPixels.Add(index);
                 }
             }
+
+            // update mesh
+
+            limbData.mesh.Update(bodyPolygonizer.GetMesh(GetSortedContour()));
+            limbData.mesh.ExportToObj("C:\\test.obj");
         }
 
         private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, JointPair jointPair, Queue<int> pixelsQueue)
@@ -304,6 +315,8 @@ namespace KinectBodyModification
 
         private bool IsContour(int index, int x, int y)
         {
+            var emptyNeighbors = 0;
+
             for (var i = 0; i < 4; i++)
             {
                 var directionX = Utils.cardinalDirections[i, 0];
@@ -316,8 +329,13 @@ namespace KinectBodyModification
 
                 if (!Utils.AreCoordinatesInBounds(offsetX, offsetY) || limbData.allPixels[neighborIndex].humanIndex == -1)
                 {
-                    return true;
+                    emptyNeighbors++;
                 }
+            }
+
+            if (emptyNeighbors == 1 || emptyNeighbors == 2)
+            {
+                return true;
             }
 
             return false;
@@ -410,6 +428,103 @@ namespace KinectBodyModification
                 }
             }
 
+        }
+
+        public HashSet<int> sortedContour = new HashSet<int>();
+        public HashSet<int> usedContourIndices = new HashSet<int>();
+        private Vector2 lastContourPoint = new Vector2(0, 0);
+
+        public HashSet<int> GetSortedContour()
+        {
+            sortedContour.Clear();
+            usedContourIndices.Clear();
+            lastContourPoint = new Vector2(0, 0);
+
+            if (limbData.contourPixels.Count > 0)
+            {
+                AddPointToContourPoints(limbData.contourPixels.Last());
+            }
+
+            ExportContourAsPolyline("C:\\contour-polyline.obj");
+
+            return sortedContour;
+        }
+
+        private void AddPointToContourPoints(int index)
+        {
+            int pointX = 0, pointY = 0;
+            Utils.GetIndexCoordinates(index, ref pointX, ref pointY);
+            Vector2 point = new Vector2(pointX, pointY);
+
+            var distanceFromLastPoint = Vector2.Distance(point, lastContourPoint);
+
+            if (!(lastContourPoint.X == 0 && lastContourPoint.Y == 0) && distanceFromLastPoint > 10)
+            {
+                return;
+            }
+
+            sortedContour.Add(index);
+            usedContourIndices.Add(index);
+
+            lastContourPoint = point;
+
+            for (var i = 0; i < 4; i++)
+            {
+                var directionX = Utils.cardinalDirections[i, 0];
+                var directionY = Utils.cardinalDirections[i, 1];
+
+                int neighborX = pointX + directionX;
+                int neighborY = pointY + directionY;
+
+                int neighborIndex = Utils.GetIndexByCoordinates(neighborX, neighborY);
+                if (!usedContourIndices.Contains(neighborIndex))
+                {
+                    usedContourIndices.Add(neighborIndex);
+                }
+            }
+
+            for (var i = 0; i < Utils.contourSeekingDirectionsCount; i++)
+            {
+                var directionX = Utils.contourSeekingDirections[i, 0];
+                var directionY = Utils.contourSeekingDirections[i, 1];
+
+                int neighborX = pointX + directionX;
+                int neighborY = pointY + directionY;
+
+                int neighborIndex = Utils.GetIndexByCoordinates(neighborX, neighborY);
+                if (!usedContourIndices.Contains(neighborIndex) && limbData.contourPixels.Contains(neighborIndex))
+                {
+                    AddPointToContourPoints(neighborIndex);
+                }
+            }
+        }
+
+        public void ExportContourAsPolyline(string path)
+        {
+            List<string> sList = new List<string>();
+
+            int lastX = -1, lastY = -1;
+
+            foreach (var index in sortedContour)
+            {
+                int x = 0, y = 0;
+                Utils.GetIndexCoordinates(index, ref x, ref y);
+
+                if (lastX != -1 && lastY != -1)
+                {
+                    var distance = Vector2.Distance(new Vector2(x, y), new Vector2(lastX, lastY));
+                    sList.Add($"{x} {y} {distance}");
+                }
+                else
+                {
+                    sList.Add($"{x} {y}");
+                }
+
+                lastX = x;
+                lastY = y;
+            }
+
+            File.WriteAllLines(path, sList);
         }
 
     }

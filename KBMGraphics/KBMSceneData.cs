@@ -10,7 +10,7 @@ namespace KBMGraphics
     public class KBMSceneData
     {
 
-        public Vector2[] vertices;
+        public QuadraticMesh mesh;
 
     }
 }

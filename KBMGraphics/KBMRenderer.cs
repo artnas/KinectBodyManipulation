@@ -11,6 +11,7 @@ using OpenTK.Input;
 using OpenTK.Platform;
 using TriangleNet;
 using All = OpenTK.Graphics.OpenGL.All;
+using BeginMode = OpenTK.Graphics.OpenGL.BeginMode;
 using BufferTarget = OpenTK.Graphics.OpenGL.BufferTarget;
 using BufferUsageHint = OpenTK.Graphics.OpenGL.BufferUsageHint;
 using ClearBufferMask = OpenTK.Graphics.OpenGL.ClearBufferMask;
@@ -34,6 +35,7 @@ namespace KBMGraphics
 {
     public class KBMRenderer
     {
+        public bool isInitialized = false;
 
         public readonly int width;
         public readonly int height;
@@ -41,14 +43,13 @@ namespace KBMGraphics
         public readonly byte[] TextureBuffer;
         private KBMSceneData sceneData;
 
-        private BodyPolygonizer bodyPolygonizer;
-
         private GraphicsContext context;
 
-        private readonly int[] frameBuffer = {0}, renderBuffer = {0}, texturePointer = {0};
+        private readonly int[] frameBuffer = {0}, renderBuffer = {0}, backgroundTexturePointer = {0}, foregroundTexturePointer = {0};
         private byte[] pixels;
 
-        private QuadraticMesh mesh;
+        private Vector2[] screenEdges;
+        private Vector2[] screenEdgeUvs;
 
         public KBMRenderer(int width, int height, byte[] outputBuffer, byte[] textureBuffer)
         {
@@ -57,18 +58,47 @@ namespace KBMGraphics
             this.OutputBuffer = outputBuffer;
             this.TextureBuffer = textureBuffer;
 
-            this.bodyPolygonizer = new BodyPolygonizer();
             // this.graphicsMode = new GraphicsMode(new ColorFormat(8, 8, 8, 8), 0, 0, 0);
 
-            this.mesh = new QuadraticMesh(bodyPolygonizer.GetMesh());
+            screenEdges = new[]
+            {
+                new Vector2(0, height), 
+                new Vector2(0, 0), 
+                new Vector2(width, 0),
 
-            // var window = new GameWindow(width, height, GraphicsMode.Default);
+                new Vector2(0, height),
+                new Vector2(width, height),
+                new Vector2(width, 0)
+            };
 
+            screenEdgeUvs = new[]
+            {
+                new Vector2(0, 1),
+                new Vector2(0, 0),
+                new Vector2(1, 0),
 
+                new Vector2(0, 1),
+                new Vector2(1, 1),
+                new Vector2(1, 0)
+            };
+        }
 
-            // var context = new GraphicsContext(new ContextHandle(handle), null);
+        ~KBMRenderer()
+        {
+            // GL.DeleteFramebuffers(1, frameBuffer);
+            // GL.DeleteRenderbuffers(1, renderBuffer);
+        }
 
-            // context.MakeCurrent(window.WindowInfo);
+        public void Initialize()
+        {
+            if (isInitialized)
+            {
+                throw new Exception("KBM Renderer is already initialized");
+            }
+            else
+            {
+                isInitialized = true;
+            }
 
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
@@ -80,11 +110,12 @@ namespace KBMGraphics
             // GL.ReadBuffer(ReadBufferMode.Back);
             // GL.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, outputBuffer);
 
-            
+
 
             GL.GenFramebuffers(1, frameBuffer);
             GL.GenRenderbuffers(1, renderBuffer);
-            GL.GenTextures(1, texturePointer);
+            GL.GenTextures(1, backgroundTexturePointer);
+            GL.GenTextures(1, foregroundTexturePointer);
 
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderBuffer[0]);
             GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, width, height);
@@ -98,19 +129,21 @@ namespace KBMGraphics
             //
             // GL.GenTextures(1, out textureColorBuffer);
 
-            GL.BindTexture(TextureTarget.Texture2D, texturePointer[0]);
+            SetBackgroundTexture(new byte[]{
+                0, 0, 0, 255,   255, 5, 255, 255,
+                255, 77, 255, 255,   0, 0, 0, 255
+            }, 2, 2);
+        }
 
-            // Black/white checkerboard
-            pixels = new byte[]{
-                0, 0, 0,   255, 5, 255,
-                255, 77, 255,   0, 0, 0
-            };
+        public void SetForegroundTexture(byte[] foregroundColorBuffer)
+        {
+            GL.BindTexture(TextureTarget.Texture2D, foregroundTexturePointer[0]);
 
             unsafe
             {
-                fixed(byte* ptr = &pixels[0])
+                fixed (byte* ptr = &foregroundColorBuffer[0])
                 {
-                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, 2, 2, 0, PixelFormat.Rgb,
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Bgra,
                         PixelType.UnsignedByte, new IntPtr(ptr));
                 }
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
@@ -118,13 +151,24 @@ namespace KBMGraphics
             }
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.Enable(EnableCap.Texture2D);
         }
 
-        ~KBMRenderer()
+        public void SetBackgroundTexture(byte[] backgroundColorBuffer, int width, int height)
         {
-            // GL.DeleteFramebuffers(1, frameBuffer);
-            // GL.DeleteRenderbuffers(1, renderBuffer);
+            GL.BindTexture(TextureTarget.Texture2D, backgroundTexturePointer[0]);
+
+            unsafe
+            {
+                fixed (byte* ptr = &backgroundColorBuffer[0])
+                {
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Bgra,
+                        PixelType.UnsignedByte, new IntPtr(ptr));
+                }
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void SetSceneData(KBMSceneData sceneData)
@@ -147,18 +191,70 @@ namespace KBMGraphics
 
         public void Draw()
         {
-
             OnBeforeDraw();
-
-            // GL.ClearColor(1, 1, 0, 1);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             Matrix4 modelView = Matrix4.LookAt(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
-
             GL.MatrixMode(MatrixMode.Modelview);
-
             GL.LoadMatrix(ref modelView);
+
+            // draw background
+
+            GL.BindTexture(TextureTarget.Texture2D, backgroundTexturePointer[0]);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Begin(PrimitiveType.Triangles);
+
+            for (var i = 0; i < screenEdges.Length; i++)
+            {
+                GL.TexCoord2(screenEdgeUvs[i].X, screenEdgeUvs[i].Y);
+                GL.Vertex2(screenEdges[i].X, screenEdges[i].Y);
+            }
+
+            GL.End();
+
+            // draw foreground
+            // if (sceneData.mesh != null)
+            // {
+            //     GL.Begin(PrimitiveType.Polygon);
+            //     GL.BindTexture(TextureTarget.Texture2D, foregroundTexturePointer[0]);
+            //     GL.Enable(EnableCap.Texture2D);
+            //
+            //     for (var i = 0; i < sceneData.mesh.indices.Count; i ++)
+            //     {
+            //         var a = sceneData.mesh.indices[i];
+            //
+            //         GL.TexCoord2(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y);
+            //         GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
+            //     }
+            //
+            //     GL.End();
+            // }
+
+             if (sceneData.mesh != null)
+             {
+                 GL.BindTexture(TextureTarget.Texture2D, foregroundTexturePointer[0]);
+                 GL.Enable(EnableCap.Texture2D);
+                 GL.Begin(PrimitiveType.Triangles);
+            
+                 for (var i = 0; i < sceneData.mesh.indices.Count; i += 3)
+                 {
+                     var a = sceneData.mesh.indices[i];
+                     var b = sceneData.mesh.indices[i + 1];
+                     var c = sceneData.mesh.indices[i + 2];
+            
+                     GL.TexCoord2(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y);
+                     GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
+            
+                     GL.TexCoord2(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y);
+                     GL.Vertex2(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y);
+            
+                     GL.TexCoord2(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y);
+                     GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
+                 }
+            
+                 GL.End();
+             }
 
             // float[] vertices =
             // {
@@ -182,7 +278,7 @@ namespace KBMGraphics
             // // GL.DrawArrays(PrimitiveType.Polygon, 0, vertices.Length/2);
             // GL.DisableVertexAttribArray(0);
 
-             GL.Begin(PrimitiveType.Triangles);
+            // GL.Begin(PrimitiveType.Triangles);
 
             // GL.Vertex2(200, 100);
             // GL.Vertex2(400, 100);
@@ -203,21 +299,24 @@ namespace KBMGraphics
             //     GL.Vertex2(sceneData.vertices[i].X, sceneData.vertices[i].Y);
             // }
 
-             for (var triangleIndex = 0; triangleIndex < mesh.indices.Count; triangleIndex+=3)
-             {
-                 var a = mesh.indices[triangleIndex];
-                 var b = mesh.indices[triangleIndex+1];
-                 var c = mesh.indices[triangleIndex+2];
-            
-                 GL.TexCoord2(mesh.vertices[a].X / width, mesh.vertices[a].Y / height);
-                 GL.Vertex2(mesh.vertices[a].X, mesh.vertices[a].Y);
-            
-                 GL.TexCoord2(mesh.vertices[b].X / width, mesh.vertices[b].Y / height);
-                 GL.Vertex2(mesh.vertices[b].X, mesh.vertices[b].Y);
-            
-                 GL.TexCoord2(mesh.vertices[c].X / width, mesh.vertices[c].Y / height);
-                 GL.Vertex2(mesh.vertices[c].X, mesh.vertices[c].Y);
-             }
+              // for (var triangleIndex = 0; triangleIndex < mesh.indices.Count; triangleIndex+=3)
+              // {
+              //     var a = mesh.indices[triangleIndex];
+              //     var b = mesh.indices[triangleIndex+1];
+              //     var c = mesh.indices[triangleIndex+2];
+              //
+              //     // GL.TexCoord2(mesh.vertices[a].X / width, mesh.vertices[a].Y / height);
+              //     GL.TexCoord2(r.NextDouble(), r.NextDouble());
+              //     GL.Vertex2(mesh.vertices[a].X, mesh.vertices[a].Y);
+              //
+              //     // GL.TexCoord2(mesh.vertices[b].X / width, mesh.vertices[b].Y / height);
+              //     GL.TexCoord2(r.NextDouble(), r.NextDouble());
+              //     GL.Vertex2(mesh.vertices[b].X, mesh.vertices[b].Y);
+              //
+              //     // GL.TexCoord2(mesh.vertices[c].X / width, mesh.vertices[c].Y / height);
+              //     GL.TexCoord2(r.NextDouble(), r.NextDouble());
+              //     GL.Vertex2(mesh.vertices[c].X, mesh.vertices[c].Y);
+              // }
 
             // for (var triangleIndex = 0; triangleIndex < mesh.Indices.GetLength(0); triangleIndex++)
             // {

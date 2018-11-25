@@ -11,17 +11,17 @@ namespace KinectBodyModification
         public int minX, maxX, minY, maxY;
 
         private readonly HashSet<int> usedContourIndices;
-        private readonly List<Vector2> contourPoints;
+        private readonly HashSet<int> contourPoints;
 
         public BonePixelsData()
         {
             indices = new HashSet<int>();
 
-            contourPoints = new List<Vector2>();
+            contourPoints = new HashSet<int>();
             usedContourIndices = new HashSet<int>();
         }
 
-        public List<Vector2> GetContourPoints()
+        public HashSet<int> GetContourPoints()
         {
             contourPoints.Clear();
             usedContourIndices.Clear();
@@ -38,7 +38,7 @@ namespace KinectBodyModification
         {
             int pointX = 0, pointY = 0;
 
-            contourPoints.Add(new Vector2(pointX, pointY));
+            contourPoints.Add(index);
             usedContourIndices.Add(index);
 
             Utils.GetIndexCoordinates(index, ref pointX, ref pointY);

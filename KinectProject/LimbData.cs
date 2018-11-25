@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using KBMGraphics;
 
 namespace KinectBodyModification
 {
@@ -10,6 +11,8 @@ namespace KinectBodyModification
         public LimbDataPixel[] allPixels;
         public List<LimbDataSkeleton> limbDataSkeletons = new List<LimbDataSkeleton>();
 
+        public QuadraticMesh mesh;
+
         public LimbData()
         {
             activePixels = new HashSet<int>();
@@ -19,6 +22,8 @@ namespace KinectBodyModification
             {
                 allPixels[i] = new LimbDataPixel();
             }
+
+            mesh = new QuadraticMesh();
         }
 
     }

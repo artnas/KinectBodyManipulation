@@ -51,6 +51,7 @@
     <Compile Include="BodyPolygonizer.cs" />
     <Compile Include="KBMRenderer.cs" />
     <Compile Include="KBMSceneData.cs" />
+    <Compile Include="KBMVertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuadraticMesh.cs" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,45 +14,96 @@ namespace KBMGraphics
     public class BodyPolygonizer
     {
 
+        public readonly int width, height;
         private readonly QualityOptions QualityOptions;
+        private List<Vertex> pointsList = new List<Vertex>();
 
-        public BodyPolygonizer()
+        public BodyPolygonizer(int width, int height)
         {
+            this.width = width;
+            this.height = height;
             this.QualityOptions = new QualityOptions();
         }
 
-        public Mesh GetMesh()
+        public Mesh GetMesh(HashSet<int> contourIndices)
         {
-            var poly = new Polygon();
-            poly.Add(new Contour(new[]
+            if (contourIndices == null || contourIndices.Count < 4)
             {
-                new Vertex(0, 0),
-                new Vertex(100, 0),
-                new Vertex(100, 100),
-                new Vertex(50, 75),
-                new Vertex(25, 90),
-                new Vertex(0, 100)
-            }));
+                return null;
+            }
 
-            // var poly = new Polygon();
-            // poly.Add(new Vertex(0, 0));
-            // poly.Add(new Vertex(100, 0));
-            // poly.Add(new Vertex(100, 100));
-            // poly.Add(new Vertex(50, 75));
-            // poly.Add(new Vertex(25, 90));
-            // poly.Add(new Vertex(0, 100));
+            var contour = new Contour(GetContourPoints(contourIndices), 0, false);
+            // var contour = new Contour(new[]
+            // {
+            //     new Vertex(0, 100), 
+            //     new Vertex(100, 150), 
+            //     new Vertex(200, 75), 
+            //     new Vertex(0, 100), 
+            // });
+            var poly = new Polygon(contourIndices.Count);
+            //
+            poly.Add(contour);
 
-            var mesh = poly.Triangulate(
-                new ConstraintOptions { ConformingDelaunay = true },
-                new QualityOptions { MinimumAngle = 25.0 }
-            ) as Mesh;
+            // var poly = new Polygon(contourIndices.Count);
+            // foreach (var index in contourIndices)
+            // {
+            //     var x = index % width;
+            //     var y = (index - x) / width;
+            //
+            //     poly.Add(new Vertex(x, y));
+            // }
 
-            return mesh;
+            try
+            {
+                var mesh = poly.Triangulate(
+                    new ConstraintOptions {ConformingDelaunay = true, Convex = false, SegmentSplitting = 0},
+                    new QualityOptions {MinimumAngle = 25}
+                ) as Mesh;
+
+                return mesh;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return null;
         }
 
-        private QuadraticMesh GetQuadraticMesh(Mesh mesh)
+        private List<Vertex> GetContourPoints(HashSet<int> contourIndices)
         {
-            return new QuadraticMesh(mesh);
+            pointsList.Clear();
+
+            var segmentation = 8;
+
+            var counter = 0;
+            foreach (var index in contourIndices)
+            {
+                if (contourIndices.Count > segmentation * 3 && counter % segmentation != 0)
+                {
+                    counter++;
+                    continue;
+                }
+                else
+                {
+                    counter++;
+                }
+
+                var x = index % width;
+                var y = (index - x) / width;
+
+                pointsList.Add(new Vertex(x, y));
+            }
+
+            List<string> sList = new List<string>();
+            foreach (var s in pointsList)
+            {
+                sList.Add(s.X + " " + s.Y);
+            }
+
+            // File.WriteAllLines("C:\\a.txt", sList);
+
+            return pointsList;
         }
 
     }

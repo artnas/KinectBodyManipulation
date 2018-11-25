@@ -106,11 +106,11 @@ namespace KinectBodyModification
 
         public static void Draw()
         {
-            DrawBackground();
+            // DrawBackground();
 
-            BoneProcessor.ProcessAllBones();
+            // BoneProcessor.ProcessAllBones();
 
-            DrawDebug();
+            // DrawDebug();
         }
     }
 }

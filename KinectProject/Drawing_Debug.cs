@@ -100,19 +100,37 @@ namespace KinectBodyModification
             //     }
             // }
 
-            // for (int i = 0; i < GB.colorBuffer.Length; i += 4)
-            // {
-            //     var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
-            //
-            //     if (limbPixel.isContour)
-            //     {
-            //
-            //         GB.outputBuffer[i] = 255;
-            //         GB.outputBuffer[i + 1] = 0;
-            //         GB.outputBuffer[i + 2] = 0;
-            //
-            //     }
-            // }
+             for (int i = 0; i < GB.colorBuffer.Length; i += 4)
+             {
+                 var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
+            
+                 if (limbPixel.isContour)
+                 {
+            
+                     GB.outputBuffer[i] = 0;
+                     GB.outputBuffer[i + 1] = 255;
+                     GB.outputBuffer[i + 2] = 0;
+            
+                 }
+             }
+
+            foreach (var i in GB.limbDataManager.usedContourIndices)
+            {
+                var _i = i * 4;
+                if (_i < 0 || _i > GB.outputBuffer.Length) continue;
+                GB.outputBuffer[_i] = 0;
+                GB.outputBuffer[_i + 1] = 0;
+                GB.outputBuffer[_i + 2] = 255;
+            }
+
+            foreach (var i in GB.limbDataManager.sortedContour)
+            {
+                var _i = i * 4;
+                if (_i < 0 || _i > GB.outputBuffer.Length) continue;
+                GB.outputBuffer[_i] = 255;
+                GB.outputBuffer[_i + 1] = 0;
+                GB.outputBuffer[_i + 2] = 0;
+            }
 
         }
 

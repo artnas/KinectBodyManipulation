@@ -6,11 +6,14 @@
 
 using System;
 using System.IO;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using KBMGraphics;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit.BackgroundRemoval;
+using OpenTK.Graphics.OpenGL;
 using Drawing = KinectBodyModification.Drawing;
 
 using GB = KinectBodyModification.GlobalBuffers;
@@ -22,6 +25,9 @@ namespace KinectBodyModification
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private KBMRenderer renderer;
+        private KBMSceneData sceneData;
 
         private bool isProcessingFrame = false;
 
@@ -70,6 +76,11 @@ namespace KinectBodyModification
         /// <param name="e">event arguments</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            if (renderer == null)
+            {
+                InitializeRenderer();
+            }
+
             // Look through all sensors and start the first connected one.
             // This requires that a Kinect is connected at the time of app startup.
             // To make your app robust against plug/unplug, 
@@ -180,6 +191,8 @@ namespace KinectBodyModification
 
             Drawing.Draw();
 
+            renderer.SetForegroundTexture(GB.backgroundRemovedBuffer);
+
             DrawOutputBuffer();
 
         }
@@ -187,12 +200,31 @@ namespace KinectBodyModification
         private void DrawOutputBuffer()
         {
 
+            PrepareRenderSceneData();
+            RenderGL();
+
             colorBitmap.WritePixels(
                 new Int32Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight),
                 GB.outputBuffer,
                 colorBitmap.PixelWidth * sizeof(int),
                 0);
 
+        }
+
+        private void PrepareRenderSceneData()
+        {
+            sceneData.mesh = GB.limbDataManager.limbData.mesh;
+        }
+
+        private void RenderGL()
+        {
+            if (renderer != null && sceneData != null)
+            {
+                renderer.Draw();
+
+                GL.Flush();
+                RenderCanvas.SwapBuffers();
+            }
         }
 
         /// <summary>
@@ -266,6 +298,11 @@ namespace KinectBodyModification
                     {
                         hasSavedBackgroundColorFrame = true;
                         Array.Copy(GB.colorBuffer, GB.savedBackgroundColorBuffer, GB.colorBuffer.Length);
+
+                        if (renderer != null && renderer.isInitialized)
+                        {
+                            renderer.SetBackgroundTexture(GB.savedBackgroundColorBuffer, Configuration.width, Configuration.height);
+                        }
                     }
                 }
             }
@@ -395,7 +432,7 @@ namespace KinectBodyModification
         //         dc.DrawRectangle(colorBrush, null, new Rect(new Point(), new Size(colorWidth, colorHeight)));
         //     }
         //
-        //     renderBitmap.Render(dv);
+        //     renderBitmap.RenderGL(dv);
         //
         //     // create a png bitmap encoder which knows how to save a .png file
         //     BitmapEncoder encoder = new PngBitmapEncoder();
@@ -424,7 +461,7 @@ namespace KinectBodyModification
         //         this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteFailed, path);
         //     }
         // }
-        
+
         // /// <summary>
         // /// Handles the checking or unchecking of the near mode combo box
         // /// </summary>
@@ -451,5 +488,35 @@ namespace KinectBodyModification
         //         }
         //     }
         // }
+
+        private void InitializeRenderer()
+        {
+            byte[] outputBuffer = new byte[Configuration.width * Configuration.height * 4];
+            byte[] textureBuffer = new byte[Configuration.width * Configuration.height * 4];
+
+            renderer = new KBMRenderer(Configuration.width, Configuration.height, outputBuffer, textureBuffer);
+            sceneData = new KBMSceneData();
+
+            renderer.SetSceneData(sceneData);
+            renderer.Initialize();
+        }
+
+        private void WindowsFormsHost_Initialized(object sender, EventArgs e)
+        {
+            RenderCanvas.MakeCurrent();
+        }
+
+        private void renderCanvas_Load(object sender, EventArgs e)
+        {
+            if (renderer == null)
+            {
+                InitializeRenderer();
+            }
+        }
+
+        private void renderCanvas_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            RenderGL();
+        }
     }
 }
