@@ -51,7 +51,7 @@ namespace KBMGraphics
             {
                 verticesDictionary.Add(vertex, verticesDictionary.Count);
                 vertices.Add(vertex);
-                uvs.Add(new Vector2((float)(vertex.X / 800.0), (float)(vertex.Y / 600.0)));
+                uvs.Add(new Vector2((float)(vertex.X / 640), (float)(vertex.Y / 480)));
             }
 
             foreach (var meshTriangle in mesh.Triangles)

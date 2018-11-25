@@ -46,10 +46,7 @@ namespace KBMGraphicsTests
         {        
             canDraw = true;
 
-            byte[] outputBuffer = new byte[800 * 600 * 4];
-            byte[] textureBuffer = new byte[800 * 600 * 4];
-
-            renderer = new KBMRenderer(800, 600, outputBuffer, textureBuffer);
+            renderer = new KBMRenderer(640, 480);
             sceneData = new KBMSceneData();
 
             renderer.SetSceneData(sceneData);

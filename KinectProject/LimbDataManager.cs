@@ -91,7 +91,7 @@ namespace KinectBodyModification
             // update mesh
 
             limbData.mesh.Update(bodyPolygonizer.GetMesh(GetSortedContour()));
-            limbData.mesh.ExportToObj("C:\\test.obj");
+            // limbData.mesh.ExportToObj("C:\\test.obj");
         }
 
         private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, JointPair jointPair, Queue<int> pixelsQueue)
@@ -445,7 +445,7 @@ namespace KinectBodyModification
                 AddPointToContourPoints(limbData.contourPixels.Last());
             }
 
-            ExportContourAsPolyline("C:\\contour-polyline.obj");
+            // ExportContourAsPolyline("C:\\contour-polyline.obj");
 
             return sortedContour;
         }

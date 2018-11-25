@@ -12,6 +12,7 @@ using OpenTK.Platform;
 using TriangleNet;
 using All = OpenTK.Graphics.OpenGL.All;
 using BeginMode = OpenTK.Graphics.OpenGL.BeginMode;
+using BlendingFactor = OpenTK.Graphics.OpenGL.BlendingFactor;
 using BufferTarget = OpenTK.Graphics.OpenGL.BufferTarget;
 using BufferUsageHint = OpenTK.Graphics.OpenGL.BufferUsageHint;
 using ClearBufferMask = OpenTK.Graphics.OpenGL.ClearBufferMask;
@@ -39,8 +40,6 @@ namespace KBMGraphics
 
         public readonly int width;
         public readonly int height;
-        public readonly byte[] OutputBuffer;
-        public readonly byte[] TextureBuffer;
         private KBMSceneData sceneData;
 
         private GraphicsContext context;
@@ -51,12 +50,10 @@ namespace KBMGraphics
         private Vector2[] screenEdges;
         private Vector2[] screenEdgeUvs;
 
-        public KBMRenderer(int width, int height, byte[] outputBuffer, byte[] textureBuffer)
+        public KBMRenderer(int width, int height)
         {
             this.width = width;
             this.height = height;
-            this.OutputBuffer = outputBuffer;
-            this.TextureBuffer = textureBuffer;
 
             // this.graphicsMode = new GraphicsMode(new ColorFormat(8, 8, 8, 8), 0, 0, 0);
 
@@ -231,30 +228,36 @@ namespace KBMGraphics
             //     GL.End();
             // }
 
-             if (sceneData.mesh != null)
-             {
-                 GL.BindTexture(TextureTarget.Texture2D, foregroundTexturePointer[0]);
-                 GL.Enable(EnableCap.Texture2D);
-                 GL.Begin(PrimitiveType.Triangles);
-            
-                 for (var i = 0; i < sceneData.mesh.indices.Count; i += 3)
-                 {
-                     var a = sceneData.mesh.indices[i];
-                     var b = sceneData.mesh.indices[i + 1];
-                     var c = sceneData.mesh.indices[i + 2];
-            
-                     GL.TexCoord2(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y);
-                     GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
-            
-                     GL.TexCoord2(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y);
-                     GL.Vertex2(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y);
-            
-                     GL.TexCoord2(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y);
-                     GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
-                 }
-            
-                 GL.End();
-             }
+            if (sceneData.mesh != null)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, foregroundTexturePointer[0]);
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.Begin(PrimitiveType.Triangles);
+
+                for (var i = 0; i < sceneData.mesh.indices.Count; i += 3)
+                {
+                    var a = sceneData.mesh.indices[i];
+                    var b = sceneData.mesh.indices[i + 1];
+                    var c = sceneData.mesh.indices[i + 2];
+
+                    GL.TexCoord2(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y);
+                    // GL.TexCoord2(sceneData.mesh.vertices[a].X / width, sceneData.mesh.vertices[a].Y / height);
+                    GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
+
+                    GL.TexCoord2(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y);
+                    // GL.TexCoord2(sceneData.mesh.vertices[b].X / width, sceneData.mesh.vertices[b].Y / height);
+                    GL.Vertex2(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y);
+
+                    GL.TexCoord2(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y);
+                    // GL.TexCoord2(sceneData.mesh.vertices[c].X / width, sceneData.mesh.vertices[c].Y / height);
+                    GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
+                }
+
+                GL.End();
+                GL.Disable(EnableCap.Blend);
+            }
 
             // float[] vertices =
             // {

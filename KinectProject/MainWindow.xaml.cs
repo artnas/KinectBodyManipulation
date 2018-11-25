@@ -494,7 +494,7 @@ namespace KinectBodyModification
             byte[] outputBuffer = new byte[Configuration.width * Configuration.height * 4];
             byte[] textureBuffer = new byte[Configuration.width * Configuration.height * 4];
 
-            renderer = new KBMRenderer(Configuration.width, Configuration.height, outputBuffer, textureBuffer);
+            renderer = new KBMRenderer(Configuration.width, Configuration.height);
             sceneData = new KBMSceneData();
 
             renderer.SetSceneData(sceneData);
@@ -516,6 +516,9 @@ namespace KinectBodyModification
 
         private void renderCanvas_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
+            // RenderCanvas.Width = RenderCanvas.Parent.Width;
+            // RenderCanvas.Height = (int)(RenderCanvas.Width * 0.75f);
+
             RenderGL();
         }
     }
