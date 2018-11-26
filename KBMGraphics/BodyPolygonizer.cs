@@ -74,7 +74,7 @@ namespace KBMGraphics
         {
             pointsList.Clear();
 
-            var segmentation = 8;
+            var segmentation = 4;
 
             var counter = 0;
             foreach (var index in contourIndices)

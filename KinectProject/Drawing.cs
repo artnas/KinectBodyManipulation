@@ -108,7 +108,7 @@ namespace KinectBodyModification
         {
             // DrawBackground();
 
-            // BoneProcessor.ProcessAllBones();
+            BoneProcessor.ProcessAllBones();
 
             // DrawDebug();
         }

@@ -151,6 +151,27 @@ namespace KinectBodyModification
             return new Vector3(-v.Y, v.X, 0) / (float) Math.Sqrt(v.X*v.X + v.Y*v.Y);
         }
 
+        public static Vector3 GetClosestPointOnLine(Vector3 a, Vector3 b, Vector3 p)
+        {
+            var vVector1 = p - a;
+            var vVector2 = Vector3.Normalize(b - a);
+
+            var d = Vector3.Distance(a, b);
+            var t = Vector3.Dot(vVector2, vVector1);
+
+            if (t <= 0)
+                return a;
+
+            if (t >= d)
+                return b;
+
+            var vVector3 = vVector2 * t;
+
+            var vClosestPoint = a + vVector3;
+
+            return vClosestPoint;
+        }
+
         /// <summary>
         /// Maps a SkeletonPoint to lie within our render space and converts to Point
         /// </summary>
