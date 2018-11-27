@@ -17,6 +17,11 @@ namespace KinectBodyModification
 
         public static void ProcessAllBones()
         {
+            if (!Settings.Instance.DrawMorphs)
+            {
+                return;
+            }
+
             AssignBonePixelsToDictionaries();
 
             foreach (var limbDataSkeleton in GB.limbDataManager.limbData.limbDataSkeletons)
@@ -74,16 +79,10 @@ namespace KinectBodyModification
 
             var bonePixelData = bonePixelsDictionary[bone.boneHash];
 
-            // if (!Settings.Instance.DrawMorphs)
-            // {
-            //     ProcessBone_Normal(bone, bonePixelData);
-            //     return;
-            // }
-
             switch (bone.boneHash)
             {
                 case 35: // head, shoulder center
-                    ProcessBone_Size(bone, bonePixelData, Settings.Instance.HeadSize / 100f);
+                    ProcessBone_Grow(bone, bonePixelData, Settings.Instance.HeadSize / 100f - 1f);
                     break;
                 case 152:
                 case 84:
@@ -105,13 +104,41 @@ namespace KinectBodyModification
                         power = Settings.Instance.LegScale / 100f
                     });
                     break;
+                // case 186:   // hands, feet
+                // case 118:
+                // case 242:
+                // case 254:
+                //     ProcessBone_Bloat(bone, bonePixelData, Settings.Instance.HeadSize / 25f);
+                //     break;
                 default:
                     // ProcessBone_Normal(bone, bonePixelData);
                     break;
             }
         }
 
-        private static void ProcessBone_Size(LimbDataBone bone, BonePixelsData bonePixelData, float scale)
+        private static void ProcessBone_Bloat(LimbDataBone bone, BonePixelsData bonePixelData, float scale)
+        {
+            var boneStartPoint = new OpenTK.Vector2(bone.startPoint.X, bone.startPoint.Y);
+            var boneEndPoint = new OpenTK.Vector2(bone.endPoint.X, bone.endPoint.Y);
+
+            var boneVector = OpenTK.Vector2.Normalize(boneEndPoint - boneStartPoint);
+
+            var indices = bonePixelData.vertexIndices;
+
+            foreach (var vertexIndex in indices)
+            {
+                var vertex = GB.limbDataManager.limbData.mesh.vertices[vertexIndex];
+                var vertexPoint = new OpenTK.Vector2((float)vertex.X, (float)vertex.Y);
+
+                var distance = OpenTK.Vector2.Distance(vertexPoint, boneEndPoint);
+                var directionVector = OpenTK.Vector2.Normalize(vertexPoint - boneStartPoint);
+
+                vertex.X += (double)(distance * directionVector.X * scale) / 2f;
+                vertex.Y += (double)(distance * directionVector.Y * scale) / 2f;
+            }
+        }
+
+        private static void ProcessBone_Grow(LimbDataBone bone, BonePixelsData bonePixelData, float scale)
         {
             var boneStartPoint = new OpenTK.Vector2(bone.startPoint.X, bone.startPoint.Y);
             var boneEndPoint = new OpenTK.Vector2(bone.endPoint.X, bone.endPoint.Y);
@@ -128,8 +155,8 @@ namespace KinectBodyModification
                 var distance = OpenTK.Vector2.Distance(vertexPoint, boneEndPoint);
                 var directionVector = OpenTK.Vector2.Normalize(vertexPoint - boneEndPoint);
 
-                vertex.X += (double)(distance * directionVector.X * scale);
-                vertex.Y += (double)(distance * directionVector.Y * scale);
+                vertex.X += (double)(distance * directionVector.X * scale) / 2f;
+                vertex.Y += (double)(distance * directionVector.Y * scale) / 2f;
             }
         }
 
@@ -163,10 +190,12 @@ namespace KinectBodyModification
                 var distance = OpenTK.Vector2.Distance(vertexPoint, closestPointOnLine);
                 var directionVector = OpenTK.Vector2.Normalize(vertexPoint - closestPointOnLine);
 
+                var distanceMultiplier = distance / 2f;
+
                 var curveScale = 1f + stretchParameters.power * stretchParameters.curve.Evaluate(progressOnLine);
 
-                vertex.X += (double)(curveScale * directionVector.X * stretchParameters.power * 10);
-                vertex.Y += (double)(curveScale * directionVector.Y * stretchParameters.power * 10);
+                vertex.X += (double)(curveScale * directionVector.X * stretchParameters.power * distanceMultiplier);
+                vertex.Y += (double)(curveScale * directionVector.Y * stretchParameters.power * distanceMultiplier);
             }
         }
 

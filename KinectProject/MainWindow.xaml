@@ -76,13 +76,13 @@
 
         <DockPanel Grid.Row="0" Margin="0 0 0 0" Grid.RowSpan="2" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_New" />
-                    <MenuItem Header="_Open" />
-                    <MenuItem Header="_Save" />
-                    <Separator />
-                    <MenuItem Header="_Exit" />
-                </MenuItem>
+                <!-- <MenuItem Header="_File"> -->
+                <!--     <MenuItem Header="_New" /> -->
+                <!--     <MenuItem Header="_Open" /> -->
+                <!--     <MenuItem Header="_Save" /> -->
+                <!--     <Separator /> -->
+                <!--     <MenuItem Header="_Exit" /> -->
+                <!-- </MenuItem> -->
                 <MenuItem Header="_Sylwetka">
                     <MenuItem Header="Przekształcenia aktywne" IsCheckable="True" IsChecked="{Binding DrawMorphs, Mode=TwoWay}"/>
                     <Grid>
@@ -114,6 +114,16 @@
                     <MenuItem Header="Rysowanie szkieletu" IsCheckable="True" IsChecked="{Binding DebugDrawSkeleton, Mode=TwoWay}"/>
                     <MenuItem Header="Rysowanie stawów" IsCheckable="True" IsChecked="{Binding DebugDrawJoints, Mode=TwoWay}"/>
                     <MenuItem Header="Rysowanie przydziału pikseli" IsCheckable="True" IsChecked="{Binding DebugDrawSilhouette, Mode=TwoWay}"/>
+                    <MenuItem Header="Renderowanie OpenGL">
+                        <DockPanel >
+                            <Label>Tryb renderowania:</Label>
+                            <ComboBox Name="OpenGLDrawModeSelector" SelectionChanged="OpenGLDrawModeSelector_OnSelectionChanged">
+                                <ComboBoxItem IsSelected="True">Normalny</ComboBoxItem>
+                                <ComboBoxItem>Wyświetlanie koordynatów UV</ComboBoxItem>
+                                <ComboBoxItem>Linie</ComboBoxItem>
+                            </ComboBox>
+                        </DockPanel>
+                    </MenuItem>
                 </MenuItem>
             </Menu>
             <Image Source="Images\Status.png" HorizontalAlignment="Left" Margin="5 4 0 0" RenderTransformOrigin="-7.2,0.595" DockPanel.Dock="Left" Width="20" Height="20" VerticalAlignment="Top"/>
@@ -132,6 +142,14 @@
         </Grid>
     </Grid>
 </Window>
+
+
+
+
+
+
+
+
 
 
 

@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Numerics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using KBMGraphics;
@@ -520,6 +521,11 @@ namespace KinectBodyModification
             // RenderCanvas.Height = (int)(RenderCanvas.Width * 0.75f);
 
             RenderGL();
+        }
+
+        private void OpenGLDrawModeSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Settings.Instance.DrawMode = (Settings.GLDrawModeEnum)OpenGLDrawModeSelector.SelectedIndex;
         }
     }
 }

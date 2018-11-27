@@ -57,7 +57,7 @@ namespace KBMGraphics
             {
                 var mesh = poly.Triangulate(
                     new ConstraintOptions {ConformingDelaunay = true, Convex = false, SegmentSplitting = 0},
-                    new QualityOptions {MinimumAngle = 25}
+                    new QualityOptions {MinimumAngle = 25, MaximumArea = 50, VariableArea = true}
                 ) as Mesh;
 
                 return mesh;

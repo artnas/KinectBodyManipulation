@@ -24,6 +24,7 @@
         public bool DebugDrawJoints { get; set; }
         public bool DebugDrawSilhouette { get; set; }
         public bool DrawMorphs { get; set; }
+        public GLDrawModeEnum DrawMode { get; set; }
 
         private Settings()
         {
@@ -34,6 +35,14 @@
             this.DebugDrawJoints = false;
             this.DebugDrawSilhouette = false;
             this.DrawMorphs = true;
+            this.DrawMode = GLDrawModeEnum.Normal;
+        }
+
+        public enum GLDrawModeEnum
+        {
+            Normal,
+            Uvs,
+            Lines
         }
 
     }
