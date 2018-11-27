@@ -25,6 +25,8 @@
         public bool DebugDrawSilhouette { get; set; }
         public bool DrawMorphs { get; set; }
         public GLDrawModeEnum DrawMode { get; set; }
+        public int OutlineSegmentation { get; set; }
+        public int TriangleAreaLimit { get; set; }
 
         private Settings()
         {
@@ -36,6 +38,8 @@
             this.DebugDrawSilhouette = false;
             this.DrawMorphs = true;
             this.DrawMode = GLDrawModeEnum.Normal;
+            this.OutlineSegmentation = 4;
+            this.TriangleAreaLimit = 50;
         }
 
         public enum GLDrawModeEnum

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using KinectBodyModification;
 using TriangleNet;
 using TriangleNet.Geometry;
 using TriangleNet.Meshing;
@@ -33,31 +33,15 @@ namespace KBMGraphics
             }
 
             var contour = new Contour(GetContourPoints(contourIndices), 0, false);
-            // var contour = new Contour(new[]
-            // {
-            //     new Vertex(0, 100), 
-            //     new Vertex(100, 150), 
-            //     new Vertex(200, 75), 
-            //     new Vertex(0, 100), 
-            // });
             var poly = new Polygon(contourIndices.Count);
-            //
-            poly.Add(contour);
 
-            // var poly = new Polygon(contourIndices.Count);
-            // foreach (var index in contourIndices)
-            // {
-            //     var x = index % width;
-            //     var y = (index - x) / width;
-            //
-            //     poly.Add(new Vertex(x, y));
-            // }
+            poly.Add(contour);
 
             try
             {
                 var mesh = poly.Triangulate(
                     new ConstraintOptions {ConformingDelaunay = true, Convex = false, SegmentSplitting = 0},
-                    new QualityOptions {MinimumAngle = 25, MaximumArea = 50, VariableArea = true}
+                    new QualityOptions {MinimumAngle = 25, MaximumArea = Settings.Instance.TriangleAreaLimit, VariableArea = true}
                 ) as Mesh;
 
                 return mesh;
@@ -74,7 +58,7 @@ namespace KBMGraphics
         {
             pointsList.Clear();
 
-            var segmentation = 4;
+            var segmentation = Settings.Instance.OutlineSegmentation;
 
             var counter = 0;
             foreach (var index in contourIndices)

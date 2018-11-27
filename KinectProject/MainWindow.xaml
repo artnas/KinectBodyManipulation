@@ -110,20 +110,40 @@
                         <Slider Grid.Row="1" x:Name="LegScale" Width="150" Maximum="200" Minimum="50" Value="{Binding LegScale, Mode=TwoWay}"/>
                     </Grid>
                 </MenuItem>
+                <MenuItem Header="_Parametry Modelu 3D">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" TextWrapping="Wrap">Dokładność obwódki</TextBlock>
+                        <Slider Grid.Row="1" x:Name="OutlineSegmentation" Width="150" Maximum="10" Minimum="1" Value="{Binding OutlineSegmentation, Mode=TwoWay}"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" TextWrapping="Wrap">Wielkość trójkątów</TextBlock>
+                        <Slider Grid.Row="1" x:Name="TriangleAreaLimit" Width="150" Maximum="100" Minimum="30" Value="{Binding TriangleAreaLimit, Mode=TwoWay}"/>
+                    </Grid>
+                </MenuItem>
                 <MenuItem Header="_Debugowanie">
                     <MenuItem Header="Rysowanie szkieletu" IsCheckable="True" IsChecked="{Binding DebugDrawSkeleton, Mode=TwoWay}"/>
                     <MenuItem Header="Rysowanie stawów" IsCheckable="True" IsChecked="{Binding DebugDrawJoints, Mode=TwoWay}"/>
                     <MenuItem Header="Rysowanie przydziału pikseli" IsCheckable="True" IsChecked="{Binding DebugDrawSilhouette, Mode=TwoWay}"/>
-                    <MenuItem Header="Renderowanie OpenGL">
-                        <DockPanel >
-                            <Label>Tryb renderowania:</Label>
-                            <ComboBox Name="OpenGLDrawModeSelector" SelectionChanged="OpenGLDrawModeSelector_OnSelectionChanged">
-                                <ComboBoxItem IsSelected="True">Normalny</ComboBoxItem>
-                                <ComboBoxItem>Wyświetlanie koordynatów UV</ComboBoxItem>
-                                <ComboBoxItem>Linie</ComboBoxItem>
-                            </ComboBox>
-                        </DockPanel>
-                    </MenuItem>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" TextWrapping="Wrap" Width="150">Wielkość trójkątów:</TextBlock>
+                        <ComboBox Grid.Row="1" Name="OpenGLDrawModeSelector" SelectionChanged="OpenGLDrawModeSelector_OnSelectionChanged">
+                            <ComboBoxItem IsSelected="True">Normalny</ComboBoxItem>
+                            <ComboBoxItem>Tryb renderowania:</ComboBoxItem>
+                            <ComboBoxItem>Linie</ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
                 </MenuItem>
             </Menu>
             <Image Source="Images\Status.png" HorizontalAlignment="Left" Margin="5 4 0 0" RenderTransformOrigin="-7.2,0.595" DockPanel.Dock="Left" Width="20" Height="20" VerticalAlignment="Top"/>
