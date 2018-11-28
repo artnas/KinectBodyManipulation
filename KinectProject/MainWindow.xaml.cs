@@ -27,39 +27,18 @@ namespace KinectBodyModification
     public partial class MainWindow : Window
     {
 
-        private KBMRenderer renderer;
-        private KBMSceneData sceneData;
+        private Renderer renderer;
+        private SceneData sceneData;
 
         private bool isProcessingFrame = false;
 
         private KinectSensor sensor;
 
-        private WriteableBitmap colorBitmap;
-
-        // private DepthImagePixel[] depthBuffer;    
-        // private byte[] colorBuffer;
-
-        // private byte[] outputBuffer;
-        // private int[] playerPixelData;
-        // private ColorImagePoint[] colorCoordinates;
-        // private DepthImagePoint[] depthCoordinates;
-
         private bool hasSavedBackgroundColorFrame = false;
         private bool hasSavedBackgroundDepthFrame = false;
-        // private byte[] backgroundRemovedBuffer;
-        // private BackgroundRemovedColorStream backgroundRemovedColorStream;
-
-        // private byte[] savedBackgroundColorBuffer;
-        // private DepthImagePixel[] savedBackgroundDepthBuffer;
 
         private readonly Skeleton[] skeletons = new Skeleton[6];
         private int trackedPlayerId = -1;
-
-        // private readonly byte[] normalBuffer = new byte[Configuration.size * 2];
-
-        // private int depthWidth, depthHeight;
-
-        // private LimbDataManager limbDataManager;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -102,19 +81,11 @@ namespace KinectBodyModification
                 sensor.DepthStream.Enable(Configuration.DepthFormat); // Turn on the depth stream to receive depth frames
                 sensor.SkeletonStream.Enable(); // Turn on to get player masks
 
-                // this.depthWidth = this.sensor.DepthStream.FrameWidth;
-                // this.depthHeight = this.sensor.DepthStream.FrameHeight;
-                //
-                // int colorWidth = this.sensor.ColorStream.FrameWidth;
-                // int colorHeight = this.sensor.ColorStream.FrameHeight;
-
-                // this.colorToDepthDivisor = colorWidth / this.depthWidth;
-
                 // Allocate space to put the depth allPixels we'll receive
                 GB.depthBuffer = new DepthImagePixel[sensor.DepthStream.FramePixelDataLength];
-
                 // Allocate space to put the color allPixels we'll create
                 GB.colorBuffer = new byte[sensor.ColorStream.FramePixelDataLength];
+
                 GB.backgroundRemovedBuffer = new byte[GB.colorBuffer.Length];
                 GB.outputBuffer = new byte[GB.colorBuffer.Length];
 
@@ -126,14 +97,6 @@ namespace KinectBodyModification
                 GB.colorCoordinates = new ColorImagePoint[sensor.DepthStream.FramePixelDataLength];
                 GB.depthCoordinates = new DepthImagePoint[sensor.DepthStream.FramePixelDataLength];
 
-                GB.normalBuffer = new byte[Configuration.size * 2];
-
-                // This is the bitmap we'll display on-screen
-                this.colorBitmap = new WriteableBitmap(Configuration.width, Configuration.height, 96.0, 96.0, PixelFormats.Bgr32, null);
-
-                //
-                // GlobalBuffers.limbDataManager = new LimbDataManager(colorBuffer, depthCoordinates, depthBuffer, backgroundRemovedBuffer, savedBackgroundDepthBuffer, sensor);
-
                 GB.limbDataManager = new LimbDataManager(sensor);
 
                 GB.backgroundRemovedColorStream = new BackgroundRemovedColorStream(sensor);
@@ -143,12 +106,6 @@ namespace KinectBodyModification
                 // Add an event handler to be called when the background removed color frame is ready, so that we can
                 // composite the image and output to the app
                 GB.backgroundRemovedColorStream.BackgroundRemovedFrameReady += this.BackgroundRemovedFrameReadyHandler;
-
-                // Set the image we display to point to the bitmap where we'll put the image data
-                MaskedColor.Source = colorBitmap;
-
-                // Drawing.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer, colorCoordinates, depthCoordinates);
-                // BoneProcessor.SetBuffers(depthBuffer, colorBuffer, outputBuffer, backgroundRemovedBuffer, limbDataManager, savedBackgroundColorBuffer, savedBackgroundDepthBuffer, normalBuffer);
 
                 // Add an event handler to be called whenever there is new depth frame data
                 sensor.AllFramesReady += SensorAllFramesReady;
@@ -164,8 +121,7 @@ namespace KinectBodyModification
                 }
             }
 
-            statusBarText.Text = sensor == null ? Properties.Resources.NoKinectReady : "Połączono z kontrolerem Kinect";
-
+            statusBarText.Text = sensor == null ? Properties.Resources.NoKinectReady : $"Połączono z kontrolerem Kinect (id: ${sensor.UniqueKinectId}, connection: ${sensor.DeviceConnectionId})";
         }
 
         /// <summary>
@@ -180,36 +136,29 @@ namespace KinectBodyModification
             {
                 if (backgroundRemovedFrame != null)
                 {
-
                     Array.Copy(backgroundRemovedFrame.GetRawPixelData(), GB.backgroundRemovedBuffer, GB.backgroundRemovedBuffer.Length);
-
                 }
             }
 
-            // Array.Copy(this.backgroundRemovedBuffer, this.outputBuffer, this.outputBuffer.Length);
-
-            GB.limbDataManager.Update(skeletons);
-
-            Drawing.Draw();
-
-            renderer.SetForegroundTexture(GB.backgroundRemovedBuffer);
-
-            DrawOutputBuffer();
-
+            Draw();
         }
 
-        private void DrawOutputBuffer()
+        private void Draw()
         {
+            renderer.SetForegroundTexture(GB.backgroundRemovedBuffer);
+
+            GB.limbDataManager.Update(skeletons);
+            BoneProcessor.ProcessAllBones();
 
             PrepareRenderSceneData();
+
+            if (Settings.Instance.ShouldDrawDebugOverlay())
+            {
+                Drawing.DrawDebug();
+                renderer.SetDebugTexture(GB.outputBuffer);
+            }
+
             RenderGL();
-
-            colorBitmap.WritePixels(
-                new Int32Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight),
-                GB.outputBuffer,
-                colorBitmap.PixelWidth * sizeof(int),
-                0);
-
         }
 
         private void PrepareRenderSceneData()
@@ -255,7 +204,6 @@ namespace KinectBodyModification
         /// <param name="e">event arguments</param>
         private void SensorAllFramesReady(object sender, AllFramesReadyEventArgs e)
         {
-
             if (isProcessingFrame)
             {
                 return;
@@ -399,7 +347,6 @@ namespace KinectBodyModification
             }
 
             isProcessingFrame = false;
-
         }
 
         // /// <summary>
@@ -492,11 +439,8 @@ namespace KinectBodyModification
 
         private void InitializeRenderer()
         {
-            byte[] outputBuffer = new byte[Configuration.width * Configuration.height * 4];
-            byte[] textureBuffer = new byte[Configuration.width * Configuration.height * 4];
-
-            renderer = new KBMRenderer(Configuration.width, Configuration.height);
-            sceneData = new KBMSceneData();
+            renderer = new Renderer(Configuration.width, Configuration.height);
+            sceneData = new SceneData();
 
             renderer.SetSceneData(sceneData);
             renderer.Initialize();

@@ -28,6 +28,9 @@ namespace KinectBodyModification
             { 0, 1 },   // dol 
         };
 
+        /// <summary>
+        /// Offsety poszukiwania kolejnego punktu do obwodki
+        /// </summary>
         public static readonly int[,] contourSeekingDirections =
         {
             { 0, 2 },
@@ -225,7 +228,7 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Calculates bone hash for a bone defined by the given start and end joint types
+        /// Oblicza hash dla kosci sprecyzowanej przez jointy (a, b)
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -235,13 +238,25 @@ namespace KinectBodyModification
             return (int) a | ((int) b << 4);
         }
 
-        public static void GetIndexCoordinates(int index, ref int x, ref int y)
+        /// <summary>
+        /// Oblicza koordynaty piksela odpowiadajacemu podanemu indeksowi
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public static void IndexToCoordinates(int index, ref int x, ref int y)
         {
             x = index % Configuration.width;
             y = (index - x) / Configuration.width;
         }
 
-        public static int GetIndexByCoordinates(int x, int y)
+        /// <summary>
+        /// Oblicza indeks piksela odpowiadajcego podanym koordynatom
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static int CoordinatesToIndex(int x, int y)
         {
             return x + y * Configuration.width;
         }

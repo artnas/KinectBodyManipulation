@@ -2,73 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:openTk="clr-namespace:OpenTK;assembly=OpenTK.GLControl"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         Title="Kinect - modyfikacja ludzkiej sylwetki" Width="1280" Height="1010" Loaded="WindowLoaded" Closing="WindowClosing">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>
-        <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f"/>
-        <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2"/>
         <Style TargetType="{x:Type Image}">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
-        </Style>
-        <Style TargetType="{x:Type Button}" x:Key="SnapshotButton" >
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" Background="Transparent">
-                                <TextBlock x:Name="SnapText" Text="{TemplateBinding Content}" TextAlignment="Left"  VerticalAlignment="Center" Foreground="{StaticResource KinectPurpleBrush}" FontSize="15" />
-                                <Grid Margin="9,0,0,0">
-                                    <Image x:Name="SnapNormal" Source="Images\SnapNormal.png" Stretch="None" HorizontalAlignment="Center"/>
-                                    <Image x:Name="SnapHover" Source="Images\SnapHover.png" Stretch="None" HorizontalAlignment="Center" Visibility="Collapsed"/>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Visibility" Value="Collapsed" TargetName="SnapNormal"/>
-                                <Setter Property="Visibility" Value="Visible" TargetName="SnapHover"/>
-                                <Setter Property="Foreground" Value="{StaticResource KinectBlueBrush}" TargetName="SnapText"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="{x:Type CheckBox}" x:Key="SquareCheckBox" >
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type CheckBox}">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" Background="Transparent">
-                                <Grid x:Name="SquareCheckBoxChecked">
-                                    <Image x:Name="CheckedNormal" Source="Images\CheckedNormal.png" Stretch="None" HorizontalAlignment="Center"/>
-                                    <Image x:Name="CheckedHover" Source="Images\CheckedHover.png" Stretch="None" HorizontalAlignment="Center" Visibility="Collapsed"/>
-                                </Grid>
-                                <Grid x:Name="SquareCheckBoxUnchecked" Visibility="Collapsed">
-                                    <Image x:Name="UncheckedNormal" Source="Images\UncheckedNormal.png" Stretch="None" HorizontalAlignment="Center"/>
-                                    <Image x:Name="UncheckedHover" Source="Images\UncheckedHover.png" Stretch="None" HorizontalAlignment="Center" Visibility="Collapsed"/>
-                                </Grid>
-                                <TextBlock x:Name="SquareCheckBoxText" Text="{TemplateBinding Content}" TextAlignment="Left"  VerticalAlignment="Center" Foreground="{StaticResource KinectPurpleBrush}" FontSize="15"  Margin="9,0,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="false">
-                                <Setter Property="Visibility" Value="Collapsed" TargetName="SquareCheckBoxChecked"/>
-                                <Setter Property="Visibility" Value="Visible" TargetName="SquareCheckBoxUnchecked"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Visibility" Value="Collapsed" TargetName="CheckedNormal"/>
-                                <Setter Property="Visibility" Value="Collapsed" TargetName="UncheckedNormal"/>
-                                <Setter Property="Visibility" Value="Visible" TargetName="CheckedHover"/>
-                                <Setter Property="Visibility" Value="Visible" TargetName="UncheckedHover"/>
-                                <Setter Property="Foreground" Value="{StaticResource KinectBlueBrush}" TargetName="SquareCheckBoxText"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
     </Window.Resources>
 
@@ -76,13 +15,6 @@
 
         <DockPanel Grid.Row="0" Margin="0 0 0 0" Grid.RowSpan="2" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
-                <!-- <MenuItem Header="_File"> -->
-                <!--     <MenuItem Header="_New" /> -->
-                <!--     <MenuItem Header="_Open" /> -->
-                <!--     <MenuItem Header="_Save" /> -->
-                <!--     <Separator /> -->
-                <!--     <MenuItem Header="_Exit" /> -->
-                <!-- </MenuItem> -->
                 <MenuItem Header="_Sylwetka">
                     <MenuItem Header="Przekształcenia aktywne" IsCheckable="True" IsChecked="{Binding DrawMorphs, Mode=TwoWay}"/>
                     <Grid>
@@ -116,7 +48,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" TextWrapping="Wrap">Dokładność obwódki</TextBlock>
+                        <TextBlock Grid.Row="0" TextWrapping="Wrap">Optymalizacja obwódki</TextBlock>
                         <Slider Grid.Row="1" x:Name="OutlineSegmentation" Width="150" Maximum="10" Minimum="1" Value="{Binding OutlineSegmentation, Mode=TwoWay}"/>
                     </Grid>
                     <Grid>
@@ -132,12 +64,13 @@
                     <MenuItem Header="Rysowanie szkieletu" IsCheckable="True" IsChecked="{Binding DebugDrawSkeleton, Mode=TwoWay}"/>
                     <MenuItem Header="Rysowanie stawów" IsCheckable="True" IsChecked="{Binding DebugDrawJoints, Mode=TwoWay}"/>
                     <MenuItem Header="Rysowanie przydziału pikseli" IsCheckable="True" IsChecked="{Binding DebugDrawSilhouette, Mode=TwoWay}"/>
+                    <MenuItem Header="Rysowanie obwódki" IsCheckable="True" IsChecked="{Binding DebugDrawOutline, Mode=TwoWay}"/>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" TextWrapping="Wrap" Width="150">Wielkość trójkątów:</TextBlock>
+                        <TextBlock Grid.Row="0" TextWrapping="Wrap" Width="150">Tryb renderowania</TextBlock>
                         <ComboBox Grid.Row="1" Name="OpenGLDrawModeSelector" SelectionChanged="OpenGLDrawModeSelector_OnSelectionChanged">
                             <ComboBoxItem IsSelected="True">Normalny</ComboBoxItem>
                             <ComboBoxItem>Tryb renderowania:</ComboBoxItem>
@@ -147,15 +80,9 @@
                 </MenuItem>
             </Menu>
             <Image Source="Images\Status.png" HorizontalAlignment="Left" Margin="5 4 0 0" RenderTransformOrigin="-7.2,0.595" DockPanel.Dock="Left" Width="20" Height="20" VerticalAlignment="Top"/>
-            <TextBlock Name="statusBarText" Margin="5 5 0 0">Wyszukiwanie kontrolera Kinect</TextBlock>
+            <TextBlock Name="statusBarText" Margin="5 5 0 0">Trwa wyszukiwanie kontrolera Kinect</TextBlock>
         </DockPanel>
-        <Grid Margin="0, 50, 0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="58*"/>
-                <ColumnDefinition Width="323*"/>
-            </Grid.ColumnDefinitions>
-            <Image Name="Backdrop" Grid.ColumnSpan="2"/>
-            <Image Name ="MaskedColor" RenderOptions.BitmapScalingMode="NearestNeighbor" Grid.ColumnSpan="2"/>
+        <Grid Margin="0, 50, 0, 0">
             <WindowsFormsHost x:Name="RenderCanvasHost" Initialized="WindowsFormsHost_Initialized" Grid.ColumnSpan="2">
                 <openTk:GLControl x:Name="RenderCanvas" Load="renderCanvas_Load" Paint="renderCanvas_Paint" Width="1280" Height="960"/>
             </WindowsFormsHost>

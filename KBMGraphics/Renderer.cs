@@ -35,23 +35,29 @@ using VertexAttribPointerType = OpenTK.Graphics.OpenGL.VertexAttribPointerType;
 
 namespace KBMGraphics
 {
-    public class KBMRenderer
+    public class Renderer
     {
         public bool isInitialized = false;
 
         public readonly int width;
         public readonly int height;
-        private KBMSceneData sceneData;
+        private SceneData sceneData;
 
         private GraphicsContext context;
 
-        private readonly int[] frameBuffer = {0}, renderBuffer = {0}, backgroundTexturePointer = {0}, foregroundTexturePointer = {0};
+        private readonly int[] 
+            frameBuffer = {0}, 
+            renderBuffer = {0}, 
+            backgroundTexturePointer = {0}, 
+            foregroundTexturePointer = {0},
+            debugTexturePointer = {0};
+
         private byte[] pixels;
 
         private Vector2[] screenEdges;
         private Vector2[] screenEdgeUvs;
 
-        public KBMRenderer(int width, int height)
+        public Renderer(int width, int height)
         {
             this.width = width;
             this.height = height;
@@ -81,7 +87,7 @@ namespace KBMGraphics
             };
         }
 
-        ~KBMRenderer()
+        ~Renderer()
         {
             // GL.DeleteFramebuffers(1, frameBuffer);
             // GL.DeleteRenderbuffers(1, renderBuffer);
@@ -107,13 +113,14 @@ namespace KBMGraphics
             GL.GenRenderbuffers(1, renderBuffer);
             GL.GenTextures(1, backgroundTexturePointer);
             GL.GenTextures(1, foregroundTexturePointer);
+            GL.GenTextures(1, debugTexturePointer);
 
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderBuffer[0]);
             GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, width, height);
 
             SetBackgroundTexture(new byte[]{
-                0, 0, 0, 255,   255, 5, 255, 255,
-                255, 77, 255, 255,   0, 0, 0, 255
+                200, 200, 200, 255,  200, 200, 200, 255,
+                200, 200, 200, 255,  200, 200, 200, 255
             }, 2, 2);
         }
 
@@ -153,7 +160,25 @@ namespace KBMGraphics
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        public void SetSceneData(KBMSceneData sceneData)
+        public void SetDebugTexture(byte[] debugColorBuffer)
+        {
+            GL.BindTexture(TextureTarget.Texture2D, debugTexturePointer[0]);
+
+            unsafe
+            {
+                fixed (byte* ptr = &debugColorBuffer[0])
+                {
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Bgra,
+                        PixelType.UnsignedByte, new IntPtr(ptr));
+                }
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Nearest);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Nearest);
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
+
+        public void SetSceneData(SceneData sceneData)
         {
             this.sceneData = sceneData;
         }
@@ -168,6 +193,11 @@ namespace KBMGraphics
 
             DrawBackground();
             DrawForeground();
+
+            if (Settings.Instance.ShouldDrawDebugOverlay())
+            {
+                DrawDebugOverlay();
+            }
         }
 
         private void DrawBackground()
@@ -257,7 +287,6 @@ namespace KBMGraphics
                 case Settings.GLDrawModeEnum.Lines:
                     if (sceneData.mesh != null)
                     {
-                        // GL.Color4(255, 255, 255, 255);
                         GL.Begin(PrimitiveType.Triangles);
                         GL.Color4(1f, 1f, 1f, 1f);
 
@@ -296,6 +325,29 @@ namespace KBMGraphics
                 GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
                 GL.End();
             }
+        }
+
+        private void DrawDebugOverlay()
+        {
+            GL.BindTexture(TextureTarget.Texture2D, debugTexturePointer[0]);
+            GL.Enable(EnableCap.Texture2D);
+
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            GL.Begin(PrimitiveType.Triangles);
+
+            GL.Color3(1f, 1f, 1f);
+
+            for (var i = 0; i < screenEdges.Length; i++)
+            {
+                GL.TexCoord2(screenEdgeUvs[i].X, screenEdgeUvs[i].Y);
+                GL.Vertex2(screenEdges[i].X, screenEdges[i].Y);
+            }
+
+            GL.End();
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
     }

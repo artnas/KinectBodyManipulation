@@ -11,7 +11,7 @@ namespace KinectBodyModification
         public LimbDataPixel[] allPixels;
         public List<LimbDataSkeleton> limbDataSkeletons = new List<LimbDataSkeleton>();
 
-        public QuadraticMesh mesh;
+        public Mesh mesh;
 
         public LimbData()
         {
@@ -23,7 +23,7 @@ namespace KinectBodyModification
                 allPixels[i] = new LimbDataPixel();
             }
 
-            mesh = new QuadraticMesh();
+            mesh = new Mesh();
         }
 
     }

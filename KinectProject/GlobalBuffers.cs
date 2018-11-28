@@ -16,7 +16,6 @@ namespace KinectBodyModification
 
         public static byte[] outputBuffer;
         public static byte[] backgroundRemovedBuffer;
-        public static byte[] normalBuffer;
 
         public static int[] playerPixelData;
 

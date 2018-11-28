@@ -7,12 +7,12 @@ using OpenTK;
 
 namespace KBMGraphics
 {
-    public struct KBMVertex
+    public struct Vertex
     {
         public Vector2 position;
         public Vector2 uvCoordinates;
 
-        public KBMVertex(Vector2 position, Vector2 uvCoordinates)
+        public Vertex(Vector2 position, Vector2 uvCoordinates)
         {
             this.position = position;
             this.uvCoordinates = uvCoordinates;

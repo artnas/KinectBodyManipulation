@@ -11,21 +11,21 @@ using TriangleNet.Meshing;
 
 namespace KBMGraphics
 {
-    public class BodyPolygonizer
+    public class OutlineTriangulator
     {
 
         public readonly int width, height;
         private readonly QualityOptions QualityOptions;
-        private List<Vertex> pointsList = new List<Vertex>();
+        private List<TriangleNet.Geometry.Vertex> pointsList = new List<TriangleNet.Geometry.Vertex>();
 
-        public BodyPolygonizer(int width, int height)
+        public OutlineTriangulator(int width, int height)
         {
             this.width = width;
             this.height = height;
             this.QualityOptions = new QualityOptions();
         }
 
-        public Mesh GetMesh(HashSet<int> contourIndices)
+        public TriangleNet.Mesh GetMesh(HashSet<int> contourIndices)
         {
             if (contourIndices == null || contourIndices.Count < 4)
             {
@@ -42,7 +42,7 @@ namespace KBMGraphics
                 var mesh = poly.Triangulate(
                     new ConstraintOptions {ConformingDelaunay = true, Convex = false, SegmentSplitting = 0},
                     new QualityOptions {MinimumAngle = 25, MaximumArea = Settings.Instance.TriangleAreaLimit, VariableArea = true}
-                ) as Mesh;
+                ) as TriangleNet.Mesh;
 
                 return mesh;
             }
@@ -54,7 +54,7 @@ namespace KBMGraphics
             return null;
         }
 
-        private List<Vertex> GetContourPoints(HashSet<int> contourIndices)
+        private List<TriangleNet.Geometry.Vertex> GetContourPoints(HashSet<int> contourIndices)
         {
             pointsList.Clear();
 
@@ -76,7 +76,7 @@ namespace KBMGraphics
                 var x = index % width;
                 var y = (index - x) / width;
 
-                pointsList.Add(new Vertex(x, y));
+                pointsList.Add(new TriangleNet.Geometry.Vertex(x, y));
             }
 
             List<string> sList = new List<string>();

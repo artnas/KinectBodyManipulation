@@ -7,10 +7,10 @@ using OpenTK;
 
 namespace KBMGraphics
 {
-    public class KBMSceneData
+    public class SceneData
     {
 
-        public QuadraticMesh mesh;
+        public Mesh mesh;
 
     }
 }

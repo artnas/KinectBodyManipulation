@@ -48,7 +48,7 @@ namespace KinectBodyModification
                 int x = (int)Math.Round(vertex.X);
                 int y = (int)Math.Round(vertex.Y);
 
-                int index = Utils.GetIndexByCoordinates(x, y);
+                int index = Utils.CoordinatesToIndex(x, y);
 
                 var limbPixel = GB.limbDataManager.limbData.allPixels[index];
 

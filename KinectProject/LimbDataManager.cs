@@ -12,14 +12,14 @@ namespace KinectBodyModification
     {
 
         private readonly KinectSensor sensor;
-        private readonly BodyPolygonizer bodyPolygonizer;
+        private readonly OutlineTriangulator _outlineTriangulator;
 
         public LimbData limbData;
 
         public LimbDataManager(KinectSensor sensor)
         {
             this.sensor = sensor;
-            this.bodyPolygonizer = new BodyPolygonizer(Configuration.width, Configuration.height);
+            this._outlineTriangulator = new OutlineTriangulator(Configuration.width, Configuration.height);
 
             this.limbData = new LimbData();
         }
@@ -77,7 +77,7 @@ namespace KinectBodyModification
             foreach (var index in limbData.activePixels)
             {
                 int pointX = 0, pointY = 0;
-                Utils.GetIndexCoordinates(index, ref pointX, ref pointY);
+                Utils.IndexToCoordinates(index, ref pointX, ref pointY);
 
                 var isContour = IsContour(index, pointX, pointY);
           
@@ -90,7 +90,7 @@ namespace KinectBodyModification
 
             // update mesh
 
-            limbData.mesh.Update(bodyPolygonizer.GetMesh(GetSortedContour()));
+            limbData.mesh.Update(_outlineTriangulator.GetMesh(GetSortedContour()));
             // limbData.mesh.ExportToObj("C:\\test.obj");
         }
 
@@ -325,7 +325,7 @@ namespace KinectBodyModification
                 var offsetX = x + directionX;
                 var offsetY = y + directionY;
 
-                int neighborIndex = Utils.GetIndexByCoordinates(offsetX, offsetY);
+                int neighborIndex = Utils.CoordinatesToIndex(offsetX, offsetY);
 
                 if (!Utils.AreCoordinatesInBounds(offsetX, offsetY) || limbData.allPixels[neighborIndex].humanIndex == -1)
                 {
@@ -379,7 +379,7 @@ namespace KinectBodyModification
                     continue;
 
                  var mappedDepthBufferIndex = 
-                     Utils.GetIndexByCoordinates(GlobalBuffers.depthCoordinates[index].X, GlobalBuffers.depthCoordinates[index].Y);
+                     Utils.CoordinatesToIndex(GlobalBuffers.depthCoordinates[index].X, GlobalBuffers.depthCoordinates[index].Y);
                 
                  if (mappedDepthBufferIndex >= 0 && mappedDepthBufferIndex < GlobalBuffers.depthBuffer.Length)
                  {
@@ -453,7 +453,7 @@ namespace KinectBodyModification
         private void AddPointToContourPoints(int index)
         {
             int pointX = 0, pointY = 0;
-            Utils.GetIndexCoordinates(index, ref pointX, ref pointY);
+            Utils.IndexToCoordinates(index, ref pointX, ref pointY);
             Vector2 point = new Vector2(pointX, pointY);
 
             var distanceFromLastPoint = Vector2.Distance(point, lastContourPoint);
@@ -476,7 +476,7 @@ namespace KinectBodyModification
                 int neighborX = pointX + directionX;
                 int neighborY = pointY + directionY;
 
-                int neighborIndex = Utils.GetIndexByCoordinates(neighborX, neighborY);
+                int neighborIndex = Utils.CoordinatesToIndex(neighborX, neighborY);
                 if (!usedContourIndices.Contains(neighborIndex))
                 {
                     usedContourIndices.Add(neighborIndex);
@@ -491,7 +491,7 @@ namespace KinectBodyModification
                 int neighborX = pointX + directionX;
                 int neighborY = pointY + directionY;
 
-                int neighborIndex = Utils.GetIndexByCoordinates(neighborX, neighborY);
+                int neighborIndex = Utils.CoordinatesToIndex(neighborX, neighborY);
                 if (!usedContourIndices.Contains(neighborIndex) && limbData.contourPixels.Contains(neighborIndex))
                 {
                     AddPointToContourPoints(neighborIndex);
@@ -508,7 +508,7 @@ namespace KinectBodyModification
             foreach (var index in sortedContour)
             {
                 int x = 0, y = 0;
-                Utils.GetIndexCoordinates(index, ref x, ref y);
+                Utils.IndexToCoordinates(index, ref x, ref y);
 
                 if (lastX != -1 && lastY != -1)
                 {

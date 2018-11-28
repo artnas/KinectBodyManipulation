@@ -49,12 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BodyPolygonizer.cs" />
-    <Compile Include="KBMRenderer.cs" />
-    <Compile Include="KBMSceneData.cs" />
-    <Compile Include="KBMVertex.cs" />
+    <Compile Include="OutlineTriangulator.cs" />
+    <Compile Include="Renderer.cs" />
+    <Compile Include="SceneData.cs" />
+    <Compile Include="Vertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuadraticMesh.cs" />
+    <Compile Include="Mesh.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>

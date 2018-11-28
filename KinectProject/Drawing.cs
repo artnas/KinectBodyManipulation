@@ -8,8 +8,27 @@ namespace KinectBodyModification
 {
     public static partial class Drawing
     {
+        private static byte[] clearBytes = GetClearBytes();
 
-        private static readonly byte[] tempBuffer = new byte[Configuration.size * 4];
+        private static byte[] GetClearBytes()
+        {
+            byte[] clearBytes = new byte[Configuration.size * 4];
+
+            for (var i = 0; i < clearBytes.Length; i += 4)
+            {
+                clearBytes[i] = 0;
+                clearBytes[i+1] = 0;
+                clearBytes[i+2] = 0;
+                clearBytes[i+3] = 0;
+            }
+
+            return clearBytes;
+        }
+
+        public static void Clear()
+        {
+            Array.Copy(clearBytes, GB.outputBuffer, clearBytes.Length);
+        }
 
         private static void DrawThickDot(byte[] buffer, int index, int thickness, Color color)
         {
@@ -24,6 +43,7 @@ namespace KinectBodyModification
                 buffer[offsetIndex] = color.B;
                 buffer[offsetIndex + 1] = color.G;
                 buffer[offsetIndex + 2] = color.R;
+                buffer[offsetIndex + 3] = 255;
             }
         }
 
@@ -80,7 +100,7 @@ namespace KinectBodyModification
                 var index = i * 4;
 
                 var mappedDepthBufferIndex =
-                    Utils.GetIndexByCoordinates(GB.depthCoordinates[i].X, GB.depthCoordinates[i].Y);
+                    Utils.CoordinatesToIndex(GB.depthCoordinates[i].X, GB.depthCoordinates[i].Y);
 
                 if (mappedDepthBufferIndex < 0 || mappedDepthBufferIndex >= GB.depthBuffer.Length) continue;
 
@@ -102,15 +122,6 @@ namespace KinectBodyModification
                     GB.outputBuffer[index + 3] = 255;
                 }
             }
-        }
-
-        public static void Draw()
-        {
-            // DrawBackground();
-
-            BoneProcessor.ProcessAllBones();
-
-            // DrawDebug();
         }
     }
 }

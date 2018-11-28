@@ -10,33 +10,33 @@ using TriangleNet.Geometry;
 
 namespace KBMGraphics
 {
-    public class QuadraticMesh
+    public class Mesh
     {
-        public List<Vertex> vertices;
+        public List<TriangleNet.Geometry.Vertex> vertices;
         public List<int> indices;
         public List<Vector2> uvs;
 
-        private Dictionary<Vertex, int> verticesDictionary;
+        private Dictionary<TriangleNet.Geometry.Vertex, int> verticesDictionary;
 
-        public QuadraticMesh()
+        public Mesh()
         {
-            vertices = new List<Vertex>();
+            vertices = new List<TriangleNet.Geometry.Vertex>();
             indices = new List<int>();
             uvs = new List<Vector2>();
-            verticesDictionary = new Dictionary<Vertex, int>();
+            verticesDictionary = new Dictionary<TriangleNet.Geometry.Vertex, int>();
         }
         
-        public QuadraticMesh(Mesh mesh)
+        public Mesh(TriangleNet.Mesh mesh)
         {
-            vertices = new List<Vertex>();
+            vertices = new List<TriangleNet.Geometry.Vertex>();
             indices = new List<int>();
             uvs = new List<Vector2>();
-            verticesDictionary = new Dictionary<Vertex, int>();
+            verticesDictionary = new Dictionary<TriangleNet.Geometry.Vertex, int>();
 
             Update(mesh);
         }
 
-        public void Update(Mesh mesh)
+        public void Update(TriangleNet.Mesh mesh)
         {
             vertices.Clear();
             indices.Clear();

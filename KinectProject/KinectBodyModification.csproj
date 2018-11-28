@@ -92,8 +92,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Curves.cs" />
     <Compile Include="Curve.cs" />
-    <Compile Include="Drawing_Debug.cs" />
-    <Compile Include="Drawing_Normal.cs" />
+    <Compile Include="Drawing.Debug.cs" />
     <Compile Include="GlobalBuffers.cs" />
     <Compile Include="JointTypePair.cs" />
     <Compile Include="JointPair.cs" />
@@ -101,7 +100,6 @@
     <Compile Include="LimbDataBone.cs" />
     <Compile Include="LimbDataSkeleton.cs" />
     <Compile Include="LimbDataPixel.cs" />
-    <Compile Include="Drawing_Human.cs" />
     <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

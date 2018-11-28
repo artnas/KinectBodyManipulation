@@ -23,6 +23,7 @@
         public bool DebugDrawSkeleton { get; set; }
         public bool DebugDrawJoints { get; set; }
         public bool DebugDrawSilhouette { get; set; }
+        public bool DebugDrawOutline { get; set; }
         public bool DrawMorphs { get; set; }
         public GLDrawModeEnum DrawMode { get; set; }
         public int OutlineSegmentation { get; set; }
@@ -36,10 +37,16 @@
             this.DebugDrawSkeleton = false;
             this.DebugDrawJoints = false;
             this.DebugDrawSilhouette = false;
+            this.DebugDrawOutline = false;
             this.DrawMorphs = true;
             this.DrawMode = GLDrawModeEnum.Normal;
             this.OutlineSegmentation = 4;
             this.TriangleAreaLimit = 50;
+        }
+
+        public bool ShouldDrawDebugOverlay()
+        {
+            return DebugDrawJoints || DebugDrawSilhouette || DebugDrawSkeleton || DebugDrawOutline;
         }
 
         public enum GLDrawModeEnum
