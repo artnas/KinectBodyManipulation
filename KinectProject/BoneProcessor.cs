@@ -81,10 +81,10 @@ namespace KinectBodyModification
 
             switch (bone.boneHash)
             {
-                case 35: // head, shoulder center
+                case 35:    // head, shoulder center
                     ProcessBone_Grow(bone, bonePixelData, Settings.Instance.HeadSize / 100f - 1f);
                     break;
-                case 152:
+                case 152:   // arms
                 case 84:
                 case 169:
                 case 101:
@@ -94,7 +94,7 @@ namespace KinectBodyModification
                         power = Settings.Instance.ArmScale / 100f
                     });
                     break;
-                case 272:
+                case 272:   // legs
                 case 305:
                 case 220:
                 case 237:
@@ -133,8 +133,11 @@ namespace KinectBodyModification
                 var distance = OpenTK.Vector2.Distance(vertexPoint, boneEndPoint);
                 var directionVector = OpenTK.Vector2.Normalize(vertexPoint - boneStartPoint);
 
-                vertex.X += (double)(distance * directionVector.X * scale) / 2f;
-                vertex.Y += (double)(distance * directionVector.Y * scale) / 2f;
+                vertex.X += (float)(distance * directionVector.X * scale) / 2f;
+                vertex.Y += (float)(distance * directionVector.Y * scale) / 2f;
+                vertex.Z = bone.boneHash;
+
+                GB.limbDataManager.limbData.mesh.vertices[vertexIndex] = vertex;
             }
         }
 
@@ -155,8 +158,11 @@ namespace KinectBodyModification
                 var distance = OpenTK.Vector2.Distance(vertexPoint, boneEndPoint);
                 var directionVector = OpenTK.Vector2.Normalize(vertexPoint - boneEndPoint);
 
-                vertex.X += (double)(distance * directionVector.X * scale) / 2f;
-                vertex.Y += (double)(distance * directionVector.Y * scale) / 2f;
+                vertex.X += (float)(distance * directionVector.X * scale) / 2f;
+                vertex.Y += (float)(distance * directionVector.Y * scale) / 2f;
+                vertex.Z = bone.boneHash;
+
+                GB.limbDataManager.limbData.mesh.vertices[vertexIndex] = vertex;
             }
         }
 
@@ -194,8 +200,11 @@ namespace KinectBodyModification
 
                 var curveScale = 1f + stretchParameters.power * stretchParameters.curve.Evaluate(progressOnLine);
 
-                vertex.X += (double)(curveScale * directionVector.X * stretchParameters.power * distanceMultiplier);
-                vertex.Y += (double)(curveScale * directionVector.Y * stretchParameters.power * distanceMultiplier);
+                vertex.X += (float)(curveScale * directionVector.X * stretchParameters.power * distanceMultiplier);
+                vertex.Y += (float)(curveScale * directionVector.Y * stretchParameters.power * distanceMultiplier);
+                vertex.Z = bone.boneHash;
+
+                GB.limbDataManager.limbData.mesh.vertices[vertexIndex] = vertex;
             }
         }
 

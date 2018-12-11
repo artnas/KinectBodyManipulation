@@ -12,26 +12,26 @@ namespace KBMGraphics
 {
     public class Mesh
     {
-        public List<TriangleNet.Geometry.Vertex> vertices;
+        public List<Vector3> vertices;
         public List<int> indices;
         public List<Vector2> uvs;
 
-        private Dictionary<TriangleNet.Geometry.Vertex, int> verticesDictionary;
+        private Dictionary<Vector3, int> verticesDictionary;
 
         public Mesh()
         {
-            vertices = new List<TriangleNet.Geometry.Vertex>();
+            vertices = new List<Vector3>();
             indices = new List<int>();
             uvs = new List<Vector2>();
-            verticesDictionary = new Dictionary<TriangleNet.Geometry.Vertex, int>();
+            verticesDictionary = new Dictionary<Vector3, int>();
         }
         
         public Mesh(TriangleNet.Mesh mesh)
         {
-            vertices = new List<TriangleNet.Geometry.Vertex>();
+            vertices = new List<Vector3>();
             indices = new List<int>();
             uvs = new List<Vector2>();
-            verticesDictionary = new Dictionary<TriangleNet.Geometry.Vertex, int>();
+            verticesDictionary = new Dictionary<Vector3, int>();
 
             Update(mesh);
         }
@@ -49,8 +49,9 @@ namespace KBMGraphics
 
             foreach (var vertex in mesh.Vertices)
             {
-                verticesDictionary.Add(vertex, verticesDictionary.Count);
-                vertices.Add(vertex);
+                var vector = new Vector3((float)vertex.X, (float)vertex.Y, 0);
+                verticesDictionary.Add(vector, verticesDictionary.Count);
+                vertices.Add(vector);
                 uvs.Add(new Vector2((float)(vertex.X / 640), (float)(vertex.Y / 480)));
             }
 
@@ -60,9 +61,13 @@ namespace KBMGraphics
                 var vb = meshTriangle.GetVertex(1);
                 var vc = meshTriangle.GetVertex(2);
 
-                var vai = verticesDictionary[va];
-                var vbi = verticesDictionary[vb];
-                var vci = verticesDictionary[vc];
+                var vca = new Vector3((float)va.X, (float)va.Y, 0);
+                var vcb = new Vector3((float)vb.X, (float)vb.Y, 0);
+                var vcc = new Vector3((float)vc.X, (float)vc.Y, 0);
+
+                var vai = verticesDictionary[vca];
+                var vbi = verticesDictionary[vcb];
+                var vci = verticesDictionary[vcc];
 
                 indices.Add(vai);
                 indices.Add(vbi);

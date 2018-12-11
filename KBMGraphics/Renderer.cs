@@ -46,7 +46,6 @@ namespace KBMGraphics
         private GraphicsContext context;
 
         private readonly int[] 
-            frameBuffer = {0}, 
             renderBuffer = {0}, 
             backgroundTexturePointer = {0}, 
             foregroundTexturePointer = {0},
@@ -89,7 +88,6 @@ namespace KBMGraphics
 
         ~Renderer()
         {
-            // GL.DeleteFramebuffers(1, frameBuffer);
             // GL.DeleteRenderbuffers(1, renderBuffer);
         }
 
@@ -109,7 +107,6 @@ namespace KBMGraphics
 
             GL.Ortho(0f, width, height, 0f, -1000f, 1000f);
 
-            GL.GenFramebuffers(1, frameBuffer);
             GL.GenRenderbuffers(1, renderBuffer);
             GL.GenTextures(1, backgroundTexturePointer);
             GL.GenTextures(1, foregroundTexturePointer);
@@ -243,13 +240,13 @@ namespace KBMGraphics
                             var c = sceneData.mesh.indices[i + 2];
 
                             GL.TexCoord2(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y);
-                            GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
+                            GL.Vertex3(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y, sceneData.mesh.vertices[a].Z);
 
                             GL.TexCoord2(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y);
-                            GL.Vertex2(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y);
+                            GL.Vertex3(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y, sceneData.mesh.vertices[b].Z);
 
                             GL.TexCoord2(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y);
-                            GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
+                            GL.Vertex3(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y, sceneData.mesh.vertices[c].Z);
                         }
 
                         GL.End();
@@ -269,13 +266,15 @@ namespace KBMGraphics
                             var b = sceneData.mesh.indices[i + 1];
                             var c = sceneData.mesh.indices[i + 2];
 
-                            GL.Color3(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y, 1f);
+                            var color = (sceneData.mesh.vertices[a].Z % 255) / 255f;
+
+                            GL.Color3(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y, color);
                             GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
 
-                            GL.Color3(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y, 1f);
+                            GL.Color3(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y, color);
                             GL.Vertex2(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y);
 
-                            GL.Color3(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y, 1f);
+                            GL.Color3(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y, color);
                             GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
                         }
 
