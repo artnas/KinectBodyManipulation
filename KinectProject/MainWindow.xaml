@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:openTk="clr-namespace:OpenTK;assembly=OpenTK.GLControl"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
-        Title="Kinect - modyfikacja ludzkiej sylwetki" Width="1280" Height="1010" Loaded="WindowLoaded" Closing="WindowClosing">
+        Title="Kinect - modyfikacja ludzkiej sylwetki" Width="1280" Height="1010" Loaded="WindowLoaded" Closing="WindowClosing" SizeChanged="MainWindow_OnSizeChanged">
 
     <Window.Resources>
         <Style TargetType="{x:Type Image}">
@@ -84,7 +84,7 @@
         </DockPanel>
         <Grid Margin="0, 50, 0, 0">
             <WindowsFormsHost x:Name="RenderCanvasHost" Initialized="WindowsFormsHost_Initialized" Grid.ColumnSpan="2">
-                <openTk:GLControl x:Name="RenderCanvas" Load="renderCanvas_Load" Paint="renderCanvas_Paint" Width="1280" Height="960"/>
+                <openTk:GLControl x:Name="RenderCanvas" Load="renderCanvas_Load" Paint="renderCanvas_Paint" Width="640" Height="480" AutoSizeMode="GrowOnly" AutoSize="False" AutoScroll="True" />
             </WindowsFormsHost>
         </Grid>
     </Grid>

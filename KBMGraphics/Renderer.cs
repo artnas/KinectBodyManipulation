@@ -350,5 +350,9 @@ namespace KBMGraphics
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
+        public void ResizeViewport(int width, int height)
+        {
+            GL.Viewport(0, 0, width, height);
+        }
     }
 }

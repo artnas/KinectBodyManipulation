@@ -471,5 +471,27 @@ namespace KinectBodyModification
         {
             Settings.Instance.DrawMode = (Settings.GLDrawModeEnum)OpenGLDrawModeSelector.SelectedIndex;
         }
+
+        /// <summary>
+        /// Wywoływane przy zmianie wielkości okna
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            int width = RenderCanvas.Width;
+            int height = (int) (RenderCanvas.Width * 0.75f);
+
+            if (height > RenderCanvas.Height)
+            {
+                height = (int) RenderCanvas.Height;
+                width = (int) (height * 1.3333f);
+            }
+
+            RenderCanvas.Width = width;
+            RenderCanvas.Height = height;
+            
+            renderer.ResizeViewport(width, height);
+        }
     }
 }
