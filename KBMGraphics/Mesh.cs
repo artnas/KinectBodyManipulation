@@ -16,14 +16,17 @@ namespace KBMGraphics
         public List<int> indices;
         public List<Vector2> uvs;
 
-        private Dictionary<Vector3, int> verticesDictionary;
+        public Dictionary<Vector3, float> vertexWeightsDictionary;
+
+        private Dictionary<Vector3, int> vertexIndicesDictionary;
 
         public Mesh()
         {
             vertices = new List<Vector3>();
             indices = new List<int>();
             uvs = new List<Vector2>();
-            verticesDictionary = new Dictionary<Vector3, int>();
+            vertexIndicesDictionary = new Dictionary<Vector3, int>();
+            vertexWeightsDictionary = new Dictionary<Vector3, float>();
         }
         
         public Mesh(TriangleNet.Mesh mesh)
@@ -31,7 +34,8 @@ namespace KBMGraphics
             vertices = new List<Vector3>();
             indices = new List<int>();
             uvs = new List<Vector2>();
-            verticesDictionary = new Dictionary<Vector3, int>();
+            vertexIndicesDictionary = new Dictionary<Vector3, int>();
+            vertexWeightsDictionary = new Dictionary<Vector3, float>();
 
             Update(mesh);
         }
@@ -41,7 +45,8 @@ namespace KBMGraphics
             vertices.Clear();
             indices.Clear();
             uvs.Clear();
-            verticesDictionary.Clear();
+            vertexIndicesDictionary.Clear();
+            vertexWeightsDictionary.Clear();
 
             if (mesh == null) return;
 
@@ -50,7 +55,8 @@ namespace KBMGraphics
             foreach (var vertex in mesh.Vertices)
             {
                 var vector = new Vector3((float)vertex.X, (float)vertex.Y, 0);
-                verticesDictionary.Add(vector, verticesDictionary.Count);
+                vertexIndicesDictionary.Add(vector, vertexIndicesDictionary.Count);
+                vertexWeightsDictionary.Add(vector, 1);
                 vertices.Add(vector);
                 uvs.Add(new Vector2((float)(vertex.X / 640), (float)(vertex.Y / 480)));
             }
@@ -65,14 +71,19 @@ namespace KBMGraphics
                 var vcb = new Vector3((float)vb.X, (float)vb.Y, 0);
                 var vcc = new Vector3((float)vc.X, (float)vc.Y, 0);
 
-                var vai = verticesDictionary[vca];
-                var vbi = verticesDictionary[vcb];
-                var vci = verticesDictionary[vcc];
+                var vai = vertexIndicesDictionary[vca];
+                var vbi = vertexIndicesDictionary[vcb];
+                var vci = vertexIndicesDictionary[vcc];
 
                 indices.Add(vai);
                 indices.Add(vbi);
                 indices.Add(vci);
             }
+        }
+
+        public float GetVertexWeight(Vector3 vertex)
+        {
+            return vertexWeightsDictionary.ContainsKey(vertex) ? vertexWeightsDictionary[vertex] : 1;
         }
 
         public void ExportToObj(string path)

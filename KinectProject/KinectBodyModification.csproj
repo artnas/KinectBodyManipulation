@@ -101,6 +101,7 @@
     <Compile Include="LimbDataSkeleton.cs" />
     <Compile Include="LimbDataPixel.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="VertexQuadTree.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

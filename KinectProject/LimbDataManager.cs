@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using KBMGraphics;
 using Microsoft.Kinect;
 
@@ -12,14 +13,16 @@ namespace KinectBodyModification
     {
 
         private readonly KinectSensor sensor;
-        private readonly OutlineTriangulator _outlineTriangulator;
+        private readonly OutlineTriangulator outlineTriangulator;
+        public readonly VertexQuadTree vertexQuadTree;
 
         public LimbData limbData;
 
         public LimbDataManager(KinectSensor sensor)
         {
             this.sensor = sensor;
-            this._outlineTriangulator = new OutlineTriangulator(Configuration.width, Configuration.height);
+            this.outlineTriangulator = new OutlineTriangulator(Configuration.width, Configuration.height);
+            this.vertexQuadTree = new VertexQuadTree();
 
             this.limbData = new LimbData();
         }
@@ -90,8 +93,11 @@ namespace KinectBodyModification
 
             // update mesh
 
-            limbData.mesh.Update(_outlineTriangulator.GetMesh(GetSortedContour()));
+            limbData.mesh.Update(outlineTriangulator.GetMesh(GetSortedContour()));
             // limbData.mesh.ExportToObj("C:\\test.obj");
+
+            // vertexQuadTree.AssignVerticesToZones(limbData);
+            // UpdateMeshVertexWeights();
         }
 
         private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, JointPair jointPair, Queue<int> pixelsQueue)
@@ -498,6 +504,62 @@ namespace KinectBodyModification
                 }
             }
         }
+        //
+        // private void UpdateMeshVertexWeights()
+        // {
+        //     var quadSize = VertexQuadTree.quadSize;
+        //
+        //     Parallel.ForEach(limbData.mesh.vertices, vertexPosition =>
+        //     {
+        //         var coordinates = vertexQuadTree.GetZoneCoordinates(vertexPosition.X, vertexPosition.Y);
+        //
+        //         if (!Utils.AreCoordinatesInBounds(coordinates.X, coordinates.Y)) return;
+        //
+        //         var thisVertexPixelIndex = Utils.CoordinatesToIndex(coordinates.X, coordinates.Y);
+        //         var thisVertexBoneHash = limbData.allPixels[thisVertexPixelIndex].boneHash;
+        //
+        //         var surroundingZones = vertexQuadTree.GetSurroundingZones(coordinates);
+        //
+        //         float totalVerticesWeightSum = 1;
+        //         float correctVerticesWeightSum = 1;
+        //
+        //         if (thisVertexBoneHash != -1)
+        //         {
+        //             foreach (var zone in surroundingZones)
+        //             {
+        //                 foreach (var vertexInZone in zone.list)
+        //                 {
+        //                     if (vertexInZone == vertexPosition) continue;
+        //
+        //                     var distance = OpenTK.Vector3.Distance(vertexPosition, vertexInZone);
+        //
+        //                     if (distance > quadSize) continue;
+        //
+        //                     var distanceWeightPower = 1f - distance / quadSize;
+        //
+        //                     var vertexInZoneCoordinates = new Vector2Int(vertexInZone);
+        //
+        //                     var vertexInZonePixelIndex =
+        //                         Utils.CoordinatesToIndex(vertexInZoneCoordinates.X, vertexInZoneCoordinates.Y);
+        //                     var vertexInZoneBoneHash = limbData.allPixels[vertexInZonePixelIndex].boneHash;
+        //
+        //                     if (vertexInZoneBoneHash == -1) continue;
+        //
+        //                     if (thisVertexBoneHash == vertexInZoneBoneHash)
+        //                     {
+        //                         correctVerticesWeightSum += distanceWeightPower;
+        //                     }
+        //
+        //                     totalVerticesWeightSum += distanceWeightPower;
+        //                 }
+        //             }
+        //         }
+        //
+        //         float weight = correctVerticesWeightSum / totalVerticesWeightSum;
+        //
+        //         limbData.mesh.vertexWeightsDictionary[vertexPosition] = weight;
+        //     });
+        // }
 
         public void ExportContourAsPolyline(string path)
         {

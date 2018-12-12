@@ -266,15 +266,21 @@ namespace KBMGraphics
                             var b = sceneData.mesh.indices[i + 1];
                             var c = sceneData.mesh.indices[i + 2];
 
-                            var color = (sceneData.mesh.vertices[a].Z % 255) / 255f;
+                            // var color = (sceneData.mesh.vertices[a].Z % 255) / 255f;
+                            var colorA = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[a]) ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[a]] : 0;
+                            var colorB = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[b]) ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[b]] : 0;
+                            var colorC = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[c]) ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[c]] : 0;
 
-                            GL.Color3(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y, color);
+                            // GL.Color3(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y, colorA);
+                            GL.Color3(colorA, colorA, colorA);
                             GL.Vertex2(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y);
 
-                            GL.Color3(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y, color);
+                            // GL.Color3(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y, colorB);
+                            GL.Color3(colorB, colorB, colorB);
                             GL.Vertex2(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y);
 
-                            GL.Color3(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y, color);
+                            // GL.Color3(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y, colorC);
+                            GL.Color3(colorC, colorC, colorC);
                             GL.Vertex2(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y);
                         }
 

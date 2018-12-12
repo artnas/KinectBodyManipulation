@@ -52,7 +52,7 @@
     <Compile Include="OutlineTriangulator.cs" />
     <Compile Include="Renderer.cs" />
     <Compile Include="SceneData.cs" />
-    <Compile Include="Vertex.cs" />
+    <Compile Include="Vector2Int.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Settings.cs" />

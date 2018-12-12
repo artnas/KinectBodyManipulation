@@ -16,7 +16,7 @@ namespace UnitTestsProject
             for (int i = 0; i < f.Length; i++)
             {
                 f[i] = i / 100f;
-                v[i] = Curves.hillCurve.Evaluate(f[i]);
+                v[i] = Curves.legsCurve.Evaluate(f[i]);
             }
 
         }

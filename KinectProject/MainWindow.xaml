@@ -73,7 +73,7 @@
                         <TextBlock Grid.Row="0" TextWrapping="Wrap" Width="150">Tryb renderowania</TextBlock>
                         <ComboBox Grid.Row="1" Name="OpenGLDrawModeSelector" SelectionChanged="OpenGLDrawModeSelector_OnSelectionChanged">
                             <ComboBoxItem IsSelected="True">Normalny</ComboBoxItem>
-                            <ComboBoxItem>Tryb renderowania:</ComboBoxItem>
+                            <ComboBoxItem>Wagi wierzchołków</ComboBoxItem>
                             <ComboBoxItem>Linie</ComboBoxItem>
                         </ComboBox>
                     </Grid>
