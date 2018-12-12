@@ -4,19 +4,19 @@ namespace KinectBodyModification
 {
     public struct JointTypePair
     {
-        public JointType a;
-        public JointType b;
+        public JointType A;
+        public JointType B;
 
         public JointTypePair(Joint a, Joint b)
         {
-            this.a = a.JointType;
-            this.b = b.JointType;
+            A = a.JointType;
+            B = b.JointType;
         }
 
         public JointTypePair(JointType a, JointType b)
         {
-            this.a = a;
-            this.b = b;
+            A = a;
+            B = b;
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class Settings
     {
-        public enum GLDrawModeEnum
+        public enum GlDrawModeEnum
         {
             Normal,
             Uvs,
@@ -21,7 +21,7 @@
             DebugDrawSilhouette = false;
             DebugDrawOutline = false;
             DrawMorphs = true;
-            DrawMode = GLDrawModeEnum.Normal;
+            DrawMode = GlDrawModeEnum.Normal;
             OutlineSegmentation = 4;
             TriangleAreaLimit = 50;
         }
@@ -36,7 +36,7 @@
         public bool DebugDrawSilhouette { get; set; }
         public bool DebugDrawOutline { get; set; }
         public bool DrawMorphs { get; set; }
-        public GLDrawModeEnum DrawMode { get; set; }
+        public GlDrawModeEnum DrawMode { get; set; }
         public int OutlineSegmentation { get; set; }
         public int TriangleAreaLimit { get; set; }
 

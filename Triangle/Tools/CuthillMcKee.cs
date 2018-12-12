@@ -311,7 +311,7 @@ namespace TriangleNet.Tools
         ///    ACM Transactions on Mathematical Software,
         ///    Volume 2, pages 378-387, 1976.
         /// </remarks>
-        void FindRoot(ref int root, int[] mask, ref int level_num, int[] level_row,
+        void FindRoot(ref int root, int[] mask, ref int level_num, int[] levelRow,
             int[] level, int offset)
         {
             int[] pcol = matrix.ColumnPointers;
@@ -326,10 +326,10 @@ namespace TriangleNet.Tools
             int level_num2 = 0;
 
             // Determine the level structure rooted at ROOT.
-            GetLevelSet(ref root, mask, ref level_num, level_row, level, offset);
+            GetLevelSet(ref root, mask, ref level_num, levelRow, level, offset);
 
             // Count the number of nodes in this level structure.
-            iccsze = level_row[level_num] - 1;
+            iccsze = levelRow[level_num] - 1;
 
             // Extreme cases:
             //   A complete graph has a level set of only a single level.
@@ -348,7 +348,7 @@ namespace TriangleNet.Tools
             {
                 mindeg = iccsze;
 
-                jstrt = level_row[level_num - 1];
+                jstrt = levelRow[level_num - 1];
                 root = level[offset + jstrt - 1];
 
                 if (jstrt < iccsze)
@@ -378,7 +378,7 @@ namespace TriangleNet.Tools
                 }
 
                 // Generate the rooted level structure associated with this node.
-                GetLevelSet(ref root, mask, ref level_num2, level_row, level, offset);
+                GetLevelSet(ref root, mask, ref level_num2, levelRow, level, offset);
 
                 // If the number of levels did not increase, accept the new ROOT.
                 if (level_num2 <= level_num)
@@ -424,7 +424,7 @@ namespace TriangleNet.Tools
         ///    Computer Solution of Large Sparse Positive Definite Systems,
         ///    Prentice Hall, 1981.
         /// </remarks>
-        void GetLevelSet(ref int root, int[] mask, ref int level_num, int[] level_row,
+        void GetLevelSet(ref int root, int[] mask, ref int level_num, int[] levelRow,
             int[] level, int offset)
         {
             int[] pcol = matrix.ColumnPointers;
@@ -449,7 +449,7 @@ namespace TriangleNet.Tools
                 lbegin = lvlend + 1;
                 lvlend = iccsze;
                 level_num += 1;
-                level_row[level_num - 1] = lbegin;
+                levelRow[level_num - 1] = lbegin;
 
                 // Generate the next level by finding all the masked neighbors of nodes
                 // in the current level.
@@ -482,7 +482,7 @@ namespace TriangleNet.Tools
                 }
             }
 
-            level_row[level_num] = lvlend + 1;
+            levelRow[level_num] = lvlend + 1;
 
             // Reset MASK to 1 for the nodes in the level structure.
             for (i = 0; i < iccsze; i++)

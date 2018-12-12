@@ -9,9 +9,8 @@ namespace KinectBodyModification
     {
         private static void ProcessAllBoneWeights()
         {
-            foreach (var limbDataSkeleton in GB.limbDataManager.limbData.limbDataSkeletons)
-            foreach (var bone in limbDataSkeleton.bones)
-                switch (bone.boneHash)
+            foreach (var bone in GB.LimbDataManager.LimbData.LimbDataSkeleton.Bones)
+                switch (bone.BoneHash)
                 {
                     case 35: // head, shoulder center
                         ProcessBoneWeights(bone,
@@ -74,29 +73,29 @@ namespace KinectBodyModification
 
         private static void ProcessBoneWeights(LimbDataBone bone, List<BonePixels> pixelListsToCheck)
         {
-            if (bone.points.Count == 0)
+            if (bone.Points.Count == 0)
                 return;
 
-            var bonePixelData = GetBonePixelsDataFromBoneDictionary(bone.boneHash);
+            var bonePixelData = GetBonePixelsDataFromBoneDictionary(bone.BoneHash);
 
             if (bonePixelData == null)
                 return;
 
             const float distanceLimit = 32f;
-            var indices = bonePixelData.vertexIndices;
+            var indices = bonePixelData.VertexIndices;
 
             Parallel.ForEach(indices, vertexIndex =>
             {
-                var thisVertex = GB.limbDataManager.limbData.mesh.vertices[vertexIndex];
+                var thisVertex = GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex];
                 var thisVertex2D = new Vector2(thisVertex.X, thisVertex.Y);
 
                 var minDistance = float.MaxValue;
 
                 foreach (var whitelistPixelList in pixelListsToCheck)
                     if (whitelistPixelList != null)
-                        foreach (var otherVertexIndex in whitelistPixelList.vertexIndices)
+                        foreach (var otherVertexIndex in whitelistPixelList.VertexIndices)
                         {
-                            var otherVertex = GB.limbDataManager.limbData.mesh.vertices[otherVertexIndex];
+                            var otherVertex = GB.LimbDataManager.LimbData.Mesh.Vertices[otherVertexIndex];
                             var otherVertex2D = new Vector2(otherVertex.X, otherVertex.Y);
 
                             var distance = Vector2.Distance(thisVertex2D, otherVertex2D);
@@ -107,8 +106,8 @@ namespace KinectBodyModification
                 if (minDistance < distanceLimit)
                 {
                     var progress = minDistance / distanceLimit;
-                    GB.limbDataManager.limbData.mesh.vertexWeightsDictionary[thisVertex] =
-                        Curves.weightsSmoothingCurve.Evaluate(progress);
+                    GB.LimbDataManager.LimbData.Mesh.VertexWeightsDictionary[thisVertex] =
+                        Curves.WeightsSmoothingCurve.Evaluate(progress);
                 }
             });
         }

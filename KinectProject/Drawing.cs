@@ -6,11 +6,11 @@ namespace KinectBodyModification
 {
     public static partial class Drawing
     {
-        private static readonly byte[] clearBytes = GetClearBytes();
+        private static readonly byte[] ClearBytes = GetClearBytes();
 
         private static byte[] GetClearBytes()
         {
-            var clearBytes = new byte[Configuration.size * 4];
+            var clearBytes = new byte[Configuration.Size * 4];
 
             for (var i = 0; i < clearBytes.Length; i += 4)
             {
@@ -25,7 +25,7 @@ namespace KinectBodyModification
 
         public static void Clear()
         {
-            Array.Copy(clearBytes, GB.outputBuffer, clearBytes.Length);
+            Array.Copy(ClearBytes, GB.OutputBuffer, ClearBytes.Length);
         }
 
         private static void DrawThickDot(byte[] buffer, int index, int thickness, Color color)
@@ -33,7 +33,7 @@ namespace KinectBodyModification
             for (var y = -thickness; y <= thickness; y++)
             for (var x = -thickness; x <= thickness; x++)
             {
-                var offsetIndex = index + x * 4 + y * Configuration.width * 4;
+                var offsetIndex = index + x * 4 + y * Configuration.Width * 4;
 
                 if (offsetIndex < 0 || offsetIndex >= buffer.Length)
                     continue;
@@ -47,77 +47,77 @@ namespace KinectBodyModification
 
         public static void DrawBackground()
         {
-            Array.Copy(GB.savedBackgroundColorBuffer, GB.outputBuffer, GB.outputBuffer.Length);
+            Array.Copy(GB.SavedBackgroundColorBuffer, GB.OutputBuffer, GB.OutputBuffer.Length);
         }
 
         public static void DrawColorBuffer()
         {
-            Array.Copy(GB.colorBuffer, GB.outputBuffer, GB.outputBuffer.Length);
+            Array.Copy(GB.ColorBuffer, GB.OutputBuffer, GB.OutputBuffer.Length);
         }
 
         public static void DrawDepthBuffer()
         {
-            for (var i = 0; i < GB.depthBuffer.Length; i++)
+            for (var i = 0; i < GB.DepthBuffer.Length; i++)
             {
                 var index = i * 4;
-                GB.outputBuffer[index + 0] = (byte) (GB.depthBuffer[i].Depth % 256);
-                GB.outputBuffer[index + 1] = (byte) (GB.depthBuffer[i].Depth % 256);
-                GB.outputBuffer[index + 2] = (byte) (GB.depthBuffer[i].Depth % 256);
-                GB.outputBuffer[index + 3] = (byte) (GB.depthBuffer[i].Depth % 256);
+                GB.OutputBuffer[index + 0] = (byte) (GB.DepthBuffer[i].Depth % 256);
+                GB.OutputBuffer[index + 1] = (byte) (GB.DepthBuffer[i].Depth % 256);
+                GB.OutputBuffer[index + 2] = (byte) (GB.DepthBuffer[i].Depth % 256);
+                GB.OutputBuffer[index + 3] = (byte) (GB.DepthBuffer[i].Depth % 256);
             }
         }
 
         public static void DrawDepthDifference()
         {
-            for (var i = 0; i < GB.depthBuffer.Length; i++)
+            for (var i = 0; i < GB.DepthBuffer.Length; i++)
             {
                 var index = i * 4;
-                var difference = (short) Math.Abs(GB.savedBackgroundDepthBuffer[i].Depth - GB.depthBuffer[i].Depth);
+                var difference = (short) Math.Abs(GB.SavedBackgroundDepthBuffer[i].Depth - GB.DepthBuffer[i].Depth);
 
-                if (difference > Configuration.depthThreshold)
+                if (difference > Configuration.DepthThreshold)
                 {
-                    GB.outputBuffer[index + 0] = (byte) (difference % 256);
-                    GB.outputBuffer[index + 1] = (byte) (difference % 256);
-                    GB.outputBuffer[index + 2] = (byte) (difference % 256);
-                    GB.outputBuffer[index + 3] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 0] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 1] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 2] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 3] = (byte) (difference % 256);
                 }
                 else
                 {
-                    GB.outputBuffer[index + 0] = 0;
-                    GB.outputBuffer[index + 1] = 0;
-                    GB.outputBuffer[index + 2] = 0;
-                    GB.outputBuffer[index + 3] = 0;
+                    GB.OutputBuffer[index + 0] = 0;
+                    GB.OutputBuffer[index + 1] = 0;
+                    GB.OutputBuffer[index + 2] = 0;
+                    GB.OutputBuffer[index + 3] = 0;
                 }
             }
         }
 
         public static void DrawMappedDepthDifference()
         {
-            for (var i = 0; i < GB.depthBuffer.Length; i++)
+            for (var i = 0; i < GB.DepthBuffer.Length; i++)
             {
                 var index = i * 4;
 
                 var mappedDepthBufferIndex =
-                    Utils.CoordinatesToIndex(GB.depthCoordinates[i].X, GB.depthCoordinates[i].Y);
+                    Utils.CoordinatesToIndex(GB.DepthCoordinates[i].X, GB.DepthCoordinates[i].Y);
 
-                if (mappedDepthBufferIndex < 0 || mappedDepthBufferIndex >= GB.depthBuffer.Length) continue;
+                if (mappedDepthBufferIndex < 0 || mappedDepthBufferIndex >= GB.DepthBuffer.Length) continue;
 
-                var difference = (short) Math.Abs(GB.savedBackgroundDepthBuffer[mappedDepthBufferIndex].Depth -
-                                                  GB.depthBuffer[mappedDepthBufferIndex].Depth);
+                var difference = (short) Math.Abs(GB.SavedBackgroundDepthBuffer[mappedDepthBufferIndex].Depth -
+                                                  GB.DepthBuffer[mappedDepthBufferIndex].Depth);
 
-                if (difference > Configuration.depthThreshold)
+                if (difference > Configuration.DepthThreshold)
                 {
-                    GB.outputBuffer[index + 0] = (byte) (difference % 256);
-                    GB.outputBuffer[index + 1] = (byte) (difference % 256);
-                    GB.outputBuffer[index + 2] = (byte) (difference % 256);
-                    GB.outputBuffer[index + 3] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 0] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 1] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 2] = (byte) (difference % 256);
+                    GB.OutputBuffer[index + 3] = (byte) (difference % 256);
                 }
                 else
                 {
-                    GB.outputBuffer[index + 0] = GB.colorBuffer[index + 0];
-                    GB.outputBuffer[index + 1] = GB.colorBuffer[index + 1];
-                    GB.outputBuffer[index + 2] = GB.colorBuffer[index + 2];
-                    GB.outputBuffer[index + 3] = 255;
+                    GB.OutputBuffer[index + 0] = GB.ColorBuffer[index + 0];
+                    GB.OutputBuffer[index + 1] = GB.ColorBuffer[index + 1];
+                    GB.OutputBuffer[index + 2] = GB.ColorBuffer[index + 2];
+                    GB.OutputBuffer[index + 3] = 255;
                 }
             }
         }

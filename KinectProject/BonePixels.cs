@@ -4,11 +4,11 @@ namespace KinectBodyModification
 {
     public class BonePixels
     {
-        public readonly HashSet<int> vertexIndices;
+        public readonly HashSet<int> VertexIndices;
 
         public BonePixels()
         {
-            vertexIndices = new HashSet<int>();
+            VertexIndices = new HashSet<int>();
         }
     }
 }

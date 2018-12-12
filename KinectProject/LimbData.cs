@@ -5,21 +5,21 @@ namespace KinectBodyModification
 {
     public class LimbData
     {
-        public HashSet<int> activePixels;
-        public LimbDataPixel[] allPixels;
-        public HashSet<int> contourPixels;
-        public List<LimbDataSkeleton> limbDataSkeletons = new List<LimbDataSkeleton>();
+        public HashSet<int> ActivePixels;
+        public LimbDataPixel[] AllPixels;
+        public HashSet<int> ContourPixels;
+        public LimbDataSkeleton LimbDataSkeleton;
 
-        public Mesh mesh;
+        public Mesh Mesh;
 
         public LimbData()
         {
-            activePixels = new HashSet<int>();
-            contourPixels = new HashSet<int>();
-            allPixels = new LimbDataPixel[Configuration.size];
-            for (var i = 0; i < Configuration.size; i++) allPixels[i] = new LimbDataPixel();
+            ActivePixels = new HashSet<int>();
+            ContourPixels = new HashSet<int>();
+            AllPixels = new LimbDataPixel[Configuration.Size];
+            for (var i = 0; i < Configuration.Size; i++) AllPixels[i] = new LimbDataPixel();
 
-            mesh = new Mesh();
+            Mesh = new Mesh();
         }
     }
 }

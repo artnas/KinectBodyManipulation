@@ -2,6 +2,6 @@
 {
     public class SceneData
     {
-        public Mesh mesh;
+        public Mesh Mesh;
     }
 }

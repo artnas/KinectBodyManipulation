@@ -5,22 +5,32 @@ namespace KinectBodyModification
 {
     public class LimbDataSkeleton
     {
-        public List<LimbDataBone> bones;
-        public Skeleton skeleton;
+        public List<LimbDataBone> Bones;
+        public Skeleton Skeleton;
 
         public LimbDataSkeleton(Skeleton skeleton)
         {
-            this.skeleton = skeleton;
+            Skeleton = skeleton;
 
-            bones = new List<LimbDataBone>();
+            Bones = new List<LimbDataBone>();
 
             foreach (JointPair jointPair in Utils.SkeletonIterator(skeleton))
-                bones.Add(new LimbDataBone(jointPair.a, jointPair.b));
+                Bones.Add(new LimbDataBone(jointPair.A, jointPair.B));
+        }
+
+        public void Update(Skeleton skeleton)
+        {
+            Skeleton = skeleton;
+
+            Bones = new List<LimbDataBone>();
+
+            foreach (JointPair jointPair in Utils.SkeletonIterator(skeleton))
+                Bones.Add(new LimbDataBone(jointPair.A, jointPair.B));
         }
 
         public LimbDataBone GetBoneByJointPair(JointPair jointPair)
         {
-            return GetBoneByJointPair(jointPair.a.JointType, jointPair.b.JointType);
+            return GetBoneByJointPair(jointPair.A.JointType, jointPair.B.JointType);
         }
 
         public LimbDataBone GetBoneByJointPair(Joint a, Joint b)
@@ -30,8 +40,8 @@ namespace KinectBodyModification
 
         public LimbDataBone GetBoneByJointPair(JointType a, JointType b)
         {
-            foreach (var bone in bones)
-                if (bone.startJoint.JointType == a && bone.endJoint.JointType == b)
+            foreach (var bone in Bones)
+                if (bone.StartJoint.JointType == a && bone.EndJoint.JointType == b)
                     return bone;
 
             return null;

@@ -4,11 +4,11 @@ namespace KinectBodyModification
 {
     public class Curve
     {
-        private readonly float[] values;
+        private readonly float[] _values;
 
         public Curve(float[] values)
         {
-            this.values = values;
+            this._values = values;
         }
 
         public static Curve FromSin(float startRad, float endRad)
@@ -35,12 +35,12 @@ namespace KinectBodyModification
 
         public float Evaluate(float progress)
         {
-            return Evaluate(values, progress);
+            return Evaluate(_values, progress);
         }
 
         public float Evaluate(float progress, float power)
         {
-            var value = Evaluate(values, progress);
+            var value = Evaluate(_values, progress);
 
             return (float) Math.Pow(value, power);
         }

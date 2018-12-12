@@ -6,7 +6,7 @@ namespace KinectBodyModification
 {
     public static partial class BoneProcessor
     {
-        private static readonly Dictionary<int, BonePixels> bonePixelsDictionary = new Dictionary<int, BonePixels>(20);
+        private static readonly Dictionary<int, BonePixels> BonePixelsDictionary = new Dictionary<int, BonePixels>(20);
 
         public static void ProcessAllBones()
         {
@@ -19,29 +19,29 @@ namespace KinectBodyModification
         private static void AssignBonePixelsToDictionaries()
         {
             // wyczysc listy
-            foreach (var entry in bonePixelsDictionary) entry.Value.vertexIndices.Clear();
+            foreach (var entry in BonePixelsDictionary) entry.Value.VertexIndices.Clear();
 
-            for (var i = 0; i < GB.limbDataManager.limbData.mesh.vertices.Count; i++)
+            for (var i = 0; i < GB.LimbDataManager.LimbData.Mesh.Vertices.Count; i++)
             {
-                var vertex = GB.limbDataManager.limbData.mesh.vertices[i];
+                var vertex = GB.LimbDataManager.LimbData.Mesh.Vertices[i];
 
                 var x = (int) Math.Round(vertex.X);
                 var y = (int) Math.Round(vertex.Y);
 
                 var index = Utils.CoordinatesToIndex(x, y);
 
-                var limbPixel = GB.limbDataManager.limbData.allPixels[index];
+                var limbPixel = GB.LimbDataManager.LimbData.AllPixels[index];
 
-                if (limbPixel.humanIndex != -1)
+                if (limbPixel.HumanIndex != -1)
                 {
-                    if (bonePixelsDictionary.ContainsKey(limbPixel.boneHash))
+                    if (BonePixelsDictionary.ContainsKey(limbPixel.BoneHash))
                     {
-                        bonePixelsDictionary[limbPixel.boneHash].vertexIndices.Add(i);
+                        BonePixelsDictionary[limbPixel.BoneHash].VertexIndices.Add(i);
                     }
                     else
                     {
-                        bonePixelsDictionary.Add(limbPixel.boneHash, new BonePixels());
-                        bonePixelsDictionary[limbPixel.boneHash].vertexIndices.Add(i);
+                        BonePixelsDictionary.Add(limbPixel.BoneHash, new BonePixels());
+                        BonePixelsDictionary[limbPixel.BoneHash].VertexIndices.Add(i);
                     }
                 }
             }
@@ -49,18 +49,18 @@ namespace KinectBodyModification
 
         private static BonePixels GetBonePixelsDataFromBoneDictionary(int boneHash)
         {
-            if (!bonePixelsDictionary.ContainsKey(boneHash)
-                || bonePixelsDictionary[boneHash] == null
-                || bonePixelsDictionary[boneHash].vertexIndices.Count == 0)
+            if (!BonePixelsDictionary.ContainsKey(boneHash)
+                || BonePixelsDictionary[boneHash] == null
+                || BonePixelsDictionary[boneHash].VertexIndices.Count == 0)
                 return null;
 
-            return bonePixelsDictionary[boneHash];
+            return BonePixelsDictionary[boneHash];
         }
 
         private struct StretchParameters
         {
-            public Curve curve;
-            public float power;
+            public Curve Curve;
+            public float Power;
         }
     }
 }

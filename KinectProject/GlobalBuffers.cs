@@ -9,22 +9,20 @@ namespace KinectBodyModification
     /// </summary>
     public static class GlobalBuffers
     {
-        public static DepthImagePixel[] depthBuffer;
+        public static DepthImagePixel[] DepthBuffer;
 
-        public static byte[] colorBuffer;
-        public static byte[] savedBackgroundColorBuffer;
+        public static byte[] ColorBuffer;
+        public static byte[] SavedBackgroundColorBuffer;
 
-        public static byte[] outputBuffer;
-        public static byte[] backgroundRemovedBuffer;
+        public static byte[] OutputBuffer;
+        public static byte[] BackgroundRemovedBuffer;
 
-        public static int[] playerPixelData;
+        public static DepthImagePixel[] SavedBackgroundDepthBuffer;
+        public static BackgroundRemovedColorStream BackgroundRemovedColorStream;
 
-        public static DepthImagePixel[] savedBackgroundDepthBuffer;
-        public static BackgroundRemovedColorStream backgroundRemovedColorStream;
+        public static ColorImagePoint[] ColorCoordinates;
+        public static DepthImagePoint[] DepthCoordinates;
 
-        public static ColorImagePoint[] colorCoordinates;
-        public static DepthImagePoint[] depthCoordinates;
-
-        public static LimbDataManager limbDataManager;
+        public static LimbDataManager LimbDataManager;
     }
 }

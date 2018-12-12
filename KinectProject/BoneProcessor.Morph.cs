@@ -7,22 +7,21 @@ namespace KinectBodyModification
     {
         private static void MorphAllBones()
         {
-            foreach (var limbDataSkeleton in GB.limbDataManager.limbData.limbDataSkeletons)
-            foreach (var bone in limbDataSkeleton.bones)
+            foreach (var bone in GB.LimbDataManager.LimbData.LimbDataSkeleton.Bones)
                 MorphBone(bone);
         }
 
         private static void MorphBone(LimbDataBone bone)
         {
-            if (bone.points.Count == 0)
+            if (bone.Points.Count == 0)
                 return;
 
-            var bonePixelData = GetBonePixelsDataFromBoneDictionary(bone.boneHash);
+            var bonePixelData = GetBonePixelsDataFromBoneDictionary(bone.BoneHash);
 
             if (bonePixelData == null)
                 return;
 
-            switch (bone.boneHash)
+            switch (bone.BoneHash)
             {
                 case 35: // head, shoulder center
                     MorphBoneGrow(bone, bonePixelData, Settings.Instance.HeadSize / 100f - 1f);
@@ -33,8 +32,8 @@ namespace KinectBodyModification
                 case 101:
                     MorphBoneStretch(bone, bonePixelData, new StretchParameters
                     {
-                        curve = Curves.armsCurve,
-                        power = Settings.Instance.ArmScale / 100f
+                        Curve = Curves.ArmsCurve,
+                        Power = Settings.Instance.ArmScale / 100f
                     });
                     break;
                 case 272: // legs
@@ -43,8 +42,8 @@ namespace KinectBodyModification
                 case 237:
                     MorphBoneStretch(bone, bonePixelData, new StretchParameters
                     {
-                        curve = Curves.legsCurve,
-                        power = Settings.Instance.LegScale / 100f
+                        Curve = Curves.LegsCurve,
+                        Power = Settings.Instance.LegScale / 100f
                     });
                     break;
                 // case 186:   // hands, feet
@@ -58,70 +57,70 @@ namespace KinectBodyModification
 
         private static void MorphBoneBloat(LimbDataBone bone, BonePixels bonePixel, float scale)
         {
-            var boneStartPoint = new Vector2(bone.startPoint.X, bone.startPoint.Y);
-            var boneEndPoint = new Vector2(bone.endPoint.X, bone.endPoint.Y);
+            var boneStartPoint = new Vector2(bone.StartPoint.X, bone.StartPoint.Y);
+            var boneEndPoint = new Vector2(bone.EndPoint.X, bone.EndPoint.Y);
 
-            var indices = bonePixel.vertexIndices;
+            var indices = bonePixel.VertexIndices;
 
             foreach (var vertexIndex in indices)
             {
-                var vertex = GB.limbDataManager.limbData.mesh.vertices[vertexIndex];
+                var vertex = GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex];
                 var vertexPoint = new Vector2(vertex.X, vertex.Y);
-                var vertexWeight = GB.limbDataManager.limbData.mesh.GetVertexWeight(vertex);
+                var vertexWeight = GB.LimbDataManager.LimbData.Mesh.GetVertexWeight(vertex);
 
                 var distance = Vector2.Distance(vertexPoint, boneEndPoint);
                 var directionVector = Vector2.Normalize(vertexPoint - boneStartPoint);
 
                 vertex.X += distance * directionVector.X * scale * vertexWeight / 2f;
                 vertex.Y += distance * directionVector.Y * scale * vertexWeight / 2f;
-                vertex.Z = bone.boneHash;
+                vertex.Z = bone.BoneHash;
 
-                GB.limbDataManager.limbData.mesh.vertices[vertexIndex] = vertex;
+                GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex] = vertex;
             }
         }
 
         private static void MorphBoneGrow(LimbDataBone bone, BonePixels bonePixel, float scale)
         {
-            var boneStartPoint = new Vector2(bone.startPoint.X, bone.startPoint.Y);
-            var boneEndPoint = new Vector2(bone.endPoint.X, bone.endPoint.Y);
+            var boneStartPoint = new Vector2(bone.StartPoint.X, bone.StartPoint.Y);
+            var boneEndPoint = new Vector2(bone.EndPoint.X, bone.EndPoint.Y);
 
-            var indices = bonePixel.vertexIndices;
+            var indices = bonePixel.VertexIndices;
 
             foreach (var vertexIndex in indices)
             {
-                var vertex = GB.limbDataManager.limbData.mesh.vertices[vertexIndex];
+                var vertex = GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex];
                 var vertexPoint = new Vector2(vertex.X, vertex.Y);
-                var vertexWeight = GB.limbDataManager.limbData.mesh.GetVertexWeight(vertex);
+                var vertexWeight = GB.LimbDataManager.LimbData.Mesh.GetVertexWeight(vertex);
 
                 var distance = Vector2.Distance(vertexPoint, boneEndPoint);
                 var directionVector = Vector2.Normalize(vertexPoint - boneEndPoint);
 
                 vertex.X += distance * directionVector.X * scale * vertexWeight / 2f;
                 vertex.Y += distance * directionVector.Y * scale * vertexWeight / 2f;
-                vertex.Z = bone.boneHash;
+                vertex.Z = bone.BoneHash;
 
-                GB.limbDataManager.limbData.mesh.vertices[vertexIndex] = vertex;
+                GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex] = vertex;
             }
         }
 
         private static void MorphBoneStretch(LimbDataBone bone, BonePixels bonePixel,
             StretchParameters stretchParameters)
         {
-            stretchParameters.power -= 1f;
+            stretchParameters.Power -= 1f;
 
-            var boneStartPoint = new Vector2(bone.startPoint.X, bone.startPoint.Y);
-            var boneEndPoint = new Vector2(bone.endPoint.X, bone.endPoint.Y);
+            var boneStartPoint = new Vector2(bone.StartPoint.X, bone.StartPoint.Y);
+            var boneEndPoint = new Vector2(bone.EndPoint.X, bone.EndPoint.Y);
             var boneLength = Vector2.Distance(boneStartPoint, boneEndPoint);
 
-            var indices = bonePixel.vertexIndices;
+            var indices = bonePixel.VertexIndices;
 
             foreach (var vertexIndex in indices)
             {
-                var vertex = GB.limbDataManager.limbData.mesh.vertices[vertexIndex];
+                var vertex = GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex];
                 var vertexPoint = new Vector2(vertex.X, vertex.Y);
-                var vertexWeight = GB.limbDataManager.limbData.mesh.GetVertexWeight(vertex);
+                var vertexWeight = GB.LimbDataManager.LimbData.Mesh.GetVertexWeight(vertex);
 
-                var closestPointOnLine3D = Utils.GetClosestPointOnLine(bone.startPoint, bone.endPoint,
+                var closestPointOnLine3D = Utils.GetClosestPointOnLine(bone.StartPoint, bone.EndPoint,
                     new Vector3(vertexPoint.X, vertexPoint.Y, 0));
                 var closestPointOnLine2D = new Vector2(closestPointOnLine3D.X, closestPointOnLine3D.Y);
 
@@ -135,15 +134,15 @@ namespace KinectBodyModification
 
                 var distanceMultiplier = distance / 2f;
 
-                var curveScale = 1f + stretchParameters.power * stretchParameters.curve.Evaluate(progressOnLine);
+                var curveScale = 1f + stretchParameters.Power * stretchParameters.Curve.Evaluate(progressOnLine);
 
-                vertex.X += curveScale * directionVector.X * stretchParameters.power * distanceMultiplier *
+                vertex.X += curveScale * directionVector.X * stretchParameters.Power * distanceMultiplier *
                             vertexWeight;
-                vertex.Y += curveScale * directionVector.Y * stretchParameters.power * distanceMultiplier *
+                vertex.Y += curveScale * directionVector.Y * stretchParameters.Power * distanceMultiplier *
                             vertexWeight;
-                vertex.Z = bone.boneHash;
+                vertex.Z = bone.BoneHash;
 
-                GB.limbDataManager.limbData.mesh.vertices[vertexIndex] = vertex;
+                GB.LimbDataManager.LimbData.Mesh.Vertices[vertexIndex] = vertex;
             }
         }
     }

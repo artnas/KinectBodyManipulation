@@ -6,41 +6,37 @@ namespace KBMGraphics
 {
     public class Mesh
     {
-        public List<Vector3> vertices;
-        public List<int> indices;
-        public List<Vector2> uvs;
+        public List<Vector3> Vertices;
+        public List<int> Indices;
+        public List<Vector2> Uvs;
 
-        public Dictionary<Vector3, float> vertexWeightsDictionary;
+        public Dictionary<Vector3, float> VertexWeightsDictionary;
 
-        private readonly Dictionary<Vector3, int> vertexIndicesDictionary;
+        private readonly Dictionary<Vector3, int> _vertexIndicesDictionary;
 
         public Mesh()
         {
-            vertices = new List<Vector3>();
-            indices = new List<int>();
-            uvs = new List<Vector2>();
-            vertexIndicesDictionary = new Dictionary<Vector3, int>();
-            vertexWeightsDictionary = new Dictionary<Vector3, float>();
+            Vertices = new List<Vector3>();
+            Indices = new List<int>();
+            Uvs = new List<Vector2>();
+            VertexWeightsDictionary = new Dictionary<Vector3, float>();
+
+            _vertexIndicesDictionary = new Dictionary<Vector3, int>();
         }
 
-        public Mesh(TriangleNet.Mesh mesh)
+        public Mesh(TriangleNet.Mesh mesh) : this()
         {
-            vertices = new List<Vector3>();
-            indices = new List<int>();
-            uvs = new List<Vector2>();
-            vertexIndicesDictionary = new Dictionary<Vector3, int>();
-            vertexWeightsDictionary = new Dictionary<Vector3, float>();
-
             Update(mesh);
         }
 
         public void Update(TriangleNet.Mesh mesh)
         {
-            vertices.Clear();
-            indices.Clear();
-            uvs.Clear();
-            vertexIndicesDictionary.Clear();
-            vertexWeightsDictionary.Clear();
+            Vertices.Clear();
+            Indices.Clear();
+            Uvs.Clear();
+            VertexWeightsDictionary.Clear();
+
+            _vertexIndicesDictionary.Clear();
 
             if (mesh == null) return;
 
@@ -49,10 +45,10 @@ namespace KBMGraphics
             foreach (var vertex in mesh.Vertices)
             {
                 var vector = new Vector3((float) vertex.X, (float) vertex.Y, 0);
-                vertexIndicesDictionary.Add(vector, vertexIndicesDictionary.Count);
-                vertexWeightsDictionary.Add(vector, 1);
-                vertices.Add(vector);
-                uvs.Add(new Vector2((float) (vertex.X / 640), (float) (vertex.Y / 480)));
+                _vertexIndicesDictionary.Add(vector, _vertexIndicesDictionary.Count);
+                VertexWeightsDictionary.Add(vector, 1);
+                Vertices.Add(vector);
+                Uvs.Add(new Vector2((float) (vertex.X / 640), (float) (vertex.Y / 480)));
             }
 
             foreach (var meshTriangle in mesh.Triangles)
@@ -65,31 +61,31 @@ namespace KBMGraphics
                 var vcb = new Vector3((float) vb.X, (float) vb.Y, 0);
                 var vcc = new Vector3((float) vc.X, (float) vc.Y, 0);
 
-                var vai = vertexIndicesDictionary[vca];
-                var vbi = vertexIndicesDictionary[vcb];
-                var vci = vertexIndicesDictionary[vcc];
+                var vai = _vertexIndicesDictionary[vca];
+                var vbi = _vertexIndicesDictionary[vcb];
+                var vci = _vertexIndicesDictionary[vcc];
 
-                indices.Add(vai);
-                indices.Add(vbi);
-                indices.Add(vci);
+                Indices.Add(vai);
+                Indices.Add(vbi);
+                Indices.Add(vci);
             }
         }
 
         public float GetVertexWeight(Vector3 vertex)
         {
-            return vertexWeightsDictionary.ContainsKey(vertex) ? vertexWeightsDictionary[vertex] : 1;
+            return VertexWeightsDictionary.ContainsKey(vertex) ? VertexWeightsDictionary[vertex] : 1;
         }
 
         public void ExportToObj(string path)
         {
             var sList = new List<string>();
 
-            foreach (var v in vertices) sList.Add($"v {v.X} {v.Y} 0");
+            foreach (var v in Vertices) sList.Add($"v {v.X} {v.Y} 0");
 
-            foreach (var u in uvs) sList.Add($"vt {u.X} {u.Y} 0");
+            foreach (var u in Uvs) sList.Add($"vt {u.X} {u.Y} 0");
 
-            for (var i = 0; i < indices.Count; i += 3)
-                sList.Add($"f {indices[i] + 1} {indices[i + 1] + 1} {indices[i + 2] + 1}");
+            for (var i = 0; i < Indices.Count; i += 3)
+                sList.Add($"f {Indices[i] + 1} {Indices[i + 1] + 1} {Indices[i + 2] + 1}");
 
             File.WriteAllLines(path, sList);
         }

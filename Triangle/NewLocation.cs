@@ -2320,8 +2320,8 @@ namespace TriangleNet
         /// <param name="neighotri">Pointer for the neighbor triangle.</param>
         /// <returns>Returns true if vertex was found.</returns>
         private bool GetNeighborsVertex(Otri badotri,
-                        double first_x, double first_y,
-                        double second_x, double second_y,
+                        double first_x, double firstY,
+                        double secondX, double secondY,
                         ref double[] thirdpoint, ref Otri neighotri)
         {
 
@@ -2365,19 +2365,19 @@ namespace TriangleNet
                         // begin searching for the correct neighbor triangle
                         firstVertexMatched = 0;
                         if ((Math.Abs(first_x - neighborvertex_1.x) < EPS) &&
-                             (Math.Abs(first_y - neighborvertex_1.y) < EPS))
+                             (Math.Abs(firstY - neighborvertex_1.y) < EPS))
                         {
                             firstVertexMatched = 11; // neighbor's 1st vertex is matched to first vertex
 
                         }
                         else if ((Math.Abs(first_x - neighborvertex_2.x) < EPS) &&
-                               (Math.Abs(first_y - neighborvertex_2.y) < EPS))
+                               (Math.Abs(firstY - neighborvertex_2.y) < EPS))
                         {
                             firstVertexMatched = 12; // neighbor's 2nd vertex is matched to first vertex
 
                         }
                         else if ((Math.Abs(first_x - neighborvertex_3.x) < EPS) &&
-                                   (Math.Abs(first_y - neighborvertex_3.y) < EPS))
+                                   (Math.Abs(firstY - neighborvertex_3.y) < EPS))
                         {
                             firstVertexMatched = 13; // neighbor's 3rd vertex is matched to first vertex
 
@@ -2386,18 +2386,18 @@ namespace TriangleNet
                 } // end of first vertex matching */
 
                         secondVertexMatched = 0;
-                        if ((Math.Abs(second_x - neighborvertex_1.x) < EPS) &&
-                            (Math.Abs(second_y - neighborvertex_1.y) < EPS))
+                        if ((Math.Abs(secondX - neighborvertex_1.x) < EPS) &&
+                            (Math.Abs(secondY - neighborvertex_1.y) < EPS))
                         {
                             secondVertexMatched = 21; // neighbor's 1st vertex is matched to second vertex
                         }
-                        else if ((Math.Abs(second_x - neighborvertex_2.x) < EPS) &&
-                           (Math.Abs(second_y - neighborvertex_2.y) < EPS))
+                        else if ((Math.Abs(secondX - neighborvertex_2.x) < EPS) &&
+                           (Math.Abs(secondY - neighborvertex_2.y) < EPS))
                         {
                             secondVertexMatched = 22; // neighbor's 2nd vertex is matched to second vertex
                         }
-                        else if ((Math.Abs(second_x - neighborvertex_3.x) < EPS) &&
-                               (Math.Abs(second_y - neighborvertex_3.y) < EPS))
+                        else if ((Math.Abs(secondX - neighborvertex_3.x) < EPS) &&
+                               (Math.Abs(secondY - neighborvertex_3.y) < EPS))
                         {
                             secondVertexMatched = 23; // neighbor's 3rd vertex is matched to second vertex
                         }/*else{	

@@ -99,6 +99,8 @@
     <Compile Include="JointPair.cs" />
     <Compile Include="LimbData.cs" />
     <Compile Include="LimbDataBone.cs" />
+    <Compile Include="LimbDataManager.Skeleton.cs" />
+    <Compile Include="LimbDataManager.Contour.cs" />
     <Compile Include="LimbDataSkeleton.cs" />
     <Compile Include="LimbDataPixel.cs" />
     <Compile Include="Utils.cs" />

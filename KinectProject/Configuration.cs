@@ -9,14 +9,14 @@ namespace KinectBodyModification
         public const DepthImageFormat DepthFormat = DepthImageFormat.Resolution640x480Fps30;
         public const ColorImageFormat ColorFormat = ColorImageFormat.RgbResolution640x480Fps30;
 
-        public static readonly int width = 640;
-        public static readonly int height = 480;
-        public static readonly int size = width * height;
+        public static readonly int Width = 640;
+        public static readonly int Height = 480;
+        public static readonly int Size = Width * Height;
 
-        public static readonly byte alphaThreshold = 120;
-        public static readonly short depthThreshold = 150;
+        public static readonly byte AlphaThreshold = 120;
+        public static readonly short DepthThreshold = 150;
 
-        public static readonly Dictionary<JointTypePair, BoneConfiguration> boneConfigurationsDictionary =
+        public static readonly Dictionary<JointTypePair, BoneConfiguration> BoneConfigurationsDictionary =
             new Dictionary<JointTypePair, BoneConfiguration>
             {
                 {
@@ -126,42 +126,42 @@ namespace KinectBodyModification
                 }
             };
 
-        private static Dictionary<int, Color> boneColorsDictionary;
+        private static Dictionary<int, Color> _boneColorsDictionary;
 
         public static Color GetBoneColor(int boneHash)
         {
-            if (boneColorsDictionary == null)
+            if (_boneColorsDictionary == null)
             {
-                boneColorsDictionary = new Dictionary<int, Color>();
+                _boneColorsDictionary = new Dictionary<int, Color>();
 
-                foreach (var entry in boneConfigurationsDictionary)
+                foreach (var entry in BoneConfigurationsDictionary)
                 {
-                    var hash = Utils.GetBoneHash(entry.Key.a, entry.Key.b);
+                    var hash = Utils.GetBoneHash(entry.Key.A, entry.Key.B);
 
-                    boneColorsDictionary.Add(hash, entry.Value.color);
+                    _boneColorsDictionary.Add(hash, entry.Value.Color);
                 }
             }
 
-            return boneColorsDictionary[boneHash];
+            return _boneColorsDictionary[boneHash];
         }
     }
 
     public class BoneConfiguration
     {
-        public Color color;
-        public JointTypePair jointTypePair;
-        public float startOffset, endOffset;
-        public int startWidth, endWidth;
+        public Color Color;
+        public JointTypePair JointTypePair;
+        public float StartOffset, EndOffset;
+        public int StartWidth, EndWidth;
 
         public BoneConfiguration(JointTypePair jointTypePair, float startOffset, float endOffset, int startWidth,
             int endWidth, Color color)
         {
-            this.jointTypePair = jointTypePair;
-            this.startOffset = startOffset;
-            this.endOffset = endOffset;
-            this.startWidth = startWidth;
-            this.endWidth = endWidth;
-            this.color = color;
+            JointTypePair = jointTypePair;
+            StartOffset = startOffset;
+            EndOffset = endOffset;
+            StartWidth = startWidth;
+            EndWidth = endWidth;
+            Color = color;
         }
     }
 }

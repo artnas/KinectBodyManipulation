@@ -8,15 +8,15 @@ namespace KBMGraphics
 {
     public class OutlineTriangulator
     {
-        public readonly int width, height;
-        private readonly QualityOptions QualityOptions;
-        private readonly List<Vertex> pointsList = new List<Vertex>();
+        public readonly int Width, Height;
+        private readonly QualityOptions _qualityOptions;
+        private readonly List<Vertex> _pointsList = new List<Vertex>();
 
         public OutlineTriangulator(int width, int height)
         {
-            this.width = width;
-            this.height = height;
-            QualityOptions = new QualityOptions();
+            this.Width = width;
+            this.Height = height;
+            _qualityOptions = new QualityOptions();
         }
 
         public TriangleNet.Mesh GetMesh(HashSet<int> contourIndices)
@@ -52,7 +52,7 @@ namespace KBMGraphics
 
         private List<Vertex> GetContourPoints(HashSet<int> contourIndices)
         {
-            pointsList.Clear();
+            _pointsList.Clear();
 
             var segmentation = Settings.Instance.OutlineSegmentation;
 
@@ -67,18 +67,18 @@ namespace KBMGraphics
 
                 counter++;
 
-                var x = index % width;
-                var y = (index - x) / width;
+                var x = index % Width;
+                var y = (index - x) / Width;
 
-                pointsList.Add(new Vertex(x, y));
+                _pointsList.Add(new Vertex(x, y));
             }
 
             var sList = new List<string>();
-            foreach (var s in pointsList) sList.Add(s.X + " " + s.Y);
+            foreach (var s in _pointsList) sList.Add(s.X + " " + s.Y);
 
             // File.WriteAllLines("C:\\a.txt", sList);
 
-            return pointsList;
+            return _pointsList;
         }
     }
 }

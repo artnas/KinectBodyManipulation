@@ -8,7 +8,7 @@ namespace KinectBodyModification
 {
     public static class Utils
     {
-        public static readonly int[,] cardinalDirections =
+        public static readonly int[,] CardinalDirections =
         {
             {-1, 0}, // lewo
             {1, 0}, // prawo
@@ -16,7 +16,7 @@ namespace KinectBodyModification
             {0, 1} // dol
         };
 
-        public static readonly int[,] ordinalDirections =
+        public static readonly int[,] OrdinalDirections =
         {
             {-1, 0}, // lewo
             {-1, -1}, // lewo gora
@@ -31,7 +31,7 @@ namespace KinectBodyModification
         /// <summary>
         ///     Offsety poszukiwania kolejnego punktu do obwodki
         /// </summary>
-        public static readonly int[,] contourSeekingDirections =
+        public static readonly int[,] ContourSeekingDirections =
         {
             {0, 2},
             {1, 1},
@@ -59,7 +59,7 @@ namespace KinectBodyModification
             {-3, 0}
         };
 
-        public static readonly int contourSeekingDirectionsCount = contourSeekingDirections.GetLength(0);
+        public static readonly int ContourSeekingDirectionsCount = ContourSeekingDirections.GetLength(0);
 
         /// <summary>
         ///     Iteruje przez szkielet zwracajac wszystkie pary jointow w postaci: (joint nadrzedny, joint podrzedny)
@@ -246,8 +246,8 @@ namespace KinectBodyModification
         /// <param name="y"></param>
         public static void IndexToCoordinates(int index, ref int x, ref int y)
         {
-            x = index % Configuration.width;
-            y = (index - x) / Configuration.width;
+            x = index % Configuration.Width;
+            y = (index - x) / Configuration.Width;
         }
 
         /// <summary>
@@ -258,12 +258,12 @@ namespace KinectBodyModification
         /// <returns></returns>
         public static int CoordinatesToIndex(int x, int y)
         {
-            return x + y * Configuration.width;
+            return x + y * Configuration.Width;
         }
 
         public static bool AreCoordinatesInBounds(int x, int y)
         {
-            return x >= 0 && x < Configuration.width && y >= 0 && y < Configuration.height;
+            return x >= 0 && x < Configuration.Width && y >= 0 && y < Configuration.Height;
         }
     }
 }
