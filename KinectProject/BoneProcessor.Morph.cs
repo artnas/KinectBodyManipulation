@@ -33,7 +33,7 @@ namespace KinectBodyModification
                     MorphBoneStretch(bone, bonePixelData, new StretchParameters
                     {
                         Curve = Curves.ArmsCurve,
-                        Power = Settings.Instance.ArmScale / 100f
+                        Power = Settings.Instance.ArmScale / 100f - 1f
                     });
                     break;
                 case 272: // legs
@@ -43,7 +43,7 @@ namespace KinectBodyModification
                     MorphBoneStretch(bone, bonePixelData, new StretchParameters
                     {
                         Curve = Curves.LegsCurve,
-                        Power = Settings.Instance.LegScale / 100f
+                        Power = Settings.Instance.LegScale / 100f - 1f
                     });
                     break;
                 // case 186:   // hands, feet
@@ -106,8 +106,6 @@ namespace KinectBodyModification
         private static void MorphBoneStretch(LimbDataBone bone, BonePixels bonePixel,
             StretchParameters stretchParameters)
         {
-            stretchParameters.Power -= 1f;
-
             var boneStartPoint = new Vector2(bone.StartPoint.X, bone.StartPoint.Y);
             var boneEndPoint = new Vector2(bone.EndPoint.X, bone.EndPoint.Y);
             var boneLength = Vector2.Distance(boneStartPoint, boneEndPoint);
