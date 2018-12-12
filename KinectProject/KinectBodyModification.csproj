@@ -87,8 +87,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BonePixelsData.cs" />
+    <Compile Include="BonePixels.cs" />
     <Compile Include="BoneProcessor.cs" />
+    <Compile Include="BoneProcessor.Weights.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Curves.cs" />
     <Compile Include="Curve.cs" />
@@ -101,7 +102,6 @@
     <Compile Include="LimbDataSkeleton.cs" />
     <Compile Include="LimbDataPixel.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="VertexQuadTree.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -136,6 +136,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
+    <Compile Include="BoneProcessor.Morph.cs" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

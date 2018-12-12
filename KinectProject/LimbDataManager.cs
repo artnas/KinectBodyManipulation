@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using KBMGraphics;
 using Microsoft.Kinect;
+using OpenTK;
 
 namespace KinectBodyModification
 {
@@ -14,7 +14,6 @@ namespace KinectBodyModification
 
         private readonly KinectSensor sensor;
         private readonly OutlineTriangulator outlineTriangulator;
-        public readonly VertexQuadTree vertexQuadTree;
 
         public LimbData limbData;
 
@@ -22,7 +21,6 @@ namespace KinectBodyModification
         {
             this.sensor = sensor;
             this.outlineTriangulator = new OutlineTriangulator(Configuration.width, Configuration.height);
-            this.vertexQuadTree = new VertexQuadTree();
 
             this.limbData = new LimbData();
         }
@@ -70,7 +68,6 @@ namespace KinectBodyModification
 
                 foreach (JointPair jointPair in Utils.SkeletonIterator(skeleton))
                 {
-                    //Console.WriteLine("para " + jointPair.a.JointType + " " + jointPair.b.JointType);
                     AssignPixelsBetweenJoints(foundSkeleton, jointPair, pixelsQueue);
                 }
             }
@@ -86,18 +83,12 @@ namespace KinectBodyModification
           
                 if (isContour)
                 {
-                    limbData.allPixels[index].isContour = isContour;
+                    limbData.allPixels[index].isContour = true;
                     limbData.contourPixels.Add(index);
                 }
             }
 
-            // update mesh
-
             limbData.mesh.Update(outlineTriangulator.GetMesh(GetSortedContour()));
-            // limbData.mesh.ExportToObj("C:\\test.obj");
-
-            // vertexQuadTree.AssignVerticesToZones(limbData);
-            // UpdateMeshVertexWeights();
         }
 
         private void AssignPixelsBetweenJoints(LimbDataSkeleton limbDataSkeleton, JointPair jointPair, Queue<int> pixelsQueue)
@@ -122,33 +113,6 @@ namespace KinectBodyModification
 
             List<Vector3> points = bone.points;
             Utils.GetPointsBetween(points, aPosition, bPosition, Configuration.width, Configuration.height);
-
-            /*
-
-            for (int i = 0; i < points.Count; i++)
-            {             
-
-                Vector3 position = points[i];
-
-                int bufferIndex = getBufferIndex((int)position.X, (int)position.Y);
-
-                LimbDataPixel pixel = limbData.allPixels[bufferIndex];
-                pixel.humanIndex = (sbyte)limbDataSkeleton.skeleton.TrackingId;
-                pixel.startJointType = a.JointType;
-                pixel.endJointType = b.JointType;
-                pixel.isBone = true;
-
-                if (i == 0)
-                    pixel.isJoint = true;
-
-                if (i <= points.Count / 4)
-                    pixel.debugDraw = true;
-
-                pixelsQueue.Enqueue(bufferIndex);
-
-            }
-
-            */
 
             if (points.Count > 0)
             {
@@ -196,7 +160,6 @@ namespace KinectBodyModification
 
             for (int k = startIndex; k < endIndex; k+=3)
             {
-
                 Vector3 point = bone.points[k];
 
                 bool isOk = true;
@@ -503,90 +466,6 @@ namespace KinectBodyModification
                     AddPointToContourPoints(neighborIndex);
                 }
             }
-        }
-        //
-        // private void UpdateMeshVertexWeights()
-        // {
-        //     var quadSize = VertexQuadTree.quadSize;
-        //
-        //     Parallel.ForEach(limbData.mesh.vertices, vertexPosition =>
-        //     {
-        //         var coordinates = vertexQuadTree.GetZoneCoordinates(vertexPosition.X, vertexPosition.Y);
-        //
-        //         if (!Utils.AreCoordinatesInBounds(coordinates.X, coordinates.Y)) return;
-        //
-        //         var thisVertexPixelIndex = Utils.CoordinatesToIndex(coordinates.X, coordinates.Y);
-        //         var thisVertexBoneHash = limbData.allPixels[thisVertexPixelIndex].boneHash;
-        //
-        //         var surroundingZones = vertexQuadTree.GetSurroundingZones(coordinates);
-        //
-        //         float totalVerticesWeightSum = 1;
-        //         float correctVerticesWeightSum = 1;
-        //
-        //         if (thisVertexBoneHash != -1)
-        //         {
-        //             foreach (var zone in surroundingZones)
-        //             {
-        //                 foreach (var vertexInZone in zone.list)
-        //                 {
-        //                     if (vertexInZone == vertexPosition) continue;
-        //
-        //                     var distance = OpenTK.Vector3.Distance(vertexPosition, vertexInZone);
-        //
-        //                     if (distance > quadSize) continue;
-        //
-        //                     var distanceWeightPower = 1f - distance / quadSize;
-        //
-        //                     var vertexInZoneCoordinates = new Vector2Int(vertexInZone);
-        //
-        //                     var vertexInZonePixelIndex =
-        //                         Utils.CoordinatesToIndex(vertexInZoneCoordinates.X, vertexInZoneCoordinates.Y);
-        //                     var vertexInZoneBoneHash = limbData.allPixels[vertexInZonePixelIndex].boneHash;
-        //
-        //                     if (vertexInZoneBoneHash == -1) continue;
-        //
-        //                     if (thisVertexBoneHash == vertexInZoneBoneHash)
-        //                     {
-        //                         correctVerticesWeightSum += distanceWeightPower;
-        //                     }
-        //
-        //                     totalVerticesWeightSum += distanceWeightPower;
-        //                 }
-        //             }
-        //         }
-        //
-        //         float weight = correctVerticesWeightSum / totalVerticesWeightSum;
-        //
-        //         limbData.mesh.vertexWeightsDictionary[vertexPosition] = weight;
-        //     });
-        // }
-
-        public void ExportContourAsPolyline(string path)
-        {
-            List<string> sList = new List<string>();
-
-            int lastX = -1, lastY = -1;
-
-            foreach (var index in sortedContour)
-            {
-                int x = 0, y = 0;
-                Utils.IndexToCoordinates(index, ref x, ref y);
-
-                if (lastX != -1 && lastY != -1)
-                {
-                    var distance = Vector2.Distance(new Vector2(x, y), new Vector2(lastX, lastY));
-                    sList.Add($"{x} {y} {distance}");
-                }
-                else
-                {
-                    sList.Add($"{x} {y}");
-                }
-
-                lastX = x;
-                lastY = y;
-            }
-
-            File.WriteAllLines(path, sList);
         }
 
     }

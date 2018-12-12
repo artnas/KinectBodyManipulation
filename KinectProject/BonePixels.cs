@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using System.Collections.Generic;
 
 namespace KinectBodyModification
 {
-    public class BonePixelsData
+    public class BonePixels
     {
         public readonly HashSet<int> vertexIndices;
 
-        public BonePixelsData()
+        public BonePixels()
         {
             vertexIndices = new HashSet<int>();
         }

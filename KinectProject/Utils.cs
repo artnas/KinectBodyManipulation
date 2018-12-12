@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Microsoft.Kinect;
+using OpenTK;
 
 namespace KinectBodyModification
 {
@@ -110,7 +110,7 @@ namespace KinectBodyModification
         {
             Vector3 v = (to - from);
 
-            int length = (int)Math.Ceiling(v.Length());
+            int length = (int)Math.Ceiling(v.Length);
 
             v = Vector3.Normalize(v);
 
