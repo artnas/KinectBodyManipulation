@@ -5,43 +5,39 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using System.IO;
-using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows.Forms;
 using KBMGraphics;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit.BackgroundRemoval;
 using OpenTK.Graphics.OpenGL;
-using Drawing = KinectBodyModification.Drawing;
-
 using GB = KinectBodyModification.GlobalBuffers;
 
 namespace KinectBodyModification
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly Skeleton[] skeletons = new Skeleton[6];
+
+        private bool hasSavedBackgroundColorFrame;
+        private bool hasSavedBackgroundDepthFrame;
+
+        private bool isProcessingFrame;
 
         private Renderer renderer;
         private SceneData sceneData;
 
-        private bool isProcessingFrame = false;
-
         private KinectSensor sensor;
-
-        private bool hasSavedBackgroundColorFrame = false;
-        private bool hasSavedBackgroundDepthFrame = false;
-
-        private readonly Skeleton[] skeletons = new Skeleton[6];
         private int trackedPlayerId = -1;
 
         /// <summary>
-        /// Initializes a new instance of the MainWindow class.
+        ///     Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
@@ -50,35 +46,30 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Execute startup tasks
+        ///     Execute startup tasks
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            if (renderer == null)
-            {
-                InitializeRenderer();
-            }
+            if (renderer == null) InitializeRenderer();
 
             // Look through all sensors and start the first connected one.
             // This requires that a Kinect is connected at the time of app startup.
             // To make your app robust against plug/unplug, 
             // it is recommended to use KinectSensorChooser provided in Microsoft.Kinect.Toolkit (See components in Toolkit Browser).
             foreach (var potentialSensor in KinectSensor.KinectSensors)
-            {
                 if (potentialSensor.Status == KinectStatus.Connected)
                 {
                     sensor = potentialSensor;
                     break;
                 }
-            }
 
             if (null != sensor)
             {
-
-                sensor.ColorStream.Enable(Configuration.ColorFormat); 
-                sensor.DepthStream.Enable(Configuration.DepthFormat); // Turn on the depth stream to receive depth frames
+                sensor.ColorStream.Enable(Configuration.ColorFormat);
+                sensor.DepthStream.Enable(Configuration
+                    .DepthFormat); // Turn on the depth stream to receive depth frames
                 sensor.SkeletonStream.Enable(); // Turn on to get player masks
 
                 // Allocate space to put the depth allPixels we'll receive
@@ -105,7 +96,7 @@ namespace KinectBodyModification
 
                 // Add an event handler to be called when the background removed color frame is ready, so that we can
                 // composite the image and output to the app
-                GB.backgroundRemovedColorStream.BackgroundRemovedFrameReady += this.BackgroundRemovedFrameReadyHandler;
+                GB.backgroundRemovedColorStream.BackgroundRemovedFrameReady += BackgroundRemovedFrameReadyHandler;
 
                 // Add an event handler to be called whenever there is new depth frame data
                 sensor.AllFramesReady += SensorAllFramesReady;
@@ -121,12 +112,14 @@ namespace KinectBodyModification
                 }
             }
 
-            statusBarText.Text = sensor == null ? Properties.Resources.NoKinectReady : $"Połączono z kontrolerem Kinect (id: ${sensor.UniqueKinectId}, connection: ${sensor.DeviceConnectionId})";
+            statusBarText.Text = sensor == null
+                ? Properties.Resources.NoKinectReady
+                : $"Połączono z kontrolerem Kinect (id: ${sensor.UniqueKinectId}, connection: ${sensor.DeviceConnectionId})";
         }
 
         /// <summary>
-        /// Handle the background removed color frame ready event. The frame obtained from the background removed
-        /// color stream is in RGBA format.
+        ///     Handle the background removed color frame ready event. The frame obtained from the background removed
+        ///     color stream is in RGBA format.
         /// </summary>
         /// <param name="sender">object that sends the event</param>
         /// <param name="e">argument of the event</param>
@@ -135,9 +128,8 @@ namespace KinectBodyModification
             using (var backgroundRemovedFrame = e.OpenBackgroundRemovedColorFrame())
             {
                 if (backgroundRemovedFrame != null)
-                {
-                    Array.Copy(backgroundRemovedFrame.GetRawPixelData(), GB.backgroundRemovedBuffer, GB.backgroundRemovedBuffer.Length);
-                }
+                    Array.Copy(backgroundRemovedFrame.GetRawPixelData(), GB.backgroundRemovedBuffer,
+                        GB.backgroundRemovedBuffer.Length);
             }
 
             Draw();
@@ -178,11 +170,11 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Execute shutdown tasks
+        ///     Execute shutdown tasks
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void WindowClosing(object sender, CancelEventArgs e)
         {
             if (null != GB.backgroundRemovedColorStream)
             {
@@ -198,30 +190,24 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Event handler for Kinect sensor's DepthFrameReady event
+        ///     Event handler for Kinect sensor's DepthFrameReady event
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void SensorAllFramesReady(object sender, AllFramesReadyEventArgs e)
         {
-            if (isProcessingFrame)
-            {
-                return;
-            }
+            if (isProcessingFrame) return;
 
             isProcessingFrame = true;
-            
+
             // in the middle of shutting down, so nothing to do
-            if (sensor == null)
-            {
-                return;
-            }
+            if (sensor == null) return;
 
-            bool depthReceived = false;
-            bool colorReceived = false;
-            bool skeletonsReceived = false;
+            var depthReceived = false;
+            var colorReceived = false;
+            var skeletonsReceived = false;
 
-            using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
+            using (var depthFrame = e.OpenDepthImageFrame())
             {
                 if (depthFrame != null)
                 {
@@ -233,7 +219,7 @@ namespace KinectBodyModification
                 }
             }
 
-            using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
+            using (var colorFrame = e.OpenColorImageFrame())
             {
                 if (colorFrame != null)
                 {
@@ -249,9 +235,8 @@ namespace KinectBodyModification
                         Array.Copy(GB.colorBuffer, GB.savedBackgroundColorBuffer, GB.colorBuffer.Length);
 
                         if (renderer != null && renderer.isInitialized)
-                        {
-                            renderer.SetBackgroundTexture(GB.savedBackgroundColorBuffer, Configuration.width, Configuration.height);
-                        }
+                            renderer.SetBackgroundTexture(GB.savedBackgroundColorBuffer, Configuration.width,
+                                Configuration.height);
                     }
                 }
             }
@@ -277,72 +262,65 @@ namespace KinectBodyModification
                 Array.Clear(GB.playerPixelData, 0, GB.playerPixelData.Length);
 
                 // loop over each row and column of the depth
-                for (int y = 0; y < Configuration.height; ++y)
+                for (var y = 0; y < Configuration.height; ++y)
+                for (var x = 0; x < Configuration.width; ++x)
                 {
-                    for (int x = 0; x < Configuration.width; ++x)
+                    // calculate index into depth array
+                    var depthIndex = x + y * Configuration.width;
+
+                    var depthPixel = GB.depthBuffer[depthIndex];
+
+                    int player = depthPixel.PlayerIndex;
+
+                    // if we're tracking a player for the current pixel, sets it opacity to full
+                    if (player > 0)
                     {
-                        // calculate index into depth array
-                        int depthIndex = x + (y * Configuration.width);
+                        // retrieve the depth to color mapping for the current depth pixel
+                        var colorImagePoint = GB.colorCoordinates[depthIndex];
 
-                        DepthImagePixel depthPixel = GB.depthBuffer[depthIndex];
+                        // scale color coordinates to depth resolution
+                        var colorInDepthX = colorImagePoint.X;
+                        var colorInDepthY = colorImagePoint.Y;
 
-                        int player = depthPixel.PlayerIndex;
-
-                        // if we're tracking a player for the current pixel, sets it opacity to full
-                        if (player > 0)
+                        // make sure the depth pixel maps to a valid point in color space
+                        // check y > 0 and y < depthHeight to make sure we don't write outside of the array
+                        // check x > 0 instead of >= 0 since to fill gaps we set opaque current pixel plus the one to the left
+                        // because of how the sensor works it is more correct to do it this way than to set to the right
+                        if (colorInDepthX > 0 && colorInDepthX < Configuration.width && colorInDepthY >= 0 &&
+                            colorInDepthY < Configuration.height)
                         {
-                            // retrieve the depth to color mapping for the current depth pixel
-                            ColorImagePoint colorImagePoint = GB.colorCoordinates[depthIndex];
+                            // calculate index into the player mask pixel array
+                            var playerPixelIndex = colorInDepthX + colorInDepthY * Configuration.width;
 
-                            // scale color coordinates to depth resolution
-                            int colorInDepthX = colorImagePoint.X;
-                            int colorInDepthY = colorImagePoint.Y;
+                            // int opaquePixelValue = -1;
 
-                            // make sure the depth pixel maps to a valid point in color space
-                            // check y > 0 and y < depthHeight to make sure we don't write outside of the array
-                            // check x > 0 instead of >= 0 since to fill gaps we set opaque current pixel plus the one to the left
-                            // because of how the sensor works it is more correct to do it this way than to set to the right
-                            if (colorInDepthX > 0 && colorInDepthX < Configuration.width && colorInDepthY >= 0 && colorInDepthY < Configuration.height)
-                            {
-                                // calculate index into the player mask pixel array
-                                int playerPixelIndex = colorInDepthX + (colorInDepthY * Configuration.width);
+                            // set opaque
+                            GB.playerPixelData[playerPixelIndex] = -1;
 
-                                // int opaquePixelValue = -1;
-
-                                // set opaque
-                                GB.playerPixelData[playerPixelIndex] = -1;
-
-                                // compensate for depth/color not corresponding exactly by setting the pixel 
-                                // to the left to opaque as well
-                                GB.playerPixelData[playerPixelIndex - 1] = -1;
-                            }
+                            // compensate for depth/color not corresponding exactly by setting the pixel 
+                            // to the left to opaque as well
+                            GB.playerPixelData[playerPixelIndex - 1] = -1;
                         }
                     }
                 }
             }
 
-            using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
+            using (var skeletonFrame = e.OpenSkeletonFrame())
             {
                 if (null != skeletonFrame)
                 {
-
                     //skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
                     GB.backgroundRemovedColorStream.ProcessSkeleton(skeletons, skeletonFrame.Timestamp);
 
                     if (trackedPlayerId == -1)
-                    {
                         foreach (var skeleton in skeletons)
-                        {
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
                                 GB.backgroundRemovedColorStream.SetTrackedPlayer(skeleton.TrackingId);
                                 trackedPlayerId = skeleton.TrackingId;
                                 Console.WriteLine("setting tracked id to " + trackedPlayerId);
                             }
-                        }
-                    }
-
                 }
             }
 
@@ -453,13 +431,10 @@ namespace KinectBodyModification
 
         private void renderCanvas_Load(object sender, EventArgs e)
         {
-            if (renderer == null)
-            {
-                InitializeRenderer();
-            }
+            if (renderer == null) InitializeRenderer();
         }
 
-        private void renderCanvas_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        private void renderCanvas_Paint(object sender, PaintEventArgs e)
         {
             // RenderCanvas.Width = RenderCanvas.Parent.Width;
             // RenderCanvas.Height = (int)(RenderCanvas.Width * 0.75f);
@@ -469,28 +444,28 @@ namespace KinectBodyModification
 
         private void OpenGLDrawModeSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Settings.Instance.DrawMode = (Settings.GLDrawModeEnum)OpenGLDrawModeSelector.SelectedIndex;
+            Settings.Instance.DrawMode = (Settings.GLDrawModeEnum) OpenGLDrawModeSelector.SelectedIndex;
         }
 
         /// <summary>
-        /// Wywoływane przy zmianie wielkości okna
+        ///     Wywoływane przy zmianie wielkości okna
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            int width = RenderCanvas.Width;
-            int height = (int) (RenderCanvas.Width * 0.75f);
+            var width = RenderCanvas.Width;
+            var height = (int) (RenderCanvas.Width * 0.75f);
 
             if (height > RenderCanvas.Height)
             {
-                height = (int) RenderCanvas.Height;
+                height = RenderCanvas.Height;
                 width = (int) (height * 1.3333f);
             }
 
             RenderCanvas.Width = width;
             RenderCanvas.Height = height;
-            
+
             renderer.ResizeViewport(width, height);
         }
     }

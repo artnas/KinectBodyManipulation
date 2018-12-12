@@ -2,20 +2,31 @@
 {
     public class Settings
     {
+        public enum GLDrawModeEnum
+        {
+            Normal,
+            Uvs,
+            Lines
+        }
 
         private static Settings _instance;
-        public static Settings Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new Settings();
-                }
 
-                return _instance;
-            }
+        private Settings()
+        {
+            HeadSize = 100;
+            ArmScale = 100;
+            LegScale = 100;
+            DebugDrawSkeleton = false;
+            DebugDrawJoints = false;
+            DebugDrawSilhouette = false;
+            DebugDrawOutline = false;
+            DrawMorphs = true;
+            DrawMode = GLDrawModeEnum.Normal;
+            OutlineSegmentation = 4;
+            TriangleAreaLimit = 50;
         }
+
+        public static Settings Instance => _instance ?? (_instance = new Settings());
 
         public float HeadSize { get; set; }
         public float ArmScale { get; set; }
@@ -29,32 +40,9 @@
         public int OutlineSegmentation { get; set; }
         public int TriangleAreaLimit { get; set; }
 
-        private Settings()
-        {
-            this.HeadSize = 100;
-            this.ArmScale = 100;
-            this.LegScale = 100;
-            this.DebugDrawSkeleton = false;
-            this.DebugDrawJoints = false;
-            this.DebugDrawSilhouette = false;
-            this.DebugDrawOutline = false;
-            this.DrawMorphs = true;
-            this.DrawMode = GLDrawModeEnum.Normal;
-            this.OutlineSegmentation = 4;
-            this.TriangleAreaLimit = 50;
-        }
-
         public bool ShouldDrawDebugOverlay()
         {
             return DebugDrawJoints || DebugDrawSilhouette || DebugDrawSkeleton || DebugDrawOutline;
         }
-
-        public enum GLDrawModeEnum
-        {
-            Normal,
-            Uvs,
-            Lines
-        }
-
     }
 }

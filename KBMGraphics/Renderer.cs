@@ -1,35 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using KinectBodyModification;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.ES30;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
-using OpenTK.Platform;
-using TriangleNet;
-using All = OpenTK.Graphics.OpenGL.All;
-using BeginMode = OpenTK.Graphics.OpenGL.BeginMode;
-using BlendingFactor = OpenTK.Graphics.OpenGL.BlendingFactor;
-using BufferTarget = OpenTK.Graphics.OpenGL.BufferTarget;
-using BufferUsageHint = OpenTK.Graphics.OpenGL.BufferUsageHint;
-using ClearBufferMask = OpenTK.Graphics.OpenGL.ClearBufferMask;
-using EnableCap = OpenTK.Graphics.OpenGL.EnableCap;
-using FramebufferTarget = OpenTK.Graphics.OpenGL.FramebufferTarget;
-using GL = OpenTK.Graphics.OpenGL.GL;
-using MatrixMode = OpenTK.Graphics.OpenGL.MatrixMode;
-using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
-using PixelInternalFormat = OpenTK.Graphics.OpenGL.PixelInternalFormat;
-using PixelType = OpenTK.Graphics.OpenGL.PixelType;
-using PrimitiveType = OpenTK.Graphics.OpenGL.PrimitiveType;
-using ReadBufferMode = OpenTK.Graphics.OpenGL.ReadBufferMode;
-using RenderbufferTarget = OpenTK.Graphics.OpenGL.RenderbufferTarget;
-using TextureParameterName = OpenTK.Graphics.OpenGL.TextureParameterName;
-using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
-using VertexAttribPointerType = OpenTK.Graphics.OpenGL.VertexAttribPointerType;
 
 // https://stackoverflow.com/questions/12157646/how-to-render-offscreen-on-opengl
 
@@ -37,24 +10,24 @@ namespace KBMGraphics
 {
     public class Renderer
     {
-        public bool isInitialized = false;
-
-        public readonly int width;
         public readonly int height;
-        private SceneData sceneData;
 
-        private GraphicsContext context;
-
-        private readonly int[] 
-            renderBuffer = {0}, 
-            backgroundTexturePointer = {0}, 
+        private readonly int[]
+            renderBuffer = {0},
+            backgroundTexturePointer = {0},
             foregroundTexturePointer = {0},
             debugTexturePointer = {0};
 
-        private byte[] pixels;
+        public readonly int width;
 
-        private Vector2[] screenEdges;
-        private Vector2[] screenEdgeUvs;
+        private GraphicsContext context;
+        public bool isInitialized;
+
+        private byte[] pixels;
+        private SceneData sceneData;
+
+        private readonly Vector2[] screenEdges;
+        private readonly Vector2[] screenEdgeUvs;
 
         public Renderer(int width, int height)
         {
@@ -65,8 +38,8 @@ namespace KBMGraphics
 
             screenEdges = new[]
             {
-                new Vector2(0, height), 
-                new Vector2(0, 0), 
+                new Vector2(0, height),
+                new Vector2(0, 0),
                 new Vector2(width, 0),
 
                 new Vector2(0, height),
@@ -94,13 +67,8 @@ namespace KBMGraphics
         public void Initialize()
         {
             if (isInitialized)
-            {
                 throw new Exception("KBM Renderer is already initialized");
-            }
-            else
-            {
-                isInitialized = true;
-            }
+            isInitialized = true;
 
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
@@ -115,9 +83,10 @@ namespace KBMGraphics
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderBuffer[0]);
             GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, width, height);
 
-            SetBackgroundTexture(new byte[]{
-                200, 200, 200, 255,  200, 200, 200, 255,
-                200, 200, 200, 255,  200, 200, 200, 255
+            SetBackgroundTexture(new byte[]
+            {
+                200, 200, 200, 255, 200, 200, 200, 255,
+                200, 200, 200, 255, 200, 200, 200, 255
             }, 2, 2);
         }
 
@@ -129,11 +98,13 @@ namespace KBMGraphics
             {
                 fixed (byte* ptr = &foregroundColorBuffer[0])
                 {
-                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Bgra,
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0,
+                        PixelFormat.Bgra,
                         PixelType.UnsignedByte, new IntPtr(ptr));
                 }
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) All.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) All.Linear);
             }
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -147,11 +118,13 @@ namespace KBMGraphics
             {
                 fixed (byte* ptr = &backgroundColorBuffer[0])
                 {
-                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Bgra,
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0,
+                        PixelFormat.Bgra,
                         PixelType.UnsignedByte, new IntPtr(ptr));
                 }
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) All.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) All.Linear);
             }
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -165,11 +138,13 @@ namespace KBMGraphics
             {
                 fixed (byte* ptr = &debugColorBuffer[0])
                 {
-                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Bgra,
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0,
+                        PixelFormat.Bgra,
                         PixelType.UnsignedByte, new IntPtr(ptr));
                 }
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Nearest);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Nearest);
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) All.Nearest);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) All.Nearest);
             }
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -184,25 +159,22 @@ namespace KBMGraphics
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            Matrix4 modelView = Matrix4.LookAt(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+            var modelView = Matrix4.LookAt(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref modelView);
 
             DrawBackground();
             DrawForeground();
 
-            if (Settings.Instance.ShouldDrawDebugOverlay())
-            {
-                DrawDebugOverlay();
-            }
+            if (Settings.Instance.ShouldDrawDebugOverlay()) DrawDebugOverlay();
         }
 
         private void DrawBackground()
-        {         
+        {
             GL.BindTexture(TextureTarget.Texture2D, backgroundTexturePointer[0]);
             GL.Enable(EnableCap.Texture2D);
 
-            GL.Begin(PrimitiveType.Triangles);  
+            GL.Begin(PrimitiveType.Triangles);
 
             GL.Color3(1f, 1f, 1f);
 
@@ -240,13 +212,16 @@ namespace KBMGraphics
                             var c = sceneData.mesh.indices[i + 2];
 
                             GL.TexCoord2(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y);
-                            GL.Vertex3(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y, sceneData.mesh.vertices[a].Z);
+                            GL.Vertex3(sceneData.mesh.vertices[a].X, sceneData.mesh.vertices[a].Y,
+                                sceneData.mesh.vertices[a].Z);
 
                             GL.TexCoord2(sceneData.mesh.uvs[b].X, sceneData.mesh.uvs[b].Y);
-                            GL.Vertex3(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y, sceneData.mesh.vertices[b].Z);
+                            GL.Vertex3(sceneData.mesh.vertices[b].X, sceneData.mesh.vertices[b].Y,
+                                sceneData.mesh.vertices[b].Z);
 
                             GL.TexCoord2(sceneData.mesh.uvs[c].X, sceneData.mesh.uvs[c].Y);
-                            GL.Vertex3(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y, sceneData.mesh.vertices[c].Z);
+                            GL.Vertex3(sceneData.mesh.vertices[c].X, sceneData.mesh.vertices[c].Y,
+                                sceneData.mesh.vertices[c].Z);
                         }
 
                         GL.End();
@@ -254,6 +229,7 @@ namespace KBMGraphics
                         GL.Disable(EnableCap.Blend);
                         GL.BindTexture(TextureTarget.Texture2D, 0);
                     }
+
                     break;
                 case Settings.GLDrawModeEnum.Uvs:
                     if (sceneData.mesh != null)
@@ -267,9 +243,15 @@ namespace KBMGraphics
                             var c = sceneData.mesh.indices[i + 2];
 
                             // var color = (sceneData.mesh.vertices[a].Z % 255) / 255f;
-                            var colorA = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[a]) ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[a]] : 0;
-                            var colorB = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[b]) ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[b]] : 0;
-                            var colorC = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[c]) ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[c]] : 0;
+                            var colorA = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[a])
+                                ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[a]]
+                                : 0;
+                            var colorB = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[b])
+                                ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[b]]
+                                : 0;
+                            var colorC = sceneData.mesh.vertexWeightsDictionary.ContainsKey(sceneData.mesh.vertices[c])
+                                ? sceneData.mesh.vertexWeightsDictionary[sceneData.mesh.vertices[c]]
+                                : 0;
 
                             // GL.Color3(sceneData.mesh.uvs[a].X, sceneData.mesh.uvs[a].Y, colorA);
                             GL.Color3(colorA, colorA, colorA);
@@ -288,6 +270,7 @@ namespace KBMGraphics
 
                         DrawTriangleLines();
                     }
+
                     break;
                 case Settings.GLDrawModeEnum.Lines:
                     if (sceneData.mesh != null)
@@ -307,9 +290,10 @@ namespace KBMGraphics
                         }
 
                         GL.End();
-                        
+
                         DrawTriangleLines();
                     }
+
                     break;
             }
         }

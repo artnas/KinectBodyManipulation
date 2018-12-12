@@ -5,9 +5,8 @@ namespace KinectBodyModification
 {
     public class LimbDataSkeleton
     {
-        public Skeleton skeleton;
-
         public List<LimbDataBone> bones;
+        public Skeleton skeleton;
 
         public LimbDataSkeleton(Skeleton skeleton)
         {
@@ -16,9 +15,7 @@ namespace KinectBodyModification
             bones = new List<LimbDataBone>();
 
             foreach (JointPair jointPair in Utils.SkeletonIterator(skeleton))
-            {
                 bones.Add(new LimbDataBone(jointPair.a, jointPair.b));
-            }
         }
 
         public LimbDataBone GetBoneByJointPair(JointPair jointPair)
@@ -34,15 +31,10 @@ namespace KinectBodyModification
         public LimbDataBone GetBoneByJointPair(JointType a, JointType b)
         {
             foreach (var bone in bones)
-            {
                 if (bone.startJoint.JointType == a && bone.endJoint.JointType == b)
-                {
                     return bone;
-                }
-            }
 
             return null;
         }
-
     }
 }

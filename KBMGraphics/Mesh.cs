@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
-using TriangleNet;
-using TriangleNet.Geometry;
 
 namespace KBMGraphics
 {
@@ -18,7 +12,7 @@ namespace KBMGraphics
 
         public Dictionary<Vector3, float> vertexWeightsDictionary;
 
-        private Dictionary<Vector3, int> vertexIndicesDictionary;
+        private readonly Dictionary<Vector3, int> vertexIndicesDictionary;
 
         public Mesh()
         {
@@ -28,7 +22,7 @@ namespace KBMGraphics
             vertexIndicesDictionary = new Dictionary<Vector3, int>();
             vertexWeightsDictionary = new Dictionary<Vector3, float>();
         }
-        
+
         public Mesh(TriangleNet.Mesh mesh)
         {
             vertices = new List<Vector3>();
@@ -54,11 +48,11 @@ namespace KBMGraphics
 
             foreach (var vertex in mesh.Vertices)
             {
-                var vector = new Vector3((float)vertex.X, (float)vertex.Y, 0);
+                var vector = new Vector3((float) vertex.X, (float) vertex.Y, 0);
                 vertexIndicesDictionary.Add(vector, vertexIndicesDictionary.Count);
                 vertexWeightsDictionary.Add(vector, 1);
                 vertices.Add(vector);
-                uvs.Add(new Vector2((float)(vertex.X / 640), (float)(vertex.Y / 480)));
+                uvs.Add(new Vector2((float) (vertex.X / 640), (float) (vertex.Y / 480)));
             }
 
             foreach (var meshTriangle in mesh.Triangles)
@@ -67,9 +61,9 @@ namespace KBMGraphics
                 var vb = meshTriangle.GetVertex(1);
                 var vc = meshTriangle.GetVertex(2);
 
-                var vca = new Vector3((float)va.X, (float)va.Y, 0);
-                var vcb = new Vector3((float)vb.X, (float)vb.Y, 0);
-                var vcc = new Vector3((float)vc.X, (float)vc.Y, 0);
+                var vca = new Vector3((float) va.X, (float) va.Y, 0);
+                var vcb = new Vector3((float) vb.X, (float) vb.Y, 0);
+                var vcc = new Vector3((float) vc.X, (float) vc.Y, 0);
 
                 var vai = vertexIndicesDictionary[vca];
                 var vbi = vertexIndicesDictionary[vcb];
@@ -88,25 +82,16 @@ namespace KBMGraphics
 
         public void ExportToObj(string path)
         {
-            List<string> sList = new List<string>();
+            var sList = new List<string>();
 
-            foreach (var v in vertices)
-            {
-                sList.Add($"v {v.X} {v.Y} 0");
-            }
+            foreach (var v in vertices) sList.Add($"v {v.X} {v.Y} 0");
 
-            foreach (var u in uvs)
-            {
-                sList.Add($"vt {u.X} {u.Y} 0");
-            }
+            foreach (var u in uvs) sList.Add($"vt {u.X} {u.Y} 0");
 
-            for (var i = 0; i < indices.Count; i+= 3)
-            {
-                sList.Add($"f {indices[i]+1} {indices[i+1]+1} {indices[i+2]+1}");
-            }
+            for (var i = 0; i < indices.Count; i += 3)
+                sList.Add($"f {indices[i] + 1} {indices[i + 1] + 1} {indices[i + 2] + 1}");
 
             File.WriteAllLines(path, sList);
         }
-
     }
 }

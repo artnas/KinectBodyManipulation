@@ -4,7 +4,6 @@ namespace KinectBodyModification
 {
     public struct JointPair
     {
-
         public Joint a;
         public Joint b;
 
@@ -13,6 +12,5 @@ namespace KinectBodyModification
             this.a = a;
             this.b = b;
         }
-
     }
 }

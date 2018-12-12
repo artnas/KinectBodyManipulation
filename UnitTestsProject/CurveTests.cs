@@ -10,30 +10,26 @@ namespace UnitTestsProject
         [TestMethod]
         public void HillCurve()
         {
-
-            float[] f = new float[100];
-            float[] v = new float[100];
-            for (int i = 0; i < f.Length; i++)
+            var f = new float[100];
+            var v = new float[100];
+            for (var i = 0; i < f.Length; i++)
             {
                 f[i] = i / 100f;
                 v[i] = Curves.legsCurve.Evaluate(f[i]);
             }
-
         }
 
         [TestMethod]
         public void SinHillCurve()
         {
-
-            float[] f = new float[100];
-            float[] v = new float[100];
-            for (int i = 0; i < f.Length; i++)
+            var f = new float[100];
+            var v = new float[100];
+            for (var i = 0; i < f.Length; i++)
             {
                 f[i] = i / 100f;
                 v[i] = Curves.sinHill.Evaluate(f[i]);
                 Console.WriteLine(i + " " + v[i]);
             }
-
         }
     }
 }

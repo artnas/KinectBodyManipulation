@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Kinect;
 using OpenTK;
@@ -7,65 +8,65 @@ namespace KinectBodyModification
 {
     public static class Utils
     {
-
         public static readonly int[,] cardinalDirections =
         {
-            { -1, 0 },  // lewo
-            { 1, 0 },   // prawo
-            { 0, -1 },  // gora
-            { 0, 1 },   // dol
+            {-1, 0}, // lewo
+            {1, 0}, // prawo
+            {0, -1}, // gora
+            {0, 1} // dol
         };
 
         public static readonly int[,] ordinalDirections =
         {
-            { -1, 0 },  // lewo
-            { -1, -1 }, // lewo gora
-            { -1, 1 },  // lewo dol
-            { 1, 0 },   // prawo
-            { 1, -1 },  // prawo gora
-            { 1, 1 },   // prawo dol
-            { 0, -1 },  // gora
-            { 0, 1 },   // dol 
+            {-1, 0}, // lewo
+            {-1, -1}, // lewo gora
+            {-1, 1}, // lewo dol
+            {1, 0}, // prawo
+            {1, -1}, // prawo gora
+            {1, 1}, // prawo dol
+            {0, -1}, // gora
+            {0, 1} // dol 
         };
 
         /// <summary>
-        /// Offsety poszukiwania kolejnego punktu do obwodki
+        ///     Offsety poszukiwania kolejnego punktu do obwodki
         /// </summary>
         public static readonly int[,] contourSeekingDirections =
         {
-            { 0, 2 },
-            { 1, 1 },
-            { 1, 2 },
-            { 2, 2 },
-            { 2, 1 },
-            { 2, 0 },
-            { 1, -1 },
-            { 2, -1 },
-            { 2, -2 },
-            { 1, -2 },
-            { 0, -2 },
-            { -1, -2 },
-            { -1, -1 },
-            { -2, -2 },
-            { -2, -1 },
-            { -2, 0 },
-            { -2, 1 },
-            { -1, 1 },
-            { -2, 2 },
-            { -1, 2 },
-            { 0, 3 },
-            { 3, 0 },
-            { 0, -3 },
-            { -3, 0 },
+            {0, 2},
+            {1, 1},
+            {1, 2},
+            {2, 2},
+            {2, 1},
+            {2, 0},
+            {1, -1},
+            {2, -1},
+            {2, -2},
+            {1, -2},
+            {0, -2},
+            {-1, -2},
+            {-1, -1},
+            {-2, -2},
+            {-2, -1},
+            {-2, 0},
+            {-2, 1},
+            {-1, 1},
+            {-2, 2},
+            {-1, 2},
+            {0, 3},
+            {3, 0},
+            {0, -3},
+            {-3, 0}
         };
+
         public static readonly int contourSeekingDirectionsCount = contourSeekingDirections.GetLength(0);
 
         /// <summary>
-        /// Iteruje przez szkielet zwracajac wszystkie pary jointow w postaci: (joint nadrzedny, joint podrzedny)
+        ///     Iteruje przez szkielet zwracajac wszystkie pary jointow w postaci: (joint nadrzedny, joint podrzedny)
         /// </summary>
         /// <param name="skeleton"></param>
         /// <returns></returns>
-        public static System.Collections.IEnumerable SkeletonIterator(Skeleton skeleton)
+        public static IEnumerable SkeletonIterator(Skeleton skeleton)
         {
             // glowa, tors
             yield return new JointPair(skeleton.Joints[JointType.Head], skeleton.Joints[JointType.ShoulderCenter]);
@@ -98,7 +99,7 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Iteruje przez piksele pomiędzy punktami (from, to)
+        ///     Iteruje przez piksele pomiędzy punktami (from, to)
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
@@ -106,17 +107,18 @@ namespace KinectBodyModification
         /// <param name="height"></param>
         /// <param name="onlyIncludePointsOnScreen"></param>
         /// <returns></returns>
-        public static System.Collections.IEnumerable IteratePointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
+        public static IEnumerable IteratePointsBetween(Vector3 from, Vector3 to, int width, int height,
+            bool onlyIncludePointsOnScreen = true)
         {
-            Vector3 v = (to - from);
+            var v = to - from;
 
-            int length = (int)Math.Ceiling(v.Length);
+            var length = (int) Math.Ceiling(v.Length);
 
             v = Vector3.Normalize(v);
 
-            Vector3 p = from;
+            var p = from;
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 p += v;
 
@@ -124,34 +126,32 @@ namespace KinectBodyModification
             }
         }
 
-        public static List<Vector3> GetPointsBetween(Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
+        public static List<Vector3> GetPointsBetween(Vector3 from, Vector3 to, int width, int height,
+            bool onlyIncludePointsOnScreen = true)
         {
-            List<Vector3> points = new List<Vector3>();
+            var points = new List<Vector3>();
 
             foreach (Vector3 point in IteratePointsBetween(from, to, width, height, onlyIncludePointsOnScreen))
-            {
                 points.Add(point);
-            }
 
             return points;
         }
 
-        public static void GetPointsBetween(List<Vector3> list, Vector3 from, Vector3 to, int width, int height, bool onlyIncludePointsOnScreen = true)
+        public static void GetPointsBetween(List<Vector3> list, Vector3 from, Vector3 to, int width, int height,
+            bool onlyIncludePointsOnScreen = true)
         {
             list.Clear();
 
             foreach (Vector3 point in IteratePointsBetween(from, to, width, height, onlyIncludePointsOnScreen))
-            {
                 list.Add(point);
-            }
         }
 
         // oblicza wektor prostopadly do prostej (a, b)
         public static Vector3 GetPerpendicularVector(Vector3 a, Vector3 b)
         {
-            Vector3 v = b - a;
+            var v = b - a;
 
-            return new Vector3(-v.Y, v.X, 0) / (float) Math.Sqrt(v.X*v.X + v.Y*v.Y);
+            return new Vector3(-v.Y, v.X, 0) / (float) Math.Sqrt(v.X * v.X + v.Y * v.Y);
         }
 
         public static Vector3 GetClosestPointOnLine(Vector3 a, Vector3 b, Vector3 p)
@@ -176,7 +176,7 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Maps a SkeletonPoint to lie within our render space and converts to Point
+        ///     Maps a SkeletonPoint to lie within our render space and converts to Point
         /// </summary>
         /// <param name="skelpoint">point to map</param>
         /// <returns>mapped point</returns>
@@ -185,13 +185,13 @@ namespace KinectBodyModification
             // Convert point to depth space.  
             // We are not using depth directly, but we do want the points in our 640x480 output resolution.
 
-            var depthPoint = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
-            var colorPoint = sensor.CoordinateMapper.MapDepthPointToColorPoint(DepthImageFormat.Resolution640x480Fps30, depthPoint, ColorImageFormat.RgbResolution640x480Fps30);
+            var depthPoint = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, Configuration.DepthFormat);
+            var colorPoint = sensor.CoordinateMapper.MapDepthPointToColorPoint(Configuration.DepthFormat, depthPoint, Configuration.ColorFormat);
             return new Vector3(colorPoint.X, colorPoint.Y, skelpoint.Z);
         }
 
         /// <summary>
-        /// Wylicza wartość będącą wynikiem interpolacji pomiędzy dwoma wartościami na podstawie podanych wag
+        ///     Wylicza wartość będącą wynikiem interpolacji pomiędzy dwoma wartościami na podstawie podanych wag
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -210,7 +210,7 @@ namespace KinectBodyModification
 
         public static byte Interpolate(byte a, byte b, float v)
         {
-            float value = Interpolate((float)a, (float)b, v, 1f - v);
+            var value = Interpolate(a, b, v, 1f - v);
 
             if (value < 0)
                 value = 0;
@@ -222,13 +222,13 @@ namespace KinectBodyModification
 
         public static int Interpolate(int a, int b, float v)
         {
-            float value = Interpolate((float)a, (float)b, v, 1f - v);
+            var value = Interpolate(a, b, v, 1f - v);
 
-            return (int)value;
+            return (int) value;
         }
 
         /// <summary>
-        /// Oblicza hash dla kosci sprecyzowanej przez jointy (a, b)
+        ///     Oblicza hash dla kosci sprecyzowanej przez jointy (a, b)
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -239,7 +239,7 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Oblicza koordynaty piksela odpowiadajacemu podanemu indeksowi
+        ///     Oblicza koordynaty piksela odpowiadajacemu podanemu indeksowi
         /// </summary>
         /// <param name="index"></param>
         /// <param name="x"></param>
@@ -251,7 +251,7 @@ namespace KinectBodyModification
         }
 
         /// <summary>
-        /// Oblicza indeks piksela odpowiadajcego podanym koordynatom
+        ///     Oblicza indeks piksela odpowiadajcego podanym koordynatom
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -263,8 +263,7 @@ namespace KinectBodyModification
 
         public static bool AreCoordinatesInBounds(int x, int y)
         {
-            return (x >= 0 && x < Configuration.width && y >= 0 && y < Configuration.height);
+            return x >= 0 && x < Configuration.width && y >= 0 && y < Configuration.height;
         }
-
     }
 }

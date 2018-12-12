@@ -4,8 +4,8 @@ using Microsoft.Kinect.Toolkit.BackgroundRemoval;
 namespace KinectBodyModification
 {
     /// <summary>
-    /// GlobalBuffers - Global Buffers
-    /// Klasa przechowywująca odniesienia do globalnych buforów wykorzystywanych w programie.
+    ///     GlobalBuffers - Global Buffers
+    ///     Klasa przechowywująca odniesienia do globalnych buforów wykorzystywanych w programie.
     /// </summary>
     public static class GlobalBuffers
     {

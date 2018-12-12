@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Windows.Media;
-using Microsoft.Kinect;
-
 using GB = KinectBodyModification.GlobalBuffers;
 
 namespace KinectBodyModification
 {
     public static partial class Drawing
     {
-        private static byte[] clearBytes = GetClearBytes();
+        private static readonly byte[] clearBytes = GetClearBytes();
 
         private static byte[] GetClearBytes()
         {
-            byte[] clearBytes = new byte[Configuration.size * 4];
+            var clearBytes = new byte[Configuration.size * 4];
 
             for (var i = 0; i < clearBytes.Length; i += 4)
             {
                 clearBytes[i] = 0;
-                clearBytes[i+1] = 0;
-                clearBytes[i+2] = 0;
-                clearBytes[i+3] = 0;
+                clearBytes[i + 1] = 0;
+                clearBytes[i + 2] = 0;
+                clearBytes[i + 3] = 0;
             }
 
             return clearBytes;

@@ -7,14 +7,24 @@ namespace KinectBodyModification
 {
     public class LimbDataBone
     {
+        public readonly int boneHash;
+        public readonly JointTypePair jointTypePair;
 
         public readonly Joint startJoint, endJoint;
-        public readonly JointTypePair jointTypePair;
-        public readonly int boneHash;
 
         public List<Vector3> points = new List<Vector3>();
 
         public Vector3 startPoint, endPoint;
+
+        public LimbDataBone(Joint startJoint, Joint endJoint)
+        {
+            this.startJoint = startJoint;
+            this.endJoint = endJoint;
+
+            jointTypePair = GetJointTypePair();
+
+            boneHash = Utils.GetBoneHash(jointTypePair.a, jointTypePair.b);
+        }
 
         public Vector3 GetStartPoint()
         {
@@ -30,16 +40,5 @@ namespace KinectBodyModification
         {
             return new JointTypePair(startJoint, endJoint);
         }
-
-        public LimbDataBone(Joint startJoint, Joint endJoint)
-        {
-            this.startJoint = startJoint;
-            this.endJoint = endJoint;
-
-            this.jointTypePair = GetJointTypePair();
-
-            this.boneHash = Utils.GetBoneHash(jointTypePair.a, jointTypePair.b);
-        }
-
     }
 }

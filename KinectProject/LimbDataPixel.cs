@@ -2,23 +2,21 @@
 {
     public class LimbDataPixel
     {
-
         public int boneHash = -1;
+        public bool debugDraw;
         public sbyte humanIndex = -1;
-        public bool isBone = false;
-        public bool isJoint = false;
-        public bool debugDraw = false;
-        public bool isContour = false;
-        
+        public bool isBone;
+        public bool isContour;
+        public bool isJoint;
+
         public void Clear()
         {
-            this.boneHash = -1;
-            this.humanIndex = -1;
-            this.isBone = false;
-            this.isJoint = false;
-            this.debugDraw = false;
-            this.isContour = false;
+            boneHash = -1;
+            humanIndex = -1;
+            isBone = false;
+            isJoint = false;
+            debugDraw = false;
+            isContour = false;
         }
-
     }
 }

@@ -1,21 +1,18 @@
 ﻿using System.Windows.Media;
 using Microsoft.Kinect;
-
 using GB = KinectBodyModification.GlobalBuffers;
 
 namespace KinectBodyModification
 {
     public static partial class Drawing
     {
-
         public static void DrawDebug()
         {
             Clear();
 
             // cialo
             if (Settings.Instance.DebugDrawSilhouette)
-            {
-                for (int i = 0; i < GB.colorBuffer.Length; i += 4)
+                for (var i = 0; i < GB.colorBuffer.Length; i += 4)
                 {
                     var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
 
@@ -29,61 +26,46 @@ namespace KinectBodyModification
                         GB.outputBuffer[i + 3] = 255;
                     }
                 }
-            }
 
             // szkielet (kosci)
             if (Settings.Instance.DebugDrawSkeleton)
-            {
                 foreach (var limbDataSkeleton in GB.limbDataManager.limbData.limbDataSkeletons)
+                foreach (var bone in limbDataSkeleton.bones)
                 {
-                    foreach (var bone in limbDataSkeleton.bones)
-                    {
-                        if (bone.points.Count == 0)
-                            continue;
+                    if (bone.points.Count == 0)
+                        continue;
 
-                        var color = Colors.White;
+                    var color = Colors.White;
 
-                        if (bone.startJoint.TrackingState == JointTrackingState.Inferred ||
-                            bone.endJoint.TrackingState == JointTrackingState.Inferred)
-                        {
-                            color = Colors.Red;
-                        }
-                        else if (bone.startJoint.TrackingState == JointTrackingState.NotTracked ||
-                                 bone.endJoint.TrackingState == JointTrackingState.NotTracked)
-                        {
-                            color = Colors.Black;
-                        }
+                    if (bone.startJoint.TrackingState == JointTrackingState.Inferred ||
+                        bone.endJoint.TrackingState == JointTrackingState.Inferred)
+                        color = Colors.Red;
+                    else if (bone.startJoint.TrackingState == JointTrackingState.NotTracked ||
+                             bone.endJoint.TrackingState == JointTrackingState.NotTracked)
+                        color = Colors.Black;
 
-                        // piksele kosci
-                        foreach (var point in bone.points)
-                        {
-                            DrawThickDot(GB.outputBuffer, ((int) point.X + (int) point.Y * Configuration.width) * 4, 2,
-                                color);
-                        }
-                    }
+                    // piksele kosci
+                    foreach (var point in bone.points)
+                        DrawThickDot(GB.outputBuffer, ((int) point.X + (int) point.Y * Configuration.width) * 4, 2,
+                            color);
                 }
-            }
 
             // szkielet (jointy)
             if (Settings.Instance.DebugDrawJoints)
-            {
                 foreach (var limbDataSkeleton in GB.limbDataManager.limbData.limbDataSkeletons)
+                foreach (var bone in limbDataSkeleton.bones)
                 {
-                    foreach (var bone in limbDataSkeleton.bones)
-                    {
-                        if (bone.points.Count == 0)
-                            continue;
+                    if (bone.points.Count == 0)
+                        continue;
 
-                        // piksele poczatkowego i koncowego jointa tej kosci
-                        DrawThickDot(GB.outputBuffer,
-                            ((int) bone.GetStartPoint().X + (int) bone.GetStartPoint().Y * Configuration.width) * 4, 3,
-                            Colors.Yellow);
-                        DrawThickDot(GB.outputBuffer,
-                            ((int) bone.GetEndPoint().X + (int) bone.GetEndPoint().Y * Configuration.width) * 4, 3,
-                            Colors.Yellow);
-                    }
+                    // piksele poczatkowego i koncowego jointa tej kosci
+                    DrawThickDot(GB.outputBuffer,
+                        ((int) bone.GetStartPoint().X + (int) bone.GetStartPoint().Y * Configuration.width) * 4, 3,
+                        Colors.Yellow);
+                    DrawThickDot(GB.outputBuffer,
+                        ((int) bone.GetEndPoint().X + (int) bone.GetEndPoint().Y * Configuration.width) * 4, 3,
+                        Colors.Yellow);
                 }
-            }
 
             // szkielet(debug)
             // for (int i = 0; i < GB.colorBuffer.Length; i += 4)
@@ -102,8 +84,7 @@ namespace KinectBodyModification
 
             if (Settings.Instance.DebugDrawOutline)
             {
-
-                for (int i = 0; i < GB.colorBuffer.Length; i += 4)
+                for (var i = 0; i < GB.colorBuffer.Length; i += 4)
                 {
                     var limbPixel = GB.limbDataManager.limbData.allPixels[i / 4];
 
@@ -135,10 +116,7 @@ namespace KinectBodyModification
                     GB.outputBuffer[_i + 2] = 0;
                     GB.outputBuffer[_i + 3] = 255;
                 }
-
             }
-
         }
-
     }
 }
