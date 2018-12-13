@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System.Threading.Tasks;
+using OpenTK;
 using GB = KinectBodyModification.GlobalBuffers;
 
 namespace KinectBodyModification
@@ -7,8 +8,7 @@ namespace KinectBodyModification
     {
         private static void MorphAllBones()
         {
-            foreach (var bone in GB.LimbDataManager.LimbData.LimbDataSkeleton.Bones)
-                MorphBone(bone);
+            Parallel.ForEach(GB.LimbDataManager.LimbData.LimbDataSkeleton.Bones, MorphBone);
         }
 
         private static void MorphBone(LimbDataBone bone)

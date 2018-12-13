@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using KinectBodyModification;
 using OpenTK;
 using OpenTK.Graphics;

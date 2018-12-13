@@ -9,7 +9,8 @@ namespace KinectBodyModification
     {
         private static void ProcessAllBoneWeights()
         {
-            foreach (var bone in GB.LimbDataManager.LimbData.LimbDataSkeleton.Bones)
+            Parallel.ForEach(GB.LimbDataManager.LimbData.LimbDataSkeleton.Bones, bone =>
+            {
                 switch (bone.BoneHash)
                 {
                     case 35: // head, shoulder center
@@ -69,6 +70,7 @@ namespace KinectBodyModification
                         ProcessBoneWeights(bone, new List<BonePixels> {GetBonePixelsDataFromBoneDictionary(254)});
                         break;
                 }
+            });
         }
 
         private static void ProcessBoneWeights(LimbDataBone bone, List<BonePixels> pixelListsToCheck)
@@ -81,7 +83,7 @@ namespace KinectBodyModification
             if (bonePixelData == null)
                 return;
 
-            const float distanceLimit = 32f;
+            const float distanceLimit = 48f;
             var indices = bonePixelData.VertexIndices;
 
             Parallel.ForEach(indices, vertexIndex =>

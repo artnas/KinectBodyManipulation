@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using KBMGraphics;
 using Microsoft.Kinect;
 using OpenTK;
@@ -29,7 +30,7 @@ namespace KinectBodyModification
 
             _floodFillPixelsQueue.Clear();
 
-            foreach (var lpd in LimbData.AllPixels) lpd.Clear();
+            Parallel.ForEach(LimbData.AllPixels, pixel => { pixel.Clear(); });
         }
 
         public void Update(Skeleton[] skeletons)
